@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;400;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities{
+  .side-menu-width{
+    min-width: 256px !important;
+  }
+  .latest-card{
+    width: 375px;
+    height: 228px;
+  }
+}
+
+* {
+  font-family: 'Poppins', sans-serif;
+}
+
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: #202020;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #46CDCF;
+  border-radius: 4px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+.inputwrap {
+  border-radius: 0.125rem;
+  background-color: #2c2c2c;
+  color: inherit;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
+  transition: all .2s ease-out;
+}
+.inputwrap input {
+  padding: .45rem 3rem;
+  width: 100%;
+  position: relative;
+  min-height: 40px;
+  z-index: 1;
+  background: none;
+  border-radius: inherit;
+}
+
+.search-icon {
+  position: absolute;
+  left: .25rem;
+  top: .25rem;
+  width: 2rem;
+  height: 2rem;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.25rem;
+}

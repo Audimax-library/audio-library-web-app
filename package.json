@@ -1,0 +1,18 @@
+{
+  "name": "cloudappdev",
+  "version": "1.0.0",
+  "description": "Cloud based audio library for visually impaired people.",
+  "main": "index.js",
+  "scripts": {
+    "build-webapp": "tailwindcss -i ./src/input.css -o ./dist/webapp/static/css/style.css",
+    "build-webapp-watch": "tailwindcss -i ./src/input.css -o ./dist/webapp/static/css/style.css --watch",
+    "build": "tailwindcss -i ./src/input.css -o ./dist/static/css/style.css",
+    "watch": "tailwindcss -i ./src/input.css -o ./dist/static/css/style.css --watch"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "tailwindcss": "^3.1.8"
+  }
+}
