@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.css" />
+  <link rel="stylesheet" href="{{ url_for('webapp.static', filename='css/style.css') }}">
+  <style>
+    .swiper {
+      margin-left: auto;
+      margin-right: auto;
+      position: relative;
+      overflow: hidden;
+      list-style: none;
+      padding: 0;
+      z-index: 1;
+      padding-bottom: 20px;
+    }
+    .swiper-wrapper {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      display: flex;
+      transition-property: transform;
+      box-sizing: content-box;
+    }
+    .swiper-slide {
+      width: 80%;
+      max-width: 380px;
+      margin-right: 20px;
+      flex-shrink: 0;
+      height: 100%;
+      position: relative;
+      transition-property: transform;
+    }
+    .swiper-pagination-bullet-active{
+      background-color: rgb(70 205 207 / 1);
+    }
+  </style>
+</head>
+<body>
+  <div class="flex flex-grow bg-BGColorLight">
+    <div class="flex flex-col lg:relative fixed bg-accent h-screen md:h-full z-50 text-sm text-white overflow-y-auto side-menu-width hidden" id="side-menu">
+      <div class="drawer flex-grow lg:static lg:h-auto fixed left-0 top-0 z-50 h-screen md:h-full">
+        <div class="lg:top-0 lg:fixed flex flex-col overflow-y-auto overscroll-contain h-screen bg-BGColorLight side-menu-width">
+          <div class="flex items-center p-2 justify-between">
+            <div class="flex-none w-40">
+              <a href="/" class="cursor-pointer">
+                <img src="https://via.placeholder.com/152x40" height="40" alt="">
+              </a>
+            </div>
+            <div class="flex-none py-2 px-2 cursor-pointer transition rounded-full hover:bg-slate-500/50 hover:drop-shadow-md" id="side-menu-close">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-currentColor icon"><path d="M18 6 6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            </div>
+          </div>
+  
+          <div class="px-4 pt-2 flex flex-col flex-shrink-0">
+            <a href="/">
+              <div class="px-2 py-1 rounded-md font-bold flex bg-themeMain hover:bg-themeDarkLight hover:text-white transition-colors">
+                <div class="flex-none"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-home text-currentColor icon"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><path d="M9 22V12h6v10"></path></svg></div> 
+                <div class="mx-2 flex-none leading-loose">Home</div>
+              </div>
+            </a>
+          </div>
+          <div class="px-4 pt-2 flex flex-col flex-shrink-0">
+            <div class="px-2 py-1 rounded-md font-bold flex">
+              <div class="flex-none"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-currentColor icon"><path d="m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></div> 
+              <div class="mx-2 flex-none">Follows</div>
+            </div>
+            <a href="/">
+              <div class="px-2 py-1 rounded-md hover:bg-BGColor hover:text-white transition-colors">
+                <div class="mx-3 flex-none">Library</div>
+              </div>
+            </a>
+            <a href="/">
+              <div class="px-2 py-1 rounded-md hover:bg-BGColor hover:text-white transition-colors">
+                <div class="mx-3 flex-none">Lists</div>
+              </div>
+            </a>
+            <a href="/">
+              <div class="px-2 py-1 rounded-md hover:bg-BGColor hover:text-white transition-colors">
+                <div class="mx-3 flex-none">History</div>
+              </div>
+            </a>
+          </div>
+  
+          <div class="px-4 pt-2 flex flex-col flex-shrink-0">
+            <div class="px-2 py-1 rounded-md font-bold flex">
+              <div class="flex-none"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-book-open text-currentColor icon"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zm20 0h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg></div> 
+              <div class="mx-2 flex-none">Titles</div>
+            </div>
+            <a href="/">
+              <div class="px-2 py-1 rounded-md hover:bg-BGColor hover:text-white transition-colors">
+                <div class="mx-3 flex-none">Advanced Search</div>
+              </div>
+            </a>
+            <a href="/">
+              <div class="px-2 py-1 rounded-md hover:bg-BGColor hover:text-white transition-colors">
+                <div class="mx-3 flex-none">Recently Added</div>
+              </div>
+            </a>
+            <a href="/">
+              <div class="px-2 py-1 rounded-md hover:bg-BGColor hover:text-white transition-colors">
+                <div class="mx-3 flex-none">Random</div>
+              </div>
+            </a>
+          </div>
+  
+          <div class="px-4 pt-2 flex flex-col flex-shrink-0">
+            <div class="px-2 py-1 rounded-md font-bold flex">
+              <div class="flex-none"><svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="text-currentColor icon"><path d="m3 21 5-5m-4-4 8 8c3-3 1-5 1-5l6-6h2l-6-6v2l-6 6s-2-2-5 1z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></div> 
+              <div class="mx-2 flex-none">Cloud Guage</div>
+            </div>
+            <a href="/">
+              <div class="px-2 py-1 rounded-md hover:bg-BGColor hover:text-white transition-colors">
+                <div class="mx-3 flex-none">About Us</div>
+              </div>
+            </a>
+            <a href="/">
+              <div class="px-2 py-1 rounded-md hover:bg-BGColor hover:text-white transition-colors">
+                <div class="mx-3 flex-none">Rules</div>
+              </div>
+            </a>
+            <a href="/">
+              <div class="px-2 py-1 rounded-md hover:bg-BGColor hover:text-white transition-colors">
+                <div class="mx-3 flex-none">Announcements</div>
+              </div>
+            </a>
+          </div>
+          <div class="flex-grow"></div>
+          <div class="mx-6 my-4">
+            <hr>
+          </div>
+          <div class="px-6 pb-4 text-sm pb-6">
+            <p>© Cloud Guage 2022</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="grow min-h-screen max-w-full bg-BGColor text-white">
+      <div class="border-b border-b-themeMain z-10 top-0 sticky">
+        <div class="container mx-auto">
+          <div class="py-2 px-6 bg-BGColor relative">
+            <div class="flex items-center">
+              <button class="rounded relative md-btn flex items-center px-3 mr-2 justify-center rounded-full px-0 transition" id="side-menu-open">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-currentColor icon"><path d="M3 12h12M3 6h18M3 18h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              </button>
+              <a href="/" class="flex items-center nuxt-link-exact-active nuxt-link-active"><img alt="Cloud Guage logo" src="https://via.placeholder.com/152x40" height="34px" class="mr-2"></a>
+              <div class="flex-grow"></div>
+  
+              <div class="items-center rounded-full cursor-pointer hidden lg:block">
+                <form action="/titles" method="GET" class="inputwrap">
+                  <input placeholder="Search" title="Search" name="q" class=""> 
+                  <div class="search-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-icon-black dark:text-icon-white text-false icon"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm10 2-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                  </div>
+                </form>
+              </div>
+  
+              <div class="flex flex-shrink-0 justify-end items-center" style="flex-basis: 0px;">
+                <button class="rounded relative md-btn flex items-center px-3 ml-auto justify-center px-0 lg:hidden" aria-label="Search" style="min-height: 40px; min-width: 40px;">
+                  <div class="bg opacity-0 hover:opacity-20 active:opacity-40 dark:hover:opacity-30 dark:active:opacity-10"></div> 
+                  <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-currentColor icon"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm10 2-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+                </button> 
+                <div class="ml-4 cursor-pointer rounded-full overflow-hidden bg-accent flex items-center justify-center" style="min-width: 40px; min-height: 40px;">
+                  <img src="https://via.placeholder.com/50x50" alt="Avatar" width="1065" height="1065" id="avatar" style="width: 40px; height: 40px;">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="container mb-4 pt-6 px-6 mx-auto">
+        {% block content %}
+        {% endblock %}
+      </div>
+    </div>
+  </div>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js" integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdn.jsdelivr.net/npm/swiper@8/swiper-bundle.min.js"></script>
+  <script>
+    $("#side-menu-close").click(function(){
+      $('#side-menu').toggle('hidden');
+      $('#side-menu-open').toggle('hidden');
+    });
+    $("#side-menu-open").click(function(){
+      $('#side-menu').toggle('hidden');
+      $('#side-menu-open').toggle('hidden');
+    });
+  </script>
+  <script type="module">
+    var swiper = new Swiper('.swiper', {
+      slidesPerView: 'auto',
+      mousewheel: true,
+      pagination: {
+        el: '.swiper-pagination',
+        clickable: true,
+      },
+      autoplay: {
+        delay: 2500,
+        disableOnInteraction: false,
+      },
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,15 @@
+server{
+	listen 80;
+	server_name 192.168.8.102;
+
+	location ^~ /static/ {
+		include /etc/nginx/mime.types;
+		root /home/dulan/flask-app/;
+	}
+
+	location / {
+		proxy_pass http://127.0.0.1:8000;
+		include /etc/nginx/proxy_params;
+		proxy_redirect off;
+	}
+}
