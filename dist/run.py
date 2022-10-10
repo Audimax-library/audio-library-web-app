@@ -37,8 +37,10 @@ bcrypt.init_app(app)
 
 from webapp.views import webapp
 from admin.views import admin
+from assisted.views import assisted
 app.register_blueprint(webapp, url_prefix="/")
 app.register_blueprint(admin, url_prefix="/admin")
+app.register_blueprint(assisted, url_prefix="/assisted")
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True)

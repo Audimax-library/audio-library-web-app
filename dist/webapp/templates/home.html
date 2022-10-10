@@ -364,9 +364,25 @@
   </div>
 </section>
 
-<section class="mt-20">
-  <div class="flex items-center justify-center mb-4">
-    <h2 class="font-header text-2xl font-semibold">Contact Us</h2>
+<section class="my-20 ">
+  <div class="grid grid-flow-col grid-cols-6 gap-8 ">
+    <div class="col-start-1 col-span-full lg:col-start-2 lg:col-span-4 bg-BGColorLight rounded">
+      <div class="grid grid-flow-col grid-cols-2 gap-4 p-4">
+        <div class="col-span-full lg:col-span-1">
+          <img src="{{ url_for('webapp.static', filename='img/newsletter.svg') }}" class="mx-auto" style="max-width: 380px; width: 100%;" alt="">
+        </div>
+        <div class="pl-6 flex items-center col-span-full lg:col-span-2" id="newsletter-form">
+          <form action="" method="post" class="w-full text-center">
+            <h2 class="font-header text-2xl font-semibold mb-2">Sign Up for Newsletter</h2>
+            <p class="text-sm text-gray-400">Subscribe to our monthly newsletter and stay up to date with our latest releases and promotions.</p>
+            <input type="email" name="newsletter-email" class="mt-4">
+            <button class="rounded relative md-btn flex items-center px-3 my-4 justify-center text-black bg-themeMain hover:themeLight glow px-4 px-6" style="min-height: 48px; min-width: 100%;">
+              <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;">Sign Me Up</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
   </div>
 </section>
 

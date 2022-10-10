@@ -27,7 +27,7 @@
       box-sizing: content-box;
     }
     .swiper-slide {
-      width: 80%;
+      width: 100%;
       max-width: 380px;
       margin-right: 20px;
       flex-shrink: 0;
@@ -41,6 +41,7 @@
   </style>
 </head>
 <body>
+  <button class="fixed top-4 -left-48 focus:bg-themeDarkLight py-4 px-6 focus:left-8 z-50 transition rounded" onclick="location.href='/assisted/';">Assisted Mode</button>
   <div class="flex flex-grow bg-BGColorLight">
     <div class="flex flex-col lg:relative fixed bg-accent h-screen md:h-full z-50 text-sm text-white overflow-y-auto side-menu-width hidden" id="side-menu">
       <div class="drawer flex-grow lg:static lg:h-auto fixed left-0 top-0 z-50 h-screen md:h-full">

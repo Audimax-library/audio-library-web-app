@@ -56,6 +56,15 @@
   background: none;
   border-radius: inherit;
 }
+#newsletter-form input{
+  padding: .45rem 3rem;
+  width: 100%;
+  position: relative;
+  min-height: 40px;
+  z-index: 1;
+  background: #191A1C;
+  border-radius: 0.125rem;
+}
 
 .search-icon {
   position: absolute;
