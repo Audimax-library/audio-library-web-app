@@ -1,4 +1,5 @@
-from flask import Blueprint,render_template, redirect
+from urllib import request
+from flask import Blueprint,render_template, redirect, session, url_for, request as rq
 from .forms import UploadFileForm
 from .models import Release
 from werkzeug.utils import secure_filename
@@ -35,20 +36,53 @@ def home_page():
         }
     return render_template('home.html', context=context)
 
-@webapp.route("/blog") #new announcements and stuf
-def blog_page():
-    music = Release.query.all()
-    print(music)
-    return "<p>Hello, World!</p>"
+from flask_login import login_required, login_user, logout_user, current_user
+from admin import db, login_manager, oauth, discord, bcrypt
+from admin.forms import LoginForm, RegistrationForm
+from admin.models import User
+
+login_manager.login_view = "webapp.login_page"
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(user_id)
+
+
+@webapp.route("/login", methods=['GET', 'POST'])
+def login_page():
+    if session.get('profile'):
+        user_detail = session['profile']
+        print(user_detail['name'])
+    if current_user.is_authenticated:
+        return redirect(url_for('admin.dashboard_page'))
+
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data).first()
+        print(rq.form.getlist('rememberme'))
+        if(user):
+            if(bcrypt.check_password_hash(user.password, form.password.data)):
+                login_user(user)
+                return redirect(url_for('admin.dashboard_page'))
+    context = {"form": form}
+    return render_template('user-login.html', context=context)
+
+@webapp.route("/register", methods=['GET', 'POST'])
+def register_page():
+    if current_user.is_authenticated:
+        return redirect(url_for('admin.dashboard_page'))
+
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        hashed_password = bcrypt.generate_password_hash(form.password.data)
+        new_user = User(username=form.username.data, email=form.email.data, password=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
+        return redirect(url_for('webapp.login_page'))
+
+    context = {"form": form}
+    return render_template('register.html', context=context)
+
 
 @webapp.route("/music") #released music
 def music_page():
-    return "<p>Hello, World!</p>"
-
-@webapp.route("/use-it") #guidelines to use music and FAQ
-def use_music_page():
-    return "<p>Hello, World!</p>"
-
-@webapp.route("/about") #about/donate
-def about_page():
     return "<p>Hello, World!</p>"

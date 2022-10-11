@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block title %}Login | Cloud Guage{% endblock %}
+{% block content %}
+
+<div class="mx-auto narrow p-4 bg-BGColor rounded">
+  <div class="flex items-center justify-start mb-4">
+    <a href="#" class="link">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-4 mb-1 text-2xl cursor-pointer feather feather-arrow-left text-icon-black dark:text-icon-white text-false icon"><path d="M19 12H5m7 7-7-7 7-7"></path></svg>
+    </a> 
+    <a href="#" class="ml-2 link" aria-label="User Login">
+      <h2 class="font-header text-2xl font-semibold">Login</h2>
+    </a>
+  </div>
+  <form method="POST">
+    {{ context.form.hidden_tag() }}
+    <div class="input">
+      <div class="user-inputwrap">
+        <input autocomplete="email" placeholder="" title="Email" name="email" class="placeholder-current p-4" required>
+        <div class="border"></div> 
+        <label class="label">Email</label>
+      </div>
+      <div class="error-wrap mt-1 mb-2">
+        <div class="error flex items-center" style="display: none;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="mr-1 xSmall text-currentColor icon"><path data-v-20f285ec="" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Zm0-14v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg> 
+          <span></span>
+        </div>
+      </div>
+    </div>
+    <div class="input" >
+      <div class="user-inputwrap">
+        <input autocomplete="current-password" name="password" placeholder="" title="Password" type="password" class="placeholder-current p-4" required>
+        <div class="border"></div> 
+        <label class="label">Password</label>
+      </div>
+      <div class="error-wrap mt-1 mb-2">
+        <div class="error flex items-center" style="display: none;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="mr-1 xSmall text-currentColor icon"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Zm0-14v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <span></span>
+        </div>
+      </div>
+    </div> 
+    <a href="/forgot" class="text-themeMain inline-block" style="text-decoration: none;">Forgot Password?</a>
+    <div class="block mt-4 p-2">
+      <label tabindex="0" role="checkbox" for="rmbr-me" class="user-checkbox focus-within:outline-white gap-2 cursor-pointer">
+        <span class="user-checkbox__wrap">
+          <span id="unchecked-svg"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-square text-icon-black dark:text-icon-white text-false icon"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg></span>
+          <span hidden id="checked-svg"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" class="text-icon-black dark:text-icon-white text-false icon"><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m9 11 3 3L22 4" stroke="#46cdcf" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+          <input type="checkbox" name="rememberme" id="rmbr-me" value="true" hidden>
+        </span> 
+        <span>Remember Me</span>
+      </label>
+    </div> 
+    <button type="submit" class="rounded relative btn flex items-center px-3 my-4 justify-center text-white bg-themeMain hover:bg-themeDarkLight active:bg-themeDark glow px-4 px-6" style="min-height: 48px; min-width: 100%;">
+      <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;">
+        Log In
+      </span>
+    </button>
+    <a href="/signup" class="rounded relative md-btn flex items-center px-3 my-4 justify-center text-themeMain px-4 px-6" style="min-height: 48px; min-width: 100%;">
+      <div class="bg opacity-0 hover:opacity-20 active:opacity-40 dark:hover:opacity-30 dark:active:opacity-10 bg-themeMain"></div>
+      <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;"> 
+        Create an Account
+      </span>
+    </a>
+  </form>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  $('#rmbr-me').change(function(){
+    if($(this).prop('checked') == true){
+      $('#checked-svg').prop('hidden', false);
+      $('#unchecked-svg').prop('hidden', true);
+    } else{
+      $('#checked-svg').prop('hidden', true);
+      $('#unchecked-svg').prop('hidden', false);
+    }
+  });
+</script>
+{% endblock %}

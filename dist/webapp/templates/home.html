@@ -369,7 +369,7 @@
     <div class="col-start-1 col-span-full lg:col-start-2 lg:col-span-4 bg-BGColorLight rounded">
       <div class="grid grid-flow-col grid-cols-2 gap-4 p-4">
         <div class="col-span-full lg:col-span-1">
-          <img src="{{ url_for('webapp.static', filename='img/newsletter.svg') }}" class="mx-auto" style="max-width: 380px; width: 100%;" alt="">
+          <img src="{{ url_for('webapp.static', filename='img/newsletter.svg') }}" class="mx-auto pt-4" style="max-width: 380px; width: 100%;" alt="">
         </div>
         <div class="pl-6 flex items-center col-span-full lg:col-span-2" id="newsletter-form">
           <form action="" method="post" class="w-full text-center">
@@ -387,4 +387,30 @@
 </section>
 
 
+{% endblock %}
+{% block scripts %}
+<script>
+  $("#side-menu-close").click(function(){
+    $('#side-menu').toggle('hidden');
+    $('#side-menu-open').toggle('hidden');
+  });
+  $("#side-menu-open").click(function(){
+    $('#side-menu').toggle('hidden');
+    $('#side-menu-open').toggle('hidden');
+  });
+</script>
+<script type="module">
+  var swiper = new Swiper('.swiper', {
+    slidesPerView: 'auto',
+    mousewheel: true,
+    pagination: {
+      el: '.swiper-pagination',
+      clickable: true,
+    },
+    autoplay: {
+      delay: 2500,
+      disableOnInteraction: false,
+    },
+  });
+</script>
 {% endblock %}

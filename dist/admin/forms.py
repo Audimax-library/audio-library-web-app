@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, EmailField, SubmitField
+from wtforms import StringField, PasswordField, EmailField, SubmitField, BooleanField
 from wtforms.validators import InputRequired, Length, ValidationError, Email
 from .models import User
 
@@ -45,4 +45,5 @@ class LoginForm(FlaskForm):
       "class": "form-control",
       "id": "InputPassword1",
       })
+  rememberme = BooleanField()
   submit = SubmitField("Sign In", render_kw={"class": "btn btn-primary"})
