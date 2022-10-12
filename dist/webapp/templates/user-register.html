@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Login | Cloud Guage{% endblock %}
+{% block title %}Sign Up | Cloud Guage{% endblock %}
 {% block content %}
 
 <div class="mx-auto narrow p-4 bg-BGColor rounded">
@@ -8,11 +8,24 @@
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-4 mb-1 text-2xl cursor-pointer feather feather-arrow-left text-icon-black dark:text-icon-white text-false icon"><path d="M19 12H5m7 7-7-7 7-7"></path></svg>
     </a> 
     <a href="#" class="ml-2 link" aria-label="User Login">
-      <h2 class="font-header text-2xl font-semibold">Login</h2>
+      <h2 class="font-header text-2xl font-semibold">Sign Up</h2>
     </a>
   </div>
-  <form id="login-form" method="POST">
+  <form id="register-form" method="POST">
     {{ context.form.hidden_tag() }}
+    <div class="input">
+      <div class="user-inputwrap">
+        <input autocomplete="username" placeholder="" title="username" name="username" class="placeholder-current p-4" required>
+        <div class="border"></div> 
+        <label class="label">Username</label>
+      </div>
+      <div class="error-wrap mt-1 mb-2">
+        <div class="error flex items-center" style="display: none;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="mr-1 xSmall text-currentColor icon"><path data-v-20f285ec="" d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Zm0-14v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg> 
+          <span></span>
+        </div>
+      </div>
+    </div>
     <div class="input">
       <div class="user-inputwrap">
         <input autocomplete="email" placeholder="" title="Email" name="email" type="email" class="placeholder-current p-4" required>
@@ -28,7 +41,7 @@
     </div>
     <div class="input" >
       <div class="user-inputwrap">
-        <input autocomplete="current-password" name="password" placeholder="" maxlength="22" minlength="8" title="Password" type="password" class="placeholder-current p-4" required>
+        <input autocomplete="current-password" id="pswd1" name="password" maxlength="22" minlength="8" placeholder="" title="Password" type="password" class="placeholder-current p-4" required>
         <div class="border"></div> 
         <label class="label">Password</label>
       </div>
@@ -38,27 +51,39 @@
           <span></span>
         </div>
       </div>
-    </div> 
-    <a href="/forgot" class="text-themeMain inline-block" style="text-decoration: none;">Forgot Password?</a>
-    <div class="block mt-4 p-2">
+    </div>
+    <div class="input" >
+      <div class="user-inputwrap">
+        <input autocomplete="current-password" id="pswd2" name="password2" maxlength="22" minlength="8" placeholder="" title="Confirm Password" type="password" class="placeholder-current p-4" required>
+        <div class="border"></div> 
+        <label class="label">Confirm Password</label>
+      </div>
+      <div class="error-wrap mt-1 mb-1 pt-2">
+        <div id="pswd2-report-error" class="error flex items-center text-red-500 invisible">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="mr-1 xSmall text-currentColor icon"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10Zm0-14v4m0 4h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <span>Passwords do not match. Please check again.</span>
+        </div>
+      </div>
+    </div>
+    <div class="block mt-2 p-2">
       <label tabindex="0" role="checkbox" for="rmbr-me" class="user-checkbox focus-within:outline-white gap-2 cursor-pointer">
         <span class="user-checkbox__wrap">
           <span id="unchecked-svg"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-square text-icon-black dark:text-icon-white text-false icon"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect></svg></span>
           <span hidden id="checked-svg"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" class="text-icon-black dark:text-icon-white text-false icon"><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m9 11 3 3L22 4" stroke="#46cdcf" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
           <input type="checkbox" name="rememberme" id="rmbr-me" value="true" hidden>
         </span> 
-        <span>Remember Me</span>
+        <span>I have read and accept the <a href="#" class="text-themeMain font-bold">Rules</a>, <a href="#" class="text-themeMain font-bold">Terms & Conditions</a>.</span>
       </label>
     </div> 
-    <button type="submit" class="rounded relative btn flex items-center px-3 my-4 justify-center text-white bg-themeMain hover:bg-themeDarkLight active:bg-themeDark glow px-4 px-6" style="min-height: 48px; min-width: 100%;">
+    <button id="reg-sub" type="submit" class="rounded relative btn flex items-center px-3 my-4 justify-center text-white bg-themeMain hover:bg-themeDarkLight active:bg-themeDark glow px-4 px-6" style="min-height: 48px; min-width: 100%;" disabled>
       <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;">
-        Log In
+        Sign Up
       </span>
     </button>
-    <a href="{{ url_for('webapp.register_page') }}" class="rounded relative md-btn flex items-center px-3 my-4 justify-center text-themeMain px-4 px-6" style="min-height: 48px; min-width: 100%;">
+    <a href="{{ url_for('webapp.login_page') }}" class="rounded relative md-btn flex items-center px-3 my-4 justify-center text-themeMain px-4 px-6" style="min-height: 48px; min-width: 100%;">
       <div class="bg opacity-0 hover:opacity-20 active:opacity-40 dark:hover:opacity-30 dark:active:opacity-10 bg-themeMain"></div>
       <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;"> 
-        Create an Account
+        Already has an account?
       </span>
     </a>
   </form>
@@ -70,12 +95,22 @@
     if($(this).prop('checked') == true){
       $('#checked-svg').prop('hidden', false);
       $('#unchecked-svg').prop('hidden', true);
+      $('#reg-sub').prop('disabled', false);
     } else{
       $('#checked-svg').prop('hidden', true);
       $('#unchecked-svg').prop('hidden', false);
+      $('#reg-sub').prop('disabled', true);
     }
   });
-  $('#login-form input').on('input', function(){
+  $('#pswd2').on('input', function(){
+    var pswd1 = $('#pswd1').val();
+    if(pswd1 == $(this).val()){
+      $('#pswd2-report-error').addClass('invisible');
+    } else{
+      $('#pswd2-report-error').removeClass('invisible');
+    }
+  });
+  $('#register-form input').on('input', function(){
     $(this).parent('.user-inputwrap').addClass('input-populated');
   });
 </script>

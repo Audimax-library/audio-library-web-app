@@ -1,5 +1,5 @@
 from urllib import request
-from flask import Blueprint,render_template, redirect, session, url_for, request as rq
+from flask import Blueprint,render_template, redirect, session, url_for, request as rq, make_response
 from .forms import UploadFileForm
 from .models import Release
 from werkzeug.utils import secure_filename
@@ -40,6 +40,7 @@ from flask_login import login_required, login_user, logout_user, current_user
 from admin import db, login_manager, oauth, discord, bcrypt
 from admin.forms import LoginForm, RegistrationForm
 from admin.models import User
+from datetime import timedelta
 
 login_manager.login_view = "webapp.login_page"
 @login_manager.user_loader
@@ -61,12 +62,12 @@ def login_page():
         print(rq.form.getlist('rememberme'))
         if(user):
             if(bcrypt.check_password_hash(user.password, form.password.data)):
-                login_user(user)
+                login_user(user, remember=True, duration=timedelta(days=30))
                 return redirect(url_for('admin.dashboard_page'))
     context = {"form": form}
     return render_template('user-login.html', context=context)
 
-@webapp.route("/register", methods=['GET', 'POST'])
+@webapp.route("/sign-up", methods=['GET', 'POST'])
 def register_page():
     if current_user.is_authenticated:
         return redirect(url_for('admin.dashboard_page'))
@@ -80,7 +81,7 @@ def register_page():
         return redirect(url_for('webapp.login_page'))
 
     context = {"form": form}
-    return render_template('register.html', context=context)
+    return render_template('user-register.html', context=context)
 
 
 @webapp.route("/music") #released music
