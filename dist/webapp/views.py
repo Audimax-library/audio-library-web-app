@@ -1,5 +1,5 @@
 from urllib import request
-from flask import Blueprint,render_template, redirect, session, url_for, request as rq, make_response
+from flask import Blueprint,render_template, redirect, session, url_for, request as rq, make_response, jsonify
 from .forms import UploadFileForm
 from .models import Release
 from werkzeug.utils import secure_filename
@@ -40,7 +40,7 @@ from flask_login import login_required, login_user, logout_user, current_user
 from admin import db, login_manager, oauth, discord, bcrypt
 from admin.forms import LoginForm, RegistrationForm
 from admin.models import User
-from datetime import timedelta
+import datetime
 
 login_manager.login_view = "webapp.login_page"
 @login_manager.user_loader
@@ -54,7 +54,7 @@ def login_page():
         user_detail = session['profile']
         print(user_detail['name'])
     if current_user.is_authenticated:
-        return redirect(url_for('admin.dashboard_page'))
+        return redirect(url_for('webapp.home_page'))
 
     form = LoginForm()
     if form.validate_on_submit():
@@ -62,8 +62,11 @@ def login_page():
         print(rq.form.getlist('rememberme'))
         if(user):
             if(bcrypt.check_password_hash(user.password, form.password.data)):
-                login_user(user, remember=True, duration=timedelta(days=30))
-                return redirect(url_for('admin.dashboard_page'))
+                if(len(rq.form.getlist('rememberme')) > 0):
+                    login_user(user, remember=True, duration=datetime.timedelta(days=30))
+                else:
+                    login_user(user)
+                return redirect(url_for('webapp.home_page'))
     context = {"form": form}
     return render_template('user-login.html', context=context)
 
@@ -83,6 +86,15 @@ def register_page():
     context = {"form": form}
     return render_template('user-register.html', context=context)
 
+@webapp.route("/logout", methods=['GET', 'POST'])
+@login_required
+def logout():
+    discord.revoke()
+    for key in list(session.keys()):
+        session.pop(key)
+    session.clear()
+    logout_user()
+    return redirect(url_for('webapp.login_page'))
 
 @webapp.route("/music") #released music
 def music_page():
