@@ -33,7 +33,9 @@ def home_page():
     context = {
         'form': fileForm,
         'latest_releases': music,
-        }
+    }
+    if current_user.is_authenticated:
+        context['user_initial'] = str(current_user)[0:2].upper()
     return render_template('home.html', context=context)
 
 from flask_login import login_required, login_user, logout_user, current_user

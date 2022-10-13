@@ -164,10 +164,21 @@
                 <button class="rounded relative md-btn flex items-center px-3 ml-auto justify-center px-0 lg:hidden" aria-label="Search" style="min-height: 40px; min-width: 40px;">
                   <div class="bg opacity-0 hover:opacity-20 active:opacity-40 dark:hover:opacity-30 dark:active:opacity-10"></div> 
                   <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-currentColor icon"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm10 2-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
-                </button> 
+                </button>
+                {% if context.user_initial is defined %}
                 <div class="ml-4 cursor-pointer rounded-full overflow-hidden bg-accent flex items-center justify-center" style="min-width: 40px; min-height: 40px;">
-                  <img src="https://via.placeholder.com/50x50" alt="Avatar" width="1065" height="1065" id="avatar" style="width: 40px; height: 40px;">
+                  <img src="https://via.placeholder.com/150/46CDCF/000000?text={{context.user_initial}}" alt="Avatar" width="150" height="150" id="avatar" style="width: 40px; height: 40px;">
                 </div>
+                {% else %}
+                <div class="flex-grow ml-4">
+                  <a href="{{ url_for('webapp.login_page') }}" class="rounded relative md-btn flex items-center px-3 justify-center text-white bg-themeMain hover:bg-themeDarkLight active:bg-themeDarkLight glow px-4 px-6" style="min-height: 48px; min-width: 100%;">
+                    <span class="flex items-center justify-center font-medium select-none whitespace-nowrap" style="pointer-events: none;">
+                      Log In
+                    </span>
+                  </a>
+                </div>
+                {% endif %}
+                
               </div>
             </div>
           </div>

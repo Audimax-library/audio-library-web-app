@@ -908,6 +908,10 @@ video {
   text-overflow: clip;
 }
 
+.whitespace-nowrap{
+  white-space: nowrap;
+}
+
 .rounded{
   border-radius: 0.25rem;
 }
@@ -1329,6 +1333,11 @@ video {
 }
 
 .focus\:bg-themeDarkLight:focus{
+  --tw-bg-opacity: 1;
+  background-color: rgb(61 132 168 / var(--tw-bg-opacity));
+}
+
+.active\:bg-themeDarkLight:active{
   --tw-bg-opacity: 1;
   background-color: rgb(61 132 168 / var(--tw-bg-opacity));
 }
