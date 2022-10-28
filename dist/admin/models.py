@@ -20,3 +20,6 @@ class Userlevel(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   title = db.Column(db.String(20), nullable=False)
   created_on = db.Column(db.DateTime, server_default=db.func.now())
+
+  def __repr__(self):
+    return f'{self.id}-{self.title}'

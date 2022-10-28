@@ -12,6 +12,7 @@ module.exports = {
       colors: {
         BGColor: '#191A1C',
         BGColorLight: 'hsl(0, 0%, 17%)',
+        BGColorDarkLight: '#3d3d3d',
         themeDark: '#48466D',
         themeDarkLight: '#3D84A8',
         themeMain: '#46CDCF',

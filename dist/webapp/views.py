@@ -6,16 +6,22 @@ from werkzeug.utils import secure_filename
 import os
 from uuid import uuid4
 from webapp import db
+from flask_login import login_required, login_user, logout_user, current_user
+from admin import db, login_manager, oauth, discord, bcrypt
+from admin.forms import LoginForm, RegistrationForm
+from admin.models import User
+import datetime
 
 webapp = Blueprint('webapp', __name__, static_folder="static", static_url_path='/webapp/static' , template_folder='templates')
 UPLOAD_FOLDER = "static/uploads/"
+login_manager.login_view = "webapp.login_page"
 
 def make_unique(string):
     ident = uuid4().__str__()
     return f"{ident}-{string}"
 
 @webapp.route("/", methods=['GET', 'POST'])
-@webapp.route("/home", methods=['GET', 'POST'])
+@webapp.route("/home/", methods=['GET', 'POST'])
 def home_page():
     fileForm = UploadFileForm()
     if(fileForm.validate_on_submit()):
@@ -38,19 +44,19 @@ def home_page():
         context['user_initial'] = str(current_user)[0:2].upper()
     return render_template('home.html', context=context)
 
-from flask_login import login_required, login_user, logout_user, current_user
-from admin import db, login_manager, oauth, discord, bcrypt
-from admin.forms import LoginForm, RegistrationForm
-from admin.models import User
-import datetime
+@webapp.route("/book/<id>", methods=['GET', 'POST'])
+def book_page(id):
+    context = {'id': id}
+    if current_user.is_authenticated:
+        context['user_initial'] = str(current_user)[0:2].upper()
+    return render_template('book.html', context=context)
 
-login_manager.login_view = "webapp.login_page"
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(user_id)
 
 
-@webapp.route("/login", methods=['GET', 'POST'])
+@webapp.route("/login/", methods=['GET', 'POST'])
 def login_page():
     if session.get('profile'):
         user_detail = session['profile']
@@ -72,7 +78,7 @@ def login_page():
     context = {"form": form}
     return render_template('user-login.html', context=context)
 
-@webapp.route("/sign-up", methods=['GET', 'POST'])
+@webapp.route("/sign-up/", methods=['GET', 'POST'])
 def register_page():
     if current_user.is_authenticated:
         return redirect(url_for('admin.dashboard_page'))
@@ -88,7 +94,7 @@ def register_page():
     context = {"form": form}
     return render_template('user-register.html', context=context)
 
-@webapp.route("/logout", methods=['GET', 'POST'])
+@webapp.route("/logout/", methods=['GET', 'POST'])
 @login_required
 def logout():
     discord.revoke()
@@ -98,6 +104,6 @@ def logout():
     logout_user()
     return redirect(url_for('webapp.login_page'))
 
-@webapp.route("/music") #released music
+@webapp.route("/music/") #released music
 def music_page():
     return "<p>Hello, World!</p>"

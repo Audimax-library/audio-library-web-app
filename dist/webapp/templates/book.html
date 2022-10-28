@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% block title %}Welcome | Cloud Guage{% endblock %}
+{% block content %}
+
+<div class="page-cover relative">
+  <div class="absolute w-full h-72 xl:h-64 overflow-hidden">
+    <div class="blur">
+      <img src="https://mangadex.org/covers/05648383-3ddc-4199-bec1-3358d90bbaa4/e054446b-c527-4492-a6cf-89d352d46682.jpg.512.jpg" class="w-full" alt="">
+    </div>
+  </div>
+  <div class="relative w-full z-10 px-6 py-8">
+    <div class="container mx-auto">
+      <div class="row-span-3 block md:hidden mb-4">
+        <img src="https://mangadex.org/covers/05648383-3ddc-4199-bec1-3358d90bbaa4/e054446b-c527-4492-a6cf-89d352d46682.jpg.512.jpg" class="rounded-lg w-52" alt="">
+      </div>
+      <div class="grid grid-rows-3 grid-flow-col gap-4">
+        <div class="row-span-3 hidden md:block">
+          <img src="https://mangadex.org/covers/05648383-3ddc-4199-bec1-3358d90bbaa4/e054446b-c527-4492-a6cf-89d352d46682.jpg.512.jpg" class="rounded-lg w-52" alt="">
+        </div>
+        <div class="col-span-2">
+          <h1 class="text-6xl font-bold">title</h1>
+          <p class="text-lg">Alt name</p>
+        </div>
+        <div class="col-span-2">
+          <div class="flex gap-2 sm:mb-0 mb-2 flex-wrap">
+            <button class="rounded relative flex items-center px-3 flex flex-grow-0 whitespace-nowrap px-2 sm:px-3 justify-center text-white bg-themeMain hover:bg-themeLight glow px-6" style="min-height: 48px; min-width: 220px;">
+              <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;">Add To Library</span>
+            </button>
+            <button class="rounded relative flex items-center px-3 justify-center text-white bg-BGColorLight hover:bg-BGColorDarkLight px-0" style="min-height: 48px; min-width: 48px;">
+              <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+              </span>
+            </button>
+            <button class="rounded relative flex items-center px-3 flex-grow sm:flex-grow-0 justify-center text-white bg-BGColorLight hover:bg-BGColorDarkLight px-6" style="min-height: 48px; min-width: 0px;">
+              <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon mr-4"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zm20 0h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg> 
+              Start Listening
+              </span>
+            </button> 
+            <button class="rounded relative flex items-center px-3 justify-center text-white bg-BGColorLight hover:bg-BGColorDarkLight px-6" style="min-height: 48px; min-width: 0px;">
+              <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon mr-4"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zm0 7v-7"></path></svg> 
+                Report
+              </span>
+            </button> 
+            <a href="/book/upload/{'book ID'}" class="rounded relative flex items-center px-3 justify-center text-white bg-BGColorLight hover:bg-BGColorDarkLight px-6" style="min-height: 48px; min-width: 0px;">
+              <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon mr-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4m14-7-5-5-5 5m5-5v12"></path></svg> 
+                Upload Chapter
+              </span>
+            </a>
+          </div>
+        </div>
+        <div class="col-span-2">
+          <div class="tags-list py-4">
+            <span class="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300">Dark</span>
+          </div>
+          <div class="stats-list">
+            <div class="flex gap-2 flex-wrap items-center text-sm sm:text-base">
+              <span title="7.6818 (Average)" class="text-themeMain flex items-center relative group" style="cursor: pointer;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1 rel text-currentColor icon"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg> 
+                7.98
+              </span>
+              <span class="text-secondary flex items-center" style="cursor: pointer;" title="425">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="mr-1 rel text-currentColor icon"><path d="m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg> 
+                425
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="py-8 text-justify">
+        <p>
+          Lorem ipsum dolor, sit amet consectetur adipisicing elit. Obcaecati, a? Molestiae quisquam aliquid labore in blanditiis, dolorum nulla eius? Vero, inventore cumque odit, nesciunt eos quidem, praesentium impedit 
+          aliquid doloremque non saepe hic unde enim quasi reprehenderit cum dolorem temporibus excepturi? Fuga quisquam magnam consequatur expedita. Fuga totam impedit id ipsum fugit! Hic quidem cumque aspernatur ratione 
+          ullam iste rerum sint nemo a? Mollitia nemo, quos natus modi qui commodi earum. Voluptatum voluptatibus, illo nostrum odio quam sit corporis facilis amet, vel, voluptate labore perspiciatis consectetur est. Quas, 
+          dignissimos distinctio a hic, ipsum ducimus ipsa necessitatibus officiis similique blanditiis aspernatur!
+        </p>
+      </div>
+      <img src="https://mangadex.org/covers/05648383-3ddc-4199-bec1-3358d90bbaa4/e054446b-c527-4492-a6cf-89d352d46682.jpg.512.jpg" class="w-full" alt="">
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
+{% block scripts %}
+<script>
+  $("#side-menu-close").click(function(){
+    $('#side-menu').toggle('hidden');
+    $('#side-menu-open').toggle('hidden');
+  });
+  $("#side-menu-open").click(function(){
+    $('#side-menu').toggle('hidden');
+    $('#side-menu-open').toggle('hidden');
+  });
+</script>
+<script type="module">
+  var swiper = new Swiper('.swiper', {
+    slidesPerView: 'auto',
+    mousewheel: true,
+    pagination: {
+      el: '.swiper-pagination',
+      clickable: true,
+    },
+    autoplay: {
+      delay: 2500,
+      disableOnInteraction: false,
+    },
+  });
+</script>
+{% endblock %}
