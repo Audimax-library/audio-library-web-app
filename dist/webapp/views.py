@@ -1,7 +1,6 @@
 from urllib import request
 from flask import Blueprint,render_template, redirect, session, url_for, request as rq, make_response, jsonify
 from .forms import UploadFileForm
-from .models import Release
 from werkzeug.utils import secure_filename
 import os
 from uuid import uuid4
@@ -23,23 +22,7 @@ def make_unique(string):
 @webapp.route("/", methods=['GET', 'POST'])
 @webapp.route("/home/", methods=['GET', 'POST'])
 def home_page():
-    fileForm = UploadFileForm()
-    if(fileForm.validate_on_submit()):
-        file = fileForm.file.data
-        sec_filename = secure_filename(file.filename)
-        split_tup = os.path.splitext(sec_filename)
-        dest_filename = make_unique(f'main_upload{split_tup[1]}')
-        file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),UPLOAD_FOLDER, dest_filename))
-        insertQuery = Release(title=fileForm.title.data, artist=fileForm.artist.data, cover_img=dest_filename, description=fileForm.description.data)
-        db.session.add(insertQuery)
-        db.session.commit()
-        return redirect('/home')
-        
-    music = Release.query.all()
-    context = {
-        'form': fileForm,
-        'latest_releases': music,
-    }
+    context = {}
     if current_user.is_authenticated:
         context['user_initial'] = str(current_user)[0:2].upper()
     return render_template('home.html', context=context)
