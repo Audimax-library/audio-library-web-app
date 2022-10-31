@@ -43,6 +43,7 @@ class Chapter(db.Model):
   order = db.Column(db.Integer, nullable=False, unique=True)
   display_number = db.Column(db.String(10), nullable=False, unique=False)
   audio_url = db.Column(db.String(100), nullable=False, unique=False, server_default="sample.mp3")
+  is_convert = db.Column(db.Boolean, unique=False, default=False)
   read_text_url = db.Column(db.String(100), nullable=True, unique=False)
   views = db.Column(db.Integer, nullable=False, default=0)
   created = db.Column(db.DateTime, server_default=db.func.now())

@@ -16,7 +16,37 @@
   <div class="fixed h-full w-full -z-10">
     <img src="{{ url_for('assisted.static', filename='asst-bg.jpg') }}" class="h-full mx-auto" alt="">
   </div>
-  <h1>Assisted Mode</h1>
-  <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Atque quia consectetur iste dignissimos impedit nobis inventore laudantium beatae nisi id. Ducimus necessitatibus sint aliquid. Quod id amet quis dolorum sequi nesciunt, consectetur quasi possimus exercitationem earum iusto nam vel repellendus molestiae aliquid, quibusdam accusantium sint eius at expedita? Odit, consectetur?</p>
-</body>
+  <div class="container mx-auto text-center my-8 pt-8 pb-16 px-4 rounded-lg bg-slate-700/50">
+    <h1 class="font-mono">Assisted Mode</h1>
+    <h1 class="text-3xl my-4">Welcome to <b>Audimax</b></h1>
+    <p>Audimax is an online audio library and you are currently using the assisted mode specially developed for visually impaired people.</p>
+    <p>If you think you are at the wrong place either press 'Esc' button on your keyboard or click <a href="/" class="text-themeMain underline">Here</a> to redirect back to main site.</p>
+  </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js" integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+      let speech = new SpeechSynthesisUtterance();
+      speech.lang = "en-US";
+      
+      let voices = [];
+      window.speechSynthesis.onvoiceschanged = () => {
+        voices = window.speechSynthesis.getVoices();
+        speech.voice = voices[2];
+        console.log(voices);
+      };
+      speech.rate = 1;
+      speech.volume = 0.5;
+      speech.pitch = 1;
+      
+      speech.text = "Audimax is an online audio library and you are currently using the assisted mode specially developed for visually impaired people."
+      
+      $(document).on('click keypress', () => {
+        window.speechSynthesis.speak(speech);
+      }); 
+      
+      window.onload = function() {
+        var startButton = document.getElementById("start");
+        startButton.click();
+      }; 
+    </script>
+  </body>
 </html>
