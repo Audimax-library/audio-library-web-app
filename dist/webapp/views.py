@@ -1,5 +1,5 @@
-from urllib import request
-from flask import Blueprint,render_template, redirect, session, url_for, request as rq, make_response, jsonify
+#from urllib import request
+from flask import Blueprint,render_template, redirect, session, url_for, request, make_response, jsonify, flash
 from .forms import UploadFileForm
 from werkzeug.utils import secure_filename
 import os
@@ -10,6 +10,7 @@ from admin import db, login_manager, oauth, discord, bcrypt
 from admin.forms import LoginForm, RegistrationForm
 from admin.models import User
 import datetime
+from sqlalchemy.exc import IntegrityError
 
 webapp = Blueprint('webapp', __name__, static_folder="static", static_url_path='/webapp/static' , template_folder='templates')
 UPLOAD_FOLDER = "static/uploads/"
@@ -43,21 +44,26 @@ def load_user(user_id):
 def login_page():
     if session.get('profile'):
         user_detail = session['profile']
-        print(user_detail['name'])
+        #print(user_detail['name'])
     if current_user.is_authenticated:
         return redirect(url_for('webapp.home_page'))
 
     form = LoginForm()
-    if form.validate_on_submit():
+    if request.method == 'POST':
         user = User.query.filter_by(email=form.email.data).first()
-        print(rq.form.getlist('rememberme'))
+        #print(request.form.getlist('rememberme'))
         if(user):
             if(bcrypt.check_password_hash(user.password, form.password.data)):
-                if(len(rq.form.getlist('rememberme')) > 0):
+                if(len(request.form.getlist('rememberme')) > 0):
                     login_user(user, remember=True, duration=datetime.timedelta(days=30))
                 else:
                     login_user(user)
+                flash('Login Successful.', 'success')
                 return redirect(url_for('webapp.home_page'))
+            else:
+                flash('Invalid Password.', 'error')
+        else:
+            flash('Invalid Email Address.', 'error')
     context = {"form": form}
     return render_template('user-login.html', context=context)
 
@@ -67,12 +73,18 @@ def register_page():
         return redirect(url_for('admin.dashboard_page'))
 
     form = RegistrationForm()
-    if form.validate_on_submit():
+    if request.method == 'POST':
         hashed_password = bcrypt.generate_password_hash(form.password.data)
         new_user = User(username=form.username.data, email=form.email.data, password=hashed_password)
-        db.session.add(new_user)
-        db.session.commit()
-        return redirect(url_for('webapp.login_page'))
+        try:
+            db.session.add(new_user)
+            db.session.commit()
+            #print(f'{form.username.data}-{form.email.data}-{form.password.data}')
+            flash('Sign Up Successful.', 'success')
+            return redirect(url_for('webapp.login_page'))
+        except IntegrityError:
+            db.session.rollback()
+            flash('Email is already in use.', 'error')
 
     context = {"form": form}
     return render_template('user-register.html', context=context)
@@ -85,6 +97,7 @@ def logout():
         session.pop(key)
     session.clear()
     logout_user()
+    flash('Log Out Successful.', 'success')
     return redirect(url_for('webapp.login_page'))
 
 @webapp.route("/music/") #released music

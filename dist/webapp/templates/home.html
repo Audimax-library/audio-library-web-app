@@ -6,14 +6,13 @@
     <span class="text-center"><span class="underline">Cloud Guage</span> is still in early access. So, bugs are to be expected. 😉</span>
   </div>
 
-
   <section>
     <div class="flex items-center justify-center mb-4">
       <a href="#" class="link">
         <h2 class="font-header text-2xl font-semibold">Latest Books</h2>
       </a> 
       <a href="#" class="ml-auto link" aria-label="View latest books list">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"class="feather feather-arrow-right text-icon-black dark:text-icon-white text-false icon"><path d="M5 12h14m-7-7 7 7-7 7"></path></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"class="feather feather-arrow-right text-icon-black text-false icon"><path d="M5 12h14m-7-7 7 7-7 7"></path></svg>
       </a>
     </div>
 
@@ -390,16 +389,6 @@
 </div>
 {% endblock %}
 {% block scripts %}
-<script>
-  $("#side-menu-close").click(function(){
-    $('#side-menu').toggle('hidden');
-    $('#side-menu-open').toggle('hidden');
-  });
-  $("#side-menu-open").click(function(){
-    $('#side-menu').toggle('hidden');
-    $('#side-menu-open').toggle('hidden');
-  });
-</script>
 <script type="module">
   var swiper = new Swiper('.swiper', {
     slidesPerView: 'auto',

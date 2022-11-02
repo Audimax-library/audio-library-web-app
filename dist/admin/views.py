@@ -50,10 +50,11 @@ def register_page():
 @admin.route("/logout", methods=['GET', 'POST'])
 @login_required
 def logout():
-    logout_user()
     discord.revoke()
     for key in list(session.keys()):
         session.pop(key)
+    session.clear()
+    logout_user()
     return redirect(url_for('admin.home_page'))
 
 @admin.route('/dashboard', methods=['GET', 'POST'])

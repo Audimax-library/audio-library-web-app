@@ -134,16 +134,6 @@
 
 {% endblock %}
 {% block scripts %}
-<script>
-  $("#side-menu-close").click(function(){
-    $('#side-menu').toggle('hidden');
-    $('#side-menu-open').toggle('hidden');
-  });
-  $("#side-menu-open").click(function(){
-    $('#side-menu').toggle('hidden');
-    $('#side-menu-open').toggle('hidden');
-  });
-</script>
 <script type="module">
   var swiper = new Swiper('.swiper', {
     slidesPerView: 'auto',
