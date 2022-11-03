@@ -26,6 +26,8 @@ def home_page():
     context = {}
     if current_user.is_authenticated:
         context['user_initial'] = str(current_user)[0:2].upper()
+        #user = User.query.filter_by(email=str(current_user)).first()
+        context['user_name'] = current_user.username
     return render_template('home.html', context=context)
 
 @webapp.route("/book/<id>", methods=['GET', 'POST'])
