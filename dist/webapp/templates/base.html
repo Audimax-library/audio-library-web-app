@@ -152,8 +152,8 @@
               <div class="flex-grow"></div>
   
               <div class="items-center rounded-full cursor-pointer hidden lg:block">
-                <form action="/titles" method="GET" class="inputwrap">
-                  <input placeholder="Search" title="Search" name="q" class=""> 
+                <form action="" method="GET" class="inputwrap" onclick="toggleModal(this)" data-modal-toggle="search-modal" >
+                  <input placeholder="Search" title="Search" name="q" autocomplete="off"> 
                   <div class="search-icon">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-icon-white text-false icon"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm10 2-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
                   </div>
@@ -194,42 +194,84 @@
   <div id="profile-modal" class="fixed top-0 left-0 z-30 bg-slate-900/50 w-full h-full backdrop-blur-sm hidden">
     <div class="relative p-4 pt-10 w-full max-w-2xl h-full md:h-auto mx-auto">
       <div class="relative bg-BGColor rounded-lg box-shadow">
-          <div class="flex justify-between items-start p-4 rounded-t border-b border-gray-600">
-              <h3 class="text-xl font-semibold text-white">
-                {% if context.user_name is defined %}
-                  Haiya, {{context.user_name}}
-                {% endif %}
-              </h3>
-              <button type="button" onclick="toggleModal(this)" data-modal-toggle="profile-modal" class="ml-auto -mx-1.5 -my-1.5 bg-BGColorDarkLight text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8" aria-label="Close">
-                <span class="sr-only">Close</span>
-                <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
-              </button>
-          </div>
-          <div class="profile-avatar mt-6">
-            <img src="https://via.placeholder.com/150/46CDCF/000000?text={{context.user_initial}}" class="mx-auto rounded-full w-1/6 h-1/6" alt="Avatar" id="avatar">
-          </div>
-          <div class="grid sm:grid-cols-2 grid-col-1 gap-4 p-6">
-            <a href="/user/me" class="p-2 flex items-center font-medium rounded text-white bg-BGColorDarkLight hover:bg-BGColorLight duration-100 ease-out">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="mr-2 text-icon-white text-false icon"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m8-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg> 
-              <span>My Profile</span>
-            </a>
-            <a href="/user/me" class="p-2 flex items-center font-medium rounded text-white bg-BGColorDarkLight hover:bg-BGColorLight duration-100 ease-out">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 text-icon-white text-false icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4m14-7-5-5-5 5m5-5v12"></path></svg>
-              <span>My Uploads</span>
-            </a>
-            <a href="/user/me" class="p-2 flex items-center font-medium rounded text-white bg-BGColorDarkLight hover:bg-BGColorLight duration-100 ease-out">
-              <svg style="width:24px;height:24px" viewBox="0 0 24 24" class="mr-2 text-icon-white text-false icon"><path fill="currentColor" d="M20 2V4L4 8V6H2V18H4V16L6 16.5V18.5C6 20.4 7.6 22 9.5 22S13 20.4 13 18.5V18.3L20 20V22H22V2H20M11 18.5C11 19.3 10.3 20 9.5 20S8 19.3 8 18.5V17L11 17.8V18.5M20 18L4 14V10L20 6V18Z"></path></svg>
-              <span>My Reports</span>
-            </a>
-          </div>
-          <div class="flex items-center p-6 space-x-2 rounded-b border-t border-gray-600">
-              <a href="/logout/" class="text-white focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 bg-themeMain hover:bg-themeMainLight focus:outline-none focus:ring-teal-800">Log Out</a>
-              <button onclick="toggleModal(this)" data-modal-toggle="profile-modal" type="button" class="focus:ring-4 focus:outline-none rounded-lg border text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 bg-gray-700 text-gray-300 border-gray-500 hover:text-white hover:bg-gray-600 focus:ring-gray-600">Close</button>
-          </div>
+        <div class="flex justify-between items-start p-4 rounded-t border-b border-gray-600">
+          <h3 class="text-xl font-semibold text-white">
+            {% if context.user_name is defined %}
+              Haiya, {{context.user_name}}
+            {% endif %}
+          </h3>
+          <button type="button" onclick="toggleModal(this)" data-modal-toggle="profile-modal" class="ml-auto -mx-1.5 -my-1.5 bg-BGColorDarkLight text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8" aria-label="Close">
+            <span class="sr-only">Close</span>
+            <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+          </button>
+        </div>
+        <div class="profile-avatar mt-6">
+          <img src="https://via.placeholder.com/150/46CDCF/000000?text={{context.user_initial}}" class="mx-auto rounded-full w-1/6 h-1/6" alt="Avatar" id="avatar">
+        </div>
+        <div class="grid sm:grid-cols-2 grid-col-1 gap-4 p-6">
+          <a href="/user/me" class="p-2 flex items-center font-medium rounded text-white bg-BGColorDarkLight hover:bg-BGColorLight duration-100 ease-out">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="mr-2 text-icon-white text-false icon"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m8-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg> 
+            <span>My Profile</span>
+          </a>
+          <a href="/user/me" class="p-2 flex items-center font-medium rounded text-white bg-BGColorDarkLight hover:bg-BGColorLight duration-100 ease-out">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2 text-icon-white text-false icon"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4m14-7-5-5-5 5m5-5v12"></path></svg>
+            <span>My Uploads</span>
+          </a>
+          <a href="/user/me" class="p-2 flex items-center font-medium rounded text-white bg-BGColorDarkLight hover:bg-BGColorLight duration-100 ease-out">
+            <svg style="width:24px;height:24px" viewBox="0 0 24 24" class="mr-2 text-icon-white text-false icon"><path fill="currentColor" d="M20 2V4L4 8V6H2V18H4V16L6 16.5V18.5C6 20.4 7.6 22 9.5 22S13 20.4 13 18.5V18.3L20 20V22H22V2H20M11 18.5C11 19.3 10.3 20 9.5 20S8 19.3 8 18.5V17L11 17.8V18.5M20 18L4 14V10L20 6V18Z"></path></svg>
+            <span>My Reports</span>
+          </a>
+        </div>
+        <div class="flex items-center p-6 space-x-2 rounded-b border-t border-gray-600">
+            <a href="/logout/" class="text-white focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 bg-themeMain hover:bg-themeMainLight focus:outline-none focus:ring-teal-800">Log Out</a>
+            <button onclick="toggleModal(this)" data-modal-toggle="profile-modal" type="button" class="focus:ring-4 focus:outline-none rounded-lg border text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 bg-gray-700 text-gray-300 border-gray-500 hover:text-white hover:bg-gray-600 focus:ring-gray-600">Close</button>
+        </div>
       </div>
-  </div>
+    </div>
   </div>
   <!-- Profile modal section END -->
+  <!-- Search modal section -->
+  <div id="search-modal" class="fixed top-0 left-0 z-30 bg-slate-900/50 w-full h-full backdrop-blur-sm hidden">
+    <div class="relative p-4 pt-10 w-full max-w-2xl h-full md:h-auto mx-auto">
+      <div class="relative bg-BGColor rounded-lg box-shadow">
+        <div class="flex justify-between items-start p-4 rounded-t">
+          <div class="items-center rounded-full cursor-pointer text-white mr-2">
+            <form action="/titles/" method="GET" class="inputwrap">
+              <input placeholder="Search" title="Search" name="q" class=""> 
+              <div class="search-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-icon-white text-false icon"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm10 2-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              </div>
+            </form>
+          </div>
+          <button type="button" onclick="toggleModal(this)" data-modal-toggle="search-modal" class="ml-auto mx-0 my-0 bg-BGColorDarkLight text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8" aria-label="Close">
+            <span class="sr-only">Close</span>
+            <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+          </button>
+        </div>
+        <div class="p-6">
+          <a href="/user/me" class="p-2 mb-2 flex items-center font-medium rounded text-white bg-BGColorDarkLight hover:bg-BGColorLight duration-100 ease-out">
+            <div style="width:50px; height:70px;" class="overflow-hidden rounded flex-none mr-4">
+              <img src="https://mangadex.org/covers/05648383-3ddc-4199-bec1-3358d90bbaa4/e054446b-c527-4492-a6cf-89d352d46682.jpg.512.jpg" alt="">
+            </div>
+            <span>A Cross-dressing Boy Who Wants an Excuse to Cross-dress</span>
+          </a>
+          <a href="/user/me" class="p-2 mb-2 flex items-center font-medium rounded text-white bg-BGColorDarkLight hover:bg-BGColorLight duration-100 ease-out">
+            <div style="width:50px; height:70px;" class="overflow-hidden rounded flex-none mr-4">
+              <img src="https://mangadex.org/covers/05648383-3ddc-4199-bec1-3358d90bbaa4/e054446b-c527-4492-a6cf-89d352d46682.jpg.512.jpg" alt="">
+            </div>
+            <span>A Cross-dressing Boy Who Wants an Excuse to Cross-dress</span>
+          </a>
+          <a href="/user/me" class="p-2 mb-2 flex items-center font-medium rounded text-white bg-BGColorDarkLight hover:bg-BGColorLight duration-100 ease-out">
+            <div style="width:50px; height:70px;" class="overflow-hidden rounded flex-none mr-4">
+              <img src="https://mangadex.org/covers/05648383-3ddc-4199-bec1-3358d90bbaa4/e054446b-c527-4492-a6cf-89d352d46682.jpg.512.jpg" alt="">
+            </div>
+            <span>A Cross-dressing Boy Who Wants an Excuse to Cross-dress</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Search modal section END -->
   <!-- Toast section -->
   <div class="fixed bottom-4 right-4 z-30">
     {% with messages = get_flashed_messages(with_categories=true) %}

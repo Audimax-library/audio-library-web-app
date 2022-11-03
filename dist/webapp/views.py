@@ -30,6 +30,11 @@ def home_page():
         context['user_name'] = current_user.username
     return render_template('home.html', context=context)
 
+@webapp.route("/titles/", methods=['GET', 'POST'])
+def titles_page():
+    query = request.args.get('q')
+    return f'<h1>{query}</h1>';
+
 @webapp.route("/book/<id>", methods=['GET', 'POST'])
 def book_page(id):
     context = {'id': id}
@@ -40,7 +45,6 @@ def book_page(id):
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(user_id)
-
 
 @webapp.route("/login/", methods=['GET', 'POST'])
 def login_page():
