@@ -1,5 +1,5 @@
 # Audimax - Audio Library Web Application
-## How to setup
+## How to setup the environment
 #
 
 1. Install nodejs, python, MySQL server on pc.
