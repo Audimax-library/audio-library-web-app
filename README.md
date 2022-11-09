@@ -2,4 +2,5 @@
 ## How to setup
 #
 
-1. install nodejs, python, MySQL server on pc
+1. Install nodejs, python, MySQL server on pc.
+1. Install python Virtual Environment module.
