@@ -1,10 +1,15 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-db_user = 'dulan'
-db_pswd = 'good'
-db_host = 'localhost'
-db_name = 'llamaloops_db'
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+db_user = os.getenv('DB_USER')
+db_pswd = os.getenv('DB_PSWD')
+db_host = os.getenv('DB_HOST')
+db_name = os.getenv('DB_NAME')
 
 
 app = Flask(__name__)
