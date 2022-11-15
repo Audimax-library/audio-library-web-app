@@ -112,7 +112,7 @@
           <div class="px-4 pt-2 flex flex-col flex-shrink-0">
             <div class="px-2 py-1 rounded-md font-bold flex">
               <div class="flex-none"><svg width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="text-currentColor icon"><path d="m3 21 5-5m-4-4 8 8c3-3 1-5 1-5l6-6h2l-6-6v2l-6 6s-2-2-5 1z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg></div> 
-              <div class="mx-2 flex-none">Cloud Guage</div>
+              <div class="mx-2 flex-none">Audimax</div>
             </div>
             <a href="/">
               <div class="px-2 py-1 rounded-md hover:bg-BGColor hover:text-white transition-colors">
@@ -148,7 +148,7 @@
               <button class="rounded relative md-btn flex items-center px-3 mr-2 justify-center rounded-full px-0 transition" id="side-menu-open">
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-currentColor icon"><path d="M3 12h12M3 6h18M3 18h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
               </button>
-              <a href="/" class="flex items-center nuxt-link-exact-active nuxt-link-active"><img alt="Cloud Guage logo" src="https://via.placeholder.com/152x40" height="34px" class="mr-2"></a>
+              <a href="/" class="flex items-center nuxt-link-exact-active nuxt-link-active"><img alt="Audimax logo" src="https://via.placeholder.com/152x40" height="34px" class="mr-2"></a>
               <div class="flex-grow"></div>
   
               <div class="items-center rounded-full cursor-pointer hidden lg:block">
@@ -190,6 +190,9 @@
       </div>
     </div>
   </div>
+  <footer class="bg-BGColorLight text-center py-4 text-white">
+    © Audimax 2022
+  </footer>
   <!-- Profile modal section -->
   <div id="profile-modal" class="fixed top-0 left-0 z-30 bg-slate-900/50 w-full h-full backdrop-blur-sm hidden">
     <div class="relative p-4 pt-10 w-full max-w-2xl h-full md:h-auto mx-auto">
@@ -237,7 +240,7 @@
         <div class="flex justify-between items-start p-4 rounded-t">
           <div class="items-center rounded-full cursor-pointer text-white mr-2">
             <form action="/titles/" method="GET" class="inputwrap">
-              <input placeholder="Search" title="Search" name="q" class=""> 
+              <input placeholder="Search" title="Search" name="q" class="" autofocus id="main_search_field"> 
               <div class="search-icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-icon-white text-false icon"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm10 2-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
               </div>
@@ -308,6 +311,10 @@
     //onclick modal close function
     function toggleModal(btn){
       let modalName = $(btn).data('modalToggle');
+      /* if(modalName == 'search-modal'){
+        $("#main_search_field").trigger('focus');
+        console.log("csc");
+      } */
       $('#'+modalName).fadeToggle('fast');
     }
     //toast timeout function
