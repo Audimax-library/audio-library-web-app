@@ -30,16 +30,29 @@ def home_page():
         context['user_name'] = current_user.username
     return render_template('home.html', context=context)
 
-@webapp.route("/titles/", methods=['GET', 'POST'])
+from .models import Book_type
+@webapp.route("/add-titles/", methods=['GET', 'POST']) #add new title
+def add_title_page():
+    genres = Book_type.query.all()
+    context = {'genres':genres}
+    if current_user.is_authenticated:
+        context['user_initial'] = str(current_user)[0:2].upper()
+        context['user_name'] = current_user.username
+    else:
+        return redirect(url_for('webapp.login_page'))
+    return render_template('new-title.html', context=context)
+
+@webapp.route("/titles/", methods=['GET', 'POST']) #search titles
 def titles_page():
     query = request.args.get('q')
-    return f'<h1>{query}</h1>';
+    return f'<h1>{query}</h1>'
 
 @webapp.route("/book/<id>", methods=['GET', 'POST'])
 def book_page(id):
     context = {'id': id}
     if current_user.is_authenticated:
         context['user_initial'] = str(current_user)[0:2].upper()
+        context['user_name'] = current_user.username
     return render_template('book.html', context=context)
 
 @login_manager.user_loader
