@@ -18,96 +18,22 @@
 
     <div class="swiper">
       <div class="swiper-wrapper">
-        <div class="swiper-slide">
-          
-          <div class="grid grid-flow-col grid-cols-4 rounded bg-BGColorLight latest-card">
-            <div>
-              <img src="https://pbs.twimg.com/profile_images/882359057142562817/WMiNW4Wq_400x400.jpg" class=" rounded-l w-full h-full object-cover" alt="" loading="lazy">
-            </div>
-            <div class="col-start-2 col-span-3 p-4 text-left">
-              <h1 class="font-base font-bold truncate">Lorem, ipsum dolor.</h1>
-              <p class="text-base text-clip">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Minus officia perferendis ex iste provident quidem asperiores perspiciatis aliquam dicta temporibus soluta fuga inventore totam...</p>
+        {% for item in context.recent_books%}
+        <a href="{{url_for('webapp.book_page', id=item.id)}}">
+          <div class="swiper-slide">
+            <div class="grid grid-flow-col grid-cols-4 rounded bg-BGColorLight latest-card">
+              <div>
+                <img src="{{ url_for('webapp.static', filename='uploads/'+item.cover_img) }}" class=" rounded-l w-full h-full object-cover" alt="" loading="lazy">
+              </div>
+              <div class="col-start-2 col-span-3 p-4 text-left">
+                <h1 class="font-base font-bold truncate">{{item.title}}</h1>
+                <p class="text-base text-clip">{{item.synopsis[:174]}}...</p>
+              </div>
             </div>
           </div>
+        </a>
+        {% endfor %}
 
-        </div>
-        <div class="swiper-slide">
-          <div class="grid grid-flow-col grid-cols-4 rounded bg-BGColorLight latest-card">
-            <div>
-              <img src="https://pbs.twimg.com/profile_images/882359057142562817/WMiNW4Wq_400x400.jpg" class=" rounded-l w-full h-full object-cover" alt="" loading="lazy">
-            </div>
-            <div class="col-start-2 col-span-3 p-4 text-left">
-              <h1 class="font-base font-bold truncate">Lorem, ipsum dolor.</h1>
-              <p class="text-base text-clip">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Minus officia perferendis ex iste provident quidem asperiores perspiciatis aliquam dicta temporibus soluta fuga inventore totam...</p>
-            </div>
-          </div>
-        </div>
-        <div class="swiper-slide">
-          <div class="grid grid-flow-col grid-cols-4 rounded bg-BGColorLight latest-card">
-            <div>
-              <img src="https://pbs.twimg.com/profile_images/882359057142562817/WMiNW4Wq_400x400.jpg" class=" rounded-l w-full h-full object-cover" alt="" loading="lazy">
-            </div>
-            <div class="col-start-2 col-span-3 p-4 text-left">
-              <h1 class="font-base font-bold truncate">Lorem, ipsum dolor.</h1>
-              <p class="text-base text-clip">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Minus officia perferendis ex iste provident quidem asperiores perspiciatis aliquam dicta temporibus soluta fuga inventore totam...</p>
-            </div>
-          </div>
-        </div>
-        <div class="swiper-slide">
-          <div class="grid grid-flow-col grid-cols-4 rounded bg-BGColorLight latest-card">
-            <div>
-              <img src="https://pbs.twimg.com/profile_images/882359057142562817/WMiNW4Wq_400x400.jpg" class=" rounded-l w-full h-full object-cover" alt="" loading="lazy">
-            </div>
-            <div class="col-start-2 col-span-3 p-4 text-left">
-              <h1 class="font-base font-bold truncate">Lorem, ipsum dolor.</h1>
-              <p class="text-base text-clip">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Minus officia perferendis ex iste provident quidem asperiores perspiciatis aliquam dicta temporibus soluta fuga inventore totam...</p>
-            </div>
-          </div>
-        </div>
-        <div class="swiper-slide">
-          <div class="grid grid-flow-col grid-cols-4 rounded bg-BGColorLight latest-card">
-            <div>
-              <img src="https://pbs.twimg.com/profile_images/882359057142562817/WMiNW4Wq_400x400.jpg" class=" rounded-l w-full h-full object-cover" alt="" loading="lazy">
-            </div>
-            <div class="col-start-2 col-span-3 p-4 text-left">
-              <h1 class="font-base font-bold truncate">Lorem, ipsum dolor.</h1>
-              <p class="text-base text-clip">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Minus officia perferendis ex iste provident quidem asperiores perspiciatis aliquam dicta temporibus soluta fuga inventore totam...</p>
-            </div>
-          </div>
-        </div>
-        <div class="swiper-slide">
-          <div class="grid grid-flow-col grid-cols-4 rounded bg-BGColorLight latest-card">
-            <div>
-              <img src="https://pbs.twimg.com/profile_images/882359057142562817/WMiNW4Wq_400x400.jpg" class=" rounded-l w-full h-full object-cover" alt="" loading="lazy">
-            </div>
-            <div class="col-start-2 col-span-3 p-4 text-left">
-              <h1 class="font-base font-bold truncate">Lorem, ipsum dolor.</h1>
-              <p class="text-base text-clip">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Minus officia perferendis ex iste provident quidem asperiores perspiciatis aliquam dicta temporibus soluta fuga inventore totam...</p>
-            </div>
-          </div>
-        </div>
-        <div class="swiper-slide">
-          <div class="grid grid-flow-col grid-cols-4 rounded bg-BGColorLight latest-card">
-            <div>
-              <img src="https://pbs.twimg.com/profile_images/882359057142562817/WMiNW4Wq_400x400.jpg" class=" rounded-l w-full h-full object-cover" alt="" loading="lazy">
-            </div>
-            <div class="col-start-2 col-span-3 p-4 text-left">
-              <h1 class="font-base font-bold truncate">Lorem, ipsum dolor.</h1>
-              <p class="text-base text-clip">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Minus officia perferendis ex iste provident quidem asperiores perspiciatis aliquam dicta temporibus soluta fuga inventore totam...</p>
-            </div>
-          </div>
-        </div>
-        <div class="swiper-slide">
-          <div class="grid grid-flow-col grid-cols-4 rounded bg-BGColorLight latest-card">
-            <div>
-              <img src="https://pbs.twimg.com/profile_images/882359057142562817/WMiNW4Wq_400x400.jpg" class=" rounded-l w-full h-full object-cover" alt="" loading="lazy">
-            </div>
-            <div class="col-start-2 col-span-3 p-4 text-left">
-              <h1 class="text-base font-bold truncate">Lorem, ipsum dolor.</h1>
-              <p class="text-base text-clip">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Minus officia perferendis ex iste provident quidem asperiores perspiciatis aliquam dicta temporibus soluta fuga inventore totam...</p>
-            </div>
-          </div>
-        </div>
       </div>
       <!-- Add Pagination -->
       <div class="swiper-pagination" style="bottom: -5px;"></div>

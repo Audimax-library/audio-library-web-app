@@ -1,25 +1,25 @@
 {% extends 'base.html' %}
-{% block title %}Welcome | Audimax{% endblock %}
+{% block title %}{{context.book_details.title}} | Audimax{% endblock %}
 {% block content %}
 
 <div class="page-cover relative">
   <div class="absolute w-full h-72 xl:h-64 overflow-hidden">
     <div class="blur">
-      <img src="https://mangadex.org/covers/05648383-3ddc-4199-bec1-3358d90bbaa4/e054446b-c527-4492-a6cf-89d352d46682.jpg.512.jpg" class="w-full" alt="">
+      <img src="{{ url_for('webapp.static', filename='uploads/'+context.book_details.cover_img) }}" class="w-full" alt="">
     </div>
   </div>
   <div class="relative w-full z-10 px-6 py-8">
     <div class="container mx-auto">
       <div class="row-span-3 block md:hidden mb-4">
-        <img src="https://mangadex.org/covers/05648383-3ddc-4199-bec1-3358d90bbaa4/e054446b-c527-4492-a6cf-89d352d46682.jpg.512.jpg" class="rounded-lg w-52" alt="">
+        <img src="{{ url_for('webapp.static', filename='uploads/'+context.book_details.cover_img) }}" class="rounded-lg w-52" alt="">
       </div>
       <div class="grid grid-rows-3 grid-flow-col gap-4">
         <div class="row-span-3 hidden md:block">
-          <img src="https://mangadex.org/covers/05648383-3ddc-4199-bec1-3358d90bbaa4/e054446b-c527-4492-a6cf-89d352d46682.jpg.512.jpg" class="rounded-lg w-52" alt="">
+          <img src="{{ url_for('webapp.static', filename='uploads/'+context.book_details.cover_img) }}" class="rounded-lg w-52" alt="">
         </div>
         <div class="col-span-2">
-          <h1 class="text-6xl font-bold">title</h1>
-          <p class="text-lg">Alt name</p>
+          <h1 class="text-6xl font-bold">{{context.book_details.title}}</h1>
+          <p class="text-lg">{{context.book_details.alt_title}}</p>
         </div>
         <div class="col-span-2">
           <div class="flex gap-2 sm:mb-0 mb-2 flex-wrap">
@@ -55,7 +55,7 @@
           <div class="flex space-x-2 py-4">
             <div class="flex items-center space-x-1 text-sm py-1 px-2 bg-green-200 text-green-800 rounded-full">
               <div style="width: 0.4rem; height: 0.4rem" class="bg-green-500 rounded-full"></div>
-              <div>Ongoing</div>
+              <div>{{context.book_details.status}}</div>
             </div>
           </div>
           <div class="stats-list">
@@ -73,40 +73,35 @@
         </div>
       </div>
       <div class="py-8 text-justify">
-        <p>
-          Lorem ipsum dolor, sit amet consectetur adipisicing elit. Obcaecati, a? Molestiae quisquam aliquid labore in blanditiis, dolorum nulla eius? Vero, inventore cumque odit, nesciunt eos quidem, praesentium impedit 
-          aliquid doloremque non saepe hic unde enim quasi reprehenderit cum dolorem temporibus excepturi? Fuga quisquam magnam consequatur expedita. Fuga totam impedit id ipsum fugit! Hic quidem cumque aspernatur ratione 
-          ullam iste rerum sint nemo a? Mollitia nemo, quos natus modi qui commodi earum. Voluptatum voluptatibus, illo nostrum odio quam sit corporis facilis amet, vel, voluptate labore perspiciatis consectetur est. Quas, 
-          dignissimos distinctio a hic, ipsum ducimus ipsa necessitatibus officiis similique blanditiis aspernatur!
-        </p>
+        <p>{{context.book_details.synopsis}}</p>
       </div>
       <div class="tag-detail mb-8">
         <div class="grid grid-cols-4 gap-4">
-          <div class="col-span-2 xl:col-span-1">
+          <div class="col-span-2 md:col-span-1">
             <p class="font-bold">Author</p>
             <div class="tags-list">
-              <span class="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 whitespace-nowrap">John Doe</span>
+              <span class="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 whitespace-nowrap">{{context.book_details.author_name}}</span>
             </div>
           </div>
-          <div class="col-span-2 xl:col-span-1">
+          <div class="col-span-2 md:col-span-1">
             <p class="font-bold">Type</p>
             <div class="tags-list">
-              <span class="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 whitespace-nowrap">Novel</span>
+              <span class="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 whitespace-nowrap">{{context.book_type.title}}</span>
             </div>
           </div>
-          <div class="col-span-2 xl:col-span-1">
+          <!-- <div class="col-span-2 xl:col-span-1">
             <p class="font-bold">Genres</p>
             <div class="tags-list">
               <span class="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 whitespace-nowrap">Adventure</span>
               <span class="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 whitespace-nowrap">History</span>
               <span class="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 whitespace-nowrap">Fantacy</span>
             </div>
-          </div>
-          <div class="col-span-2 xl:col-span-1">
+          </div> -->
+          <div class="col-span-2 md:col-span-1">
             <p class="font-bold">Formats</p>
             <div class="tags-list">
               <span class="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 whitespace-nowrap">Voice Read</span>
-              <span class="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 whitespace-nowrap">Machine Read</span>
+              <!-- <span class="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 whitespace-nowrap">Machine Read</span> -->
             </div>
           </div>
         </div>

@@ -11,28 +11,77 @@ from admin.forms import LoginForm, RegistrationForm
 from admin.models import User
 import datetime
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import desc
+from .models import Book_type, Book
 
 webapp = Blueprint('webapp', __name__, static_folder="static", static_url_path='/webapp/static' , template_folder='templates')
 UPLOAD_FOLDER = "static/uploads/"
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 login_manager.login_view = "webapp.login_page"
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(user_id)
 
 def make_unique(string):
     ident = uuid4().__str__()
     return f"{ident}-{string}"
 
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+######## home page
 @webapp.route("/", methods=['GET', 'POST'])
 @webapp.route("/home/", methods=['GET', 'POST'])
 def home_page():
-    context = {}
+    recent_books = Book.query.filter_by(is_approved=1).order_by(desc(Book.created)).limit(8).all()
+    print(recent_books)
+    context = {'recent_books':recent_books}
     if current_user.is_authenticated:
         context['user_initial'] = str(current_user)[0:2].upper()
         #user = User.query.filter_by(email=str(current_user)).first()
         context['user_name'] = current_user.username
     return render_template('home.html', context=context)
 
-from .models import Book_type
-@webapp.route("/add-titles/", methods=['GET', 'POST']) #add new title
+######## add new title
+@webapp.route("/add-titles/", methods=['GET', 'POST'])
 def add_title_page():
+    if request.method == 'POST':
+        new_title = request.form['new-title']
+        new_alt_title = request.form['new-alt-title']
+        new_title_cover = request.files['new-title-cover']
+        new_title_synopsis = request.form['new-title-synopsis']
+        new_title_genre = request.form['new-title-genre']
+        new_title_status = request.form['new-title-status']
+        new_title_lang = request.form['new-title-lang']
+        new_title_author = request.form['new-title-author']
+        if new_title_cover and allowed_file(new_title_cover.filename):
+            filename = secure_filename(new_title_cover.filename)
+            split_tup = os.path.splitext(filename)
+            dest_filename = make_unique(f'new_title_cover{split_tup[1]}')
+            try:
+                new_title_cover.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),UPLOAD_FOLDER, dest_filename))
+                new_title_query = Book(title=new_title, 
+                    alt_title=new_alt_title, 
+                    cover_img=dest_filename, 
+                    synopsis=new_title_synopsis, 
+                    type_id=int(new_title_genre), 
+                    status=new_title_status, 
+                    language=new_title_lang, 
+                    author_name=new_title_author, 
+                    draft_user_email=str(current_user))
+                db.session.add(new_title_query)
+                db.session.commit()
+            except Exception as e:
+                flash('An error occured while creating the new title. Please try again later.', 'error')
+                print(e)
+                return redirect(url_for('webapp.add_title_page'))
+            flash('New title has been created. Title will be approved within 24Hrs', 'success')
+            return redirect(url_for('webapp.home_page'))
+        else:
+            print("Invalid file type")
+            flash('Invalid file type. (Allowed only JPG, JPEG, PNG)', 'error')
+            return redirect(url_for('webapp.add_title_page'))
     genres = Book_type.query.all()
     context = {'genres':genres}
     if current_user.is_authenticated:
@@ -42,23 +91,28 @@ def add_title_page():
         return redirect(url_for('webapp.login_page'))
     return render_template('new-title.html', context=context)
 
-@webapp.route("/titles/", methods=['GET', 'POST']) #search titles
+######## search titles
+
+@webapp.route("/titles/", methods=['GET', 'POST'])
 def titles_page():
     query = request.args.get('q')
     return f'<h1>{query}</h1>'
 
-@webapp.route("/book/<id>", methods=['GET', 'POST'])
+######## view title
+@webapp.route("/book/<int:id>/", methods=['GET', 'POST'])
 def book_page(id):
-    context = {'id': id}
+    book_details = Book.query.get_or_404(id)
+    book_type = Book_type.query.get_or_404(book_details.type_id)
+    context = {
+        'book_details': book_details,
+        'book_type': book_type,
+        }
     if current_user.is_authenticated:
         context['user_initial'] = str(current_user)[0:2].upper()
         context['user_name'] = current_user.username
     return render_template('book.html', context=context)
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(user_id)
-
+######## user login page 
 @webapp.route("/login/", methods=['GET', 'POST'])
 def login_page():
     if session.get('profile'):

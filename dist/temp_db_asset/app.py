@@ -36,7 +36,9 @@ class Book(db.Model):
   views = db.Column(db.Integer, nullable=False, default=0)
   created = db.Column(db.DateTime, server_default=db.func.now())
   updated = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
-  author_id = db.Column(db.Integer, db.ForeignKey('author.id'),nullable=False)
+  author_name = db.Column(db.String(200), nullable=False, unique=False)
+  is_approved = db.Column(db.Boolean, unique=False, default=0)
+  draft_user_email = db.Column(db.String(200), db.ForeignKey(User.email),nullable=False)
   chapters = db.relationship('Chapter', backref="book")
   #genre_tags = db.relationship('Genre', secondary=book_genre, backref="tagged_books")
 
@@ -46,13 +48,14 @@ class Book(db.Model):
 class Book_type(db.Model):
   id = db.Column(db.Integer, autoincrement=True, primary_key=True)
   title = db.Column(db.String(100), nullable=False, unique=True)
+  books = db.relationship('Book', backref='book_type')
 
 class Chapter(db.Model):
   id = db.Column(db.Integer, autoincrement=True, primary_key=True)
   order = db.Column(db.Integer, nullable=False, unique=True)
   display_number = db.Column(db.String(10), nullable=False, unique=False)
   audio_url = db.Column(db.String(100), nullable=False, unique=False, server_default="sample.mp3")
-  is_convert = db.Column(db.Boolean, unique=False, default=False)
+  is_convert = db.Column(db.Boolean, unique=False, default=0)
   read_text_url = db.Column(db.String(100), nullable=True, unique=False)
   views = db.Column(db.Integer, nullable=False, default=0)
   created = db.Column(db.DateTime, server_default=db.func.now())
@@ -71,7 +74,7 @@ class Genre(db.Model):
   def __repr__(self):
     return f'{self.title}'
 
-class Author(db.Model):
+""" class Author(db.Model):
   id = db.Column(db.Integer, autoincrement=True, primary_key=True)
   name = db.Column(db.String(200), nullable=False, unique=True)
   created = db.Column(db.DateTime, server_default=db.func.now())
@@ -79,16 +82,16 @@ class Author(db.Model):
   books = db.relationship('Book', backref="author")
 
   def __repr__(self):
-    return f'{self.name}'
+    return f'{self.name}' """
 
 class Rating(db.Model):
   rating_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-  book_id = db.Column(db.Integer, db.ForeignKey('book.id'), nullable=False)
-  user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+  book_id = db.Column(db.Integer, db.ForeignKey(Book.id), nullable=False)
+  user_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=False)
   score = db.Column(db.Integer, nullable=False)
 
-  users = db.relationship("User", backref=db.backref("rating", order_by=rating_id))
-  books = db.relationship("Book", backref=db.backref("rating", order_by=rating_id))
+  users = db.relationship(User, backref=db.backref("rating", order_by=rating_id))
+  books = db.relationship(Book, backref=db.backref("rating", order_by=rating_id))
   
   def __repr__(self):
     return f'Movie{self.book_id}-User{self.user_id}-score{self.score}'

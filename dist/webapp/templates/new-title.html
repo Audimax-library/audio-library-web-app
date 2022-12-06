@@ -5,7 +5,7 @@
 <div class="container mx-auto my-8">
   <h1 class="text-4xl text-center font-bold">Create New Title</h1>
 
-  <form action="" method="POST">
+  <form action="" method="POST" enctype=multipart/form-data>
 
     <div class="form-field mb-6">
       <label for="title-field" class="text-xl">Title:</label>
@@ -39,7 +39,7 @@
       <label for="" class="text-xl">Book Genre:</label>
       <div class="inputwrap">
         <select id="" name="new-title-genre" class="text-sm rounded block w-full p-2.5 placeholder-gray-400 focus:outline-none focus:border focus:border-themeMain" style="background-color:#2c2c2c;" required>
-          <option selected>Choose a genre</option>
+          <option selected value="">Choose a genre</option>
           {% for genre in context.genres %}
           <option value="{{genre.id}}">{{genre.title}}</option>
           {% endfor %}
@@ -50,7 +50,7 @@
       <label for="" class="text-xl">Book Status:(Audiobook Status)</label>
       <div class="inputwrap">
         <select id="" name="new-title-status" class="text-sm rounded block w-full p-2.5 placeholder-gray-400 focus:outline-none focus:border focus:border-themeMain" style="background-color:#2c2c2c;" required>
-          <option selected>Choose status</option>
+          <option selected value="">Choose status</option>
           <option value="Ongoing">Ongoing</option>
           <option value="Completed">Completed</option>
           <option value="Hiatus">Hiatus</option>
@@ -62,7 +62,7 @@
       <label for="" class="text-xl">Book Language:</label>
       <div class="inputwrap">
         <select id="" name="new-title-lang" class="text-sm rounded block w-full p-2.5 placeholder-gray-400 focus:outline-none focus:border focus:border-themeMain" style="background-color:#2c2c2c;" required>
-          <option selected>Choose Language</option>
+          <option selected value="">Choose Language</option>
           <option value="Sinhala">Sinhala</option>
           <option value="English">English</option>
         </select>
