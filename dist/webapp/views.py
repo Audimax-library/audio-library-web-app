@@ -12,11 +12,13 @@ from admin.models import User
 import datetime
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import desc
-from .models import Book_type, Book
+from .models import Book_type, Book, Chapter
 
 webapp = Blueprint('webapp', __name__, static_folder="static", static_url_path='/webapp/static' , template_folder='templates')
 UPLOAD_FOLDER = "static/uploads/"
+CHAPTER_UPLOAD_FOLDER = "static/uploads/chapters/"
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+ALLOWED_AUDIO_EXTENSIONS = {'mp3', 'wav'}
 login_manager.login_view = "webapp.login_page"
 
 @login_manager.user_loader
@@ -27,8 +29,11 @@ def make_unique(string):
     ident = uuid4().__str__()
     return f"{ident}-{string}"
 
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+def allowed_file(filename, filetype):
+    if filetype == 'image':
+        return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    else:
+        return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_AUDIO_EXTENSIONS
 
 ######## home page
 @webapp.route("/", methods=['GET', 'POST'])
@@ -55,13 +60,14 @@ def add_title_page():
         new_title_status = request.form['new-title-status']
         new_title_lang = request.form['new-title-lang']
         new_title_author = request.form['new-title-author']
-        if new_title_cover and allowed_file(new_title_cover.filename):
+        if new_title_cover and allowed_file(new_title_cover.filename, 'image'):
             filename = secure_filename(new_title_cover.filename)
             split_tup = os.path.splitext(filename)
             dest_filename = make_unique(f'new_title_cover{split_tup[1]}')
             try:
                 new_title_cover.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),UPLOAD_FOLDER, dest_filename))
-                new_title_query = Book(title=new_title, 
+                new_title_query = Book(
+                    title=new_title, 
                     alt_title=new_alt_title, 
                     cover_img=dest_filename, 
                     synopsis=new_title_synopsis, 
@@ -88,6 +94,7 @@ def add_title_page():
         context['user_initial'] = str(current_user)[0:2].upper()
         context['user_name'] = current_user.username
     else:
+        flash('You have to be logged in to your account.', 'error')
         return redirect(url_for('webapp.login_page'))
     return render_template('new-title.html', context=context)
 
@@ -111,6 +118,53 @@ def book_page(id):
         context['user_initial'] = str(current_user)[0:2].upper()
         context['user_name'] = current_user.username
     return render_template('book.html', context=context)
+
+######## Upload new chapter
+@webapp.route("/book/<int:id>/upload/", methods=['GET', 'POST'])
+def upload_chapter(id):
+    if request.method == 'POST':
+        chapter_title = request.form['title']
+        chapter_title_id = request.form['title-id']
+        chapter_order = request.form['chapter-order']
+        chapter_display = request.form['chapter-display']
+        chapter_audio_file = request.files['audio-file']
+        if chapter_audio_file and allowed_file(chapter_audio_file.filename, 'audio'):
+            filename = secure_filename(chapter_audio_file.filename)
+            split_tup = os.path.splitext(filename)
+            dest_filename = make_unique(f'{chapter_title_id}_chapter_{split_tup[1]}')
+            try:
+                chapter_audio_file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),CHAPTER_UPLOAD_FOLDER, dest_filename))
+                try:
+                    new_chapter_query = Chapter(
+                        order = int(chapter_order),
+                        display_number = chapter_display,
+                        audio_url=dest_filename,
+                        is_convert=0,
+                        read_text_url='NULL',
+                        uploaded_by=str(current_user),
+                        book_id=chapter_title_id
+                    )
+                    db.session.add(new_chapter_query)
+                    db.session.commit()
+                    flash('New Chapter added successfully!.', 'success')
+                    return redirect(url_for('webapp.book_page', id=chapter_title_id))
+                except Exception as e:
+                    flash('An error occured while updating the database. Please try again later.', 'error')
+                    print(e)
+                    return redirect(url_for('webapp.home_page'))
+            except Exception as e:
+                flash('An error occured uploading the audio file. Please try again later.', 'error')
+                print(e)
+                return redirect(url_for('webapp.home_page'))
+    book_details = Book.query.get_or_404(id)
+    context = {'book_details': book_details}
+    if current_user.is_authenticated:
+        context['user_initial'] = str(current_user)[0:2].upper()
+        context['user_name'] = current_user.username
+    else:
+        flash('You have to be logged in to your account.', 'error')
+        return redirect(url_for('webapp.login_page'))
+    return render_template('new-chapter.html', context=context)
 
 ######## user login page 
 @webapp.route("/login/", methods=['GET', 'POST'])

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Login | Audimax{% endblock %}
+{% block title %}Sign In | Audimax{% endblock %}
 {% block content %}
 
 <div class="mx-auto narrow p-4 bg-BGColor rounded">
@@ -8,7 +8,7 @@
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-4 mb-1 text-2xl cursor-pointer feather feather-arrow-left text-icon-black dark:text-icon-white text-false icon"><path d="M19 12H5m7 7-7-7 7-7"></path></svg>
     </a> 
     <a href="#" class="ml-2 link" aria-label="User Login">
-      <h2 class="font-header text-2xl font-semibold">Login</h2>
+      <h2 class="font-header text-2xl font-semibold">Sign In</h2>
     </a>
   </div>
   <form id="login-form" method="POST">
@@ -52,7 +52,7 @@
     </div> 
     <button type="submit" class="rounded relative btn flex items-center px-3 my-4 justify-center text-white bg-themeMain hover:bg-themeDarkLight active:bg-themeDark glow px-4 px-6" style="min-height: 48px; min-width: 100%;">
       <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;">
-        Log In
+        Sign In
       </span>
     </button>
     <a href="{{ url_for('webapp.register_page') }}" class="rounded relative md-btn flex items-center px-3 my-4 justify-center text-themeMain px-4 px-6" style="min-height: 48px; min-width: 100%;">

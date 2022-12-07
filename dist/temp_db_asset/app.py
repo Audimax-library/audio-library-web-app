@@ -60,19 +60,20 @@ class Chapter(db.Model):
   views = db.Column(db.Integer, nullable=False, default=0)
   created = db.Column(db.DateTime, server_default=db.func.now())
   updated = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
+  uploaded_by = db.Column(db.String(200), db.ForeignKey(User.email),nullable=False)
   book_id = db.Column(db.Integer, db.ForeignKey('book.id'),nullable=False)
 
   def __repr__(self):
     return f'Chapter-{self.display_number}'
 
-class Genre(db.Model):
+""" class Genre(db.Model):
   id = db.Column(db.Integer, autoincrement=True, primary_key=True)
   title = db.Column(db.String(50), nullable=False, unique=True)
   created = db.Column(db.DateTime, server_default=db.func.now())
   updated = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
 
   def __repr__(self):
-    return f'{self.title}'
+    return f'{self.title}' """
 
 """ class Author(db.Model):
   id = db.Column(db.Integer, autoincrement=True, primary_key=True)

@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% block title %}Upload {{context.book_details.title}} | Audimax{% endblock %}
+{% block content %}
+
+<div class="container mx-auto my-8">
+  <h1 class="text-4xl text-center font-bold">Add a New Chapter</h1>
+
+  <form action="" method="POST" enctype=multipart/form-data>
+
+    <div class="form-field mb-6">
+      <label for="title-field" class="text-xl">Title:</label>
+      <div class="inputwrap">
+        <input id="title-field" type="text" name="title" class="focus:outline-none text-slate-500" readonly value="{{context.book_details.title}}">
+        <input type="hidden" name="title-id" value="{{context.book_details.id}}" required>
+        <div class="search-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(255, 255, 255, 1);"><path d="M6 22h15v-2H6.012C5.55 19.988 5 19.805 5 19s.55-.988 1.012-1H21V4c0-1.103-.897-2-2-2H6c-1.206 0-3 .799-3 3v14c0 2.201 1.794 3 3 3zM5 8V5c0-.805.55-.988 1-1h13v12H5V8z"></path><path d="M8 6h9v2H8z"></path></svg>
+        </div>
+      </div>
+      <span class="text-sm text-slate-500 italic">*can't be changed</span>
+    </div>
+    <div class="form-field mb-6">
+      <label for="chapter-order" class="text-xl">Chapter Order Number: </label>
+      <div class="inputwrap">
+        <input id="chapter-order" type="number" min="0" step="1" name="chapter-order" class="focus:outline-none focus:border focus:border-themeMain" required>
+        <div class="search-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(255, 255, 255, 1);"><path d="M6 22h15v-2H6.012C5.55 19.988 5 19.805 5 19s.55-.988 1.012-1H21V4c0-1.103-.897-2-2-2H6c-1.206 0-3 .799-3 3v14c0 2.201 1.794 3 3 3zM5 8V5c0-.805.55-.988 1-1h13v12H5V8z"></path><path d="M8 6h9v2H8z"></path></svg>
+        </div>
+      </div>
+      <span class="text-sm text-slate-500 italic">*This should be an integer and this value sets the order of chapters.</span>
+    </div>
+    <div class="form-field mb-6">
+      <label for="chapter-display" class="text-xl">Chapter Display Number: </label>
+      <div class="inputwrap">
+        <input id="chapter-display" type="text" name="chapter-display" class="focus:outline-none focus:border focus:border-themeMain" required>
+        <div class="search-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(255, 255, 255, 1);"><path d="M6 22h15v-2H6.012C5.55 19.988 5 19.805 5 19s.55-.988 1.012-1H21V4c0-1.103-.897-2-2-2H6c-1.206 0-3 .799-3 3v14c0 2.201 1.794 3 3 3zM5 8V5c0-.805.55-.988 1-1h13v12H5V8z"></path><path d="M8 6h9v2H8z"></path></svg>
+        </div>
+      </div>
+      <span class="text-sm text-slate-500 italic">*This value is used to display to the user.</span>
+    </div>
+    <div class="form-field mb-6">
+      <label class="block mb-2 text-xl text-white" for="audio-file">Upload Audio File:</label>
+      <input class="block w-full text-md focus:border rounded cursor-pointer text-gray-400 focus:outline-none focus:border-themeMain placeholder-gray-400 p-2" style="background-color: #2C2C2C;" id="audio-file" type="file" name="audio-file" accept=".mp3, .wav" required>
+      <span class="text-sm text-slate-500 italic">*A chapter audio file should be max 50MB in size.</span><br>
+      <span class="text-sm text-slate-500 italic">*Only .mp3 and .wav formats are allowed.</span>
+    </div>
+
+    <!-- coming soon -->
+    <!-- <div class="flex items-center mb-4">
+      <input id="convert-checkbox" name="convert-checkbox" type="checkbox" value="" class="w-4 h-4 text-themeMain rounded focus:ring-themeMain ring-offset-gray-800 focus:ring-2 bg-gray-700 border-gray-600">
+      <label for="convert-checkbox" class="ml-2 text-sm text-gray-300">Convert this audio clip to text?</label>
+      <span class="text-sm text-slate-500 italic">*By checking this, you allows us to convert your audio file to text using AI.</span>
+    </div>
+    <div class="form-field mb-6">
+      <label for="" class="text-xl">Chapter text: </label>
+      <div class="">
+        <textarea name="chapter-text" id="" cols="20" rows="10" style="background-color:#2c2c2c;" class="focus:outline-none focus:border focus:border-themeMain w-full rounded p-2"></textarea>
+      </div>
+    </div> -->
+
+    <button type="submit" class="rounded relative flex items-center px-3 justify-center text-black bg-themeDarkLight hover:bg-themeLight px-6 transition-colors" style="min-height: 48px; min-width: 0px;">
+      <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon mr-4"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4m14-7-5-5-5 5m5-5v12"></path></svg> 
+        Submit Title
+      </span>
+    </button>
+
+  </form>
+</div>
+
+
+{% endblock %}
+{% block scripts %}
+<script>
+  var uploadField = document.getElementById("audio-file");
+
+  uploadField.onchange = function() {
+    if(this.files[0].size > 52428800){
+      alert("File is too big! Max limit is 50MB.");
+      this.value = "";
+    };
+  };
+</script>
+<script type="module">
+  var swiper = new Swiper('.swiper', {
+    slidesPerView: 'auto',
+    mousewheel: true,
+    pagination: {
+      el: '.swiper-pagination',
+      clickable: true,
+    },
+    autoplay: {
+      delay: 2500,
+      disableOnInteraction: false,
+    },
+  });
+</script>
+{% endblock %}
