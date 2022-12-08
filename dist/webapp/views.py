@@ -99,7 +99,6 @@ def add_title_page():
     return render_template('new-title.html', context=context)
 
 ######## search titles
-
 @webapp.route("/titles/", methods=['GET', 'POST'])
 def titles_page():
     query = request.args.get('q')
@@ -108,11 +107,13 @@ def titles_page():
 ######## view title
 @webapp.route("/book/<int:id>/", methods=['GET', 'POST'])
 def book_page(id):
+    chapter_uploader_details = db.session.query(Book, Chapter, User).join(Book, Book.id==Chapter.book_id).join(User, User.email==Chapter.uploaded_by).order_by(Chapter.order).all()
     book_details = Book.query.get_or_404(id)
     book_type = Book_type.query.get_or_404(book_details.type_id)
     context = {
         'book_details': book_details,
         'book_type': book_type,
+        'upload_details': chapter_uploader_details,
         }
     if current_user.is_authenticated:
         context['user_initial'] = str(current_user)[0:2].upper()

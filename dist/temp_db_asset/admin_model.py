@@ -7,8 +7,8 @@ class User(db.Model, UserMixin):
   username = db.Column(db.String(200), nullable=False)
   email = db.Column(db.String(200), nullable=False, unique=True)
   password = db.Column(db.String(64), nullable=False)
-  books = db.relationship('Book', backref='user')
-  chapters = db.relationship('Chapter', backref='user')
+  #books = db.relationship('Book', backref='user')
+  #chapters = db.relationship('Chapter', backref='user')
 
   def __repr__(self):
     return f'{self.email}'

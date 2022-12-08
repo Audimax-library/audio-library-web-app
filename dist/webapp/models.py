@@ -48,6 +48,10 @@ class Chapter(db.Model):
   def __repr__(self):
     return f'Chapter-{self.display_number}'
 
+  @property
+  def elapsed_time(self):
+    return (self.updated.strftime("%d/%m/%Y"))
+
 class Genre(db.Model):
   id = db.Column(db.Integer, autoincrement=True, primary_key=True)
   title = db.Column(db.String(50), nullable=False, unique=True)

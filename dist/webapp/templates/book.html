@@ -11,15 +11,15 @@
   <div class="relative w-full z-10 px-6 py-8">
     <div class="container mx-auto">
       <div class="row-span-3 block md:hidden mb-4">
-        <img src="{{ url_for('webapp.static', filename='uploads/'+context.book_details.cover_img) }}" class="rounded-lg w-52" alt="">
+        <img src="{{ url_for('webapp.static', filename='uploads/'+context.book_details.cover_img) }}" class="rounded-lg w-52 shadow-lg" alt="">
       </div>
       <div class="grid grid-rows-3 grid-flow-col gap-4">
         <div class="row-span-3 hidden md:block">
-          <img src="{{ url_for('webapp.static', filename='uploads/'+context.book_details.cover_img) }}" class="rounded-lg w-52" alt="">
+          <img src="{{ url_for('webapp.static', filename='uploads/'+context.book_details.cover_img) }}" class="rounded-lg w-52 shadow-lg" alt="">
         </div>
         <div class="col-span-2">
-          <h1 class="text-6xl font-bold">{{context.book_details.title}}</h1>
-          <p class="text-lg">{{context.book_details.alt_title}}</p>
+          <h1 class="text-6xl font-bold drop-shadow">{{context.book_details.title}}</h1>
+          <p class="text-lg drop-shadow-sm">{{context.book_details.alt_title}}</p>
         </div>
         <div class="col-span-2">
           <div class="flex gap-2 sm:mb-0 mb-2 flex-wrap">
@@ -52,7 +52,7 @@
           </div>
         </div>
         <div class="col-span-2">
-          <div class="flex space-x-2 py-4">
+          <div class="flex space-x-2 pt-6 pb-4">
             <div class="flex items-center space-x-1 text-sm py-1 px-2 bg-green-200 text-green-800 rounded-full">
               <div style="width: 0.4rem; height: 0.4rem" class="bg-green-500 rounded-full"></div>
               <div>{{context.book_details.status}}</div>
@@ -78,7 +78,7 @@
       <div class="tag-detail mb-8">
         <div class="grid grid-cols-4 gap-4">
           <div class="col-span-2 md:col-span-1">
-            <p class="font-bold">Author</p>
+            <p class="font-bold">Author {{context.book_details.draft_user_email.username}}</p>
             <div class="tags-list">
               <span class="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 whitespace-nowrap">{{context.book_details.author_name}}</span>
             </div>
@@ -107,76 +107,22 @@
         </div>
       </div>
       <div class="chapter-list grid grid-cols-2 gap-4 p-8">
-        
-        <a href="">
+        {% for chapter in context.upload_details%}
+        <a href="{{chapter[0].id}}/listen/{{chapter[1].id}}/">
           <div class="chapter-list-item col-span-2 md:col-span-1 bg-BGColorLight hover:bg-BGColorDarkLight border-l-4 rounded border-themeMain py-2 px-4">
             <div class="flex flex-col sm:flex-row">
               <div class="flex-auto">
-                <div class="font-bold text-sm">Chapter 00</div>
+                <div class="font-bold text-sm">Chapter {{chapter[1].display_number}}</div>
               </div>
               <div class="flex-auto">
-                <div class="text-xs text-right italic">10 minutes ago</div>
+                <div class="text-xs text-right italic">{{chapter[1].elapsed_time}}</div>
               </div>
             </div>
-            <div class=" text-sm">John Doe</div>
+            <div class=" text-sm">{{chapter[2].username}}</div>
           </div>
         </a>
-
-
-        <a href="">
-          <div class="chapter-list-item col-span-2 md:col-span-1 bg-BGColorLight hover:bg-BGColorDarkLight border-l-4 rounded border-themeMain py-2 px-4">
-            <div class="flex flex-col sm:flex-row">
-              <div class="flex-auto">
-                <div class="font-bold text-sm">Chapter 01</div>
-              </div>
-              <div class="flex-auto">
-                <div class="text-xs text-right italic">10 minutes ago</div>
-              </div>
-            </div>
-            <div class=" text-sm">John Doe</div>
-          </div>
-        </a>
-        <a href="">
-          <div class="chapter-list-item col-span-2 md:col-span-1 bg-BGColorLight hover:bg-BGColorDarkLight border-l-4 rounded border-themeMain py-2 px-4">
-            <div class="flex flex-col sm:flex-row">
-              <div class="flex-auto">
-                <div class="font-bold text-sm">Chapter 02</div>
-              </div>
-              <div class="flex-auto">
-                <div class="text-xs text-right italic">10 minutes ago</div>
-              </div>
-            </div>
-            <div class=" text-sm">John Doe</div>
-          </div>
-        </a>
-        <a href="">
-          <div class="chapter-list-item col-span-2 md:col-span-1 bg-BGColorLight hover:bg-BGColorDarkLight border-l-4 rounded border-themeMain py-2 px-4">
-            <div class="flex flex-col sm:flex-row">
-              <div class="flex-auto">
-                <div class="font-bold text-sm">Chapter 03</div>
-              </div>
-              <div class="flex-auto">
-                <div class="text-xs text-right italic">10 minutes ago</div>
-              </div>
-            </div>
-            <div class=" text-sm">John Doe</div>
-          </div>
-        </a>
-        <a href="">
-          <div class="chapter-list-item col-span-2 md:col-span-1 bg-BGColorLight hover:bg-BGColorDarkLight border-l-4 rounded border-themeMain py-2 px-4">
-            <div class="flex flex-col sm:flex-row">
-              <div class="flex-auto">
-                <div class="font-bold text-sm">Chapter 04</div>
-              </div>
-              <div class="flex-auto">
-                <div class="text-xs text-right italic">10 minutes ago</div>
-              </div>
-            </div>
-            <div class=" text-sm">John Doe</div>
-          </div>
-        </a>
+        {% endfor %}
       </div>
-      <!-- <img src="https://mangadex.org/covers/05648383-3ddc-4199-bec1-3358d90bbaa4/e054446b-c527-4492-a6cf-89d352d46682.jpg.512.jpg" class="w-full" alt=""> -->
     </div>
   </div>
 </div>
