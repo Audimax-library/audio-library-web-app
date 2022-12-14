@@ -38,8 +38,7 @@
     <div class="form-field mb-6">
       <label for="" class="text-xl">Book Genre:</label>
       <div class="inputwrap">
-        <select id="" name="new-title-genre" class="text-sm rounded block w-full p-2.5 placeholder-gray-400 focus:outline-none focus:border focus:border-themeMain" style="background-color:#2c2c2c;" required>
-          <option selected value="">Choose a genre</option>
+        <select id="" name="new-title-genre" size="10" class="text-sm rounded block w-full p-2.5 placeholder-gray-400 focus:outline-none focus:border focus:border-themeMain" style="background-color:#2c2c2c;" multiple required>
           {% for genre in context.genres %}
           <option value="{{genre.id}}">{{genre.title}}</option>
           {% endfor %}

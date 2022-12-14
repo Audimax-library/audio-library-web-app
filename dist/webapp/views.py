@@ -1,5 +1,4 @@
-#from urllib import request
-from flask import Blueprint,render_template, redirect, session, url_for, request, make_response, jsonify, flash
+from flask import Blueprint,render_template, redirect, session, url_for, request, make_response, jsonify, abort, flash
 from .forms import UploadFileForm
 from werkzeug.utils import secure_filename
 import os
@@ -9,10 +8,10 @@ from flask_login import login_required, login_user, logout_user, current_user
 from admin import db, login_manager, oauth, discord, bcrypt
 from admin.forms import LoginForm, RegistrationForm
 from admin.models import User
-import datetime
+import datetime, json
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import desc
-from .models import Book_type, Book, Chapter
+from sqlalchemy import desc, or_
+from .models import Genre, Book, Chapter
 
 webapp = Blueprint('webapp', __name__, static_folder="static", static_url_path='/webapp/static' , template_folder='templates')
 UPLOAD_FOLDER = "static/uploads/"
@@ -20,6 +19,9 @@ CHAPTER_UPLOAD_FOLDER = "static/uploads/chapters/"
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 ALLOWED_AUDIO_EXTENSIONS = {'mp3', 'wav'}
 login_manager.login_view = "webapp.login_page"
+status_types = ['Ongoing', 'Completed', 'Hiatus', 'Discontinued']
+lang_types = ['Sinhala', 'English']
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -34,6 +36,13 @@ def allowed_file(filename, filetype):
         return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
     else:
         return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_AUDIO_EXTENSIONS
+
+def book_obj_to_dist(obj):
+    dist_list = []
+    for item in obj:
+        dist_item = {"id": item.id, "title":item.title, "cover_img":item.cover_img, "status":item.status}
+        dist_list.append(dist_item)
+    return dist_list
 
 ######## home page
 @webapp.route("/", methods=['GET', 'POST'])
@@ -56,7 +65,7 @@ def add_title_page():
         new_alt_title = request.form['new-alt-title']
         new_title_cover = request.files['new-title-cover']
         new_title_synopsis = request.form['new-title-synopsis']
-        new_title_genre = request.form['new-title-genre']
+        new_title_genre = request.form.getlist('new-title-genre')
         new_title_status = request.form['new-title-status']
         new_title_lang = request.form['new-title-lang']
         new_title_author = request.form['new-title-author']
@@ -71,11 +80,13 @@ def add_title_page():
                     alt_title=new_alt_title, 
                     cover_img=dest_filename, 
                     synopsis=new_title_synopsis, 
-                    type_id=int(new_title_genre), 
                     status=new_title_status, 
                     language=new_title_lang, 
                     author_name=new_title_author, 
                     draft_user_email=str(current_user))
+                for item in new_title_genre:
+                    genre_obj = db.session.query(Genre).filter_by(id=item).first()
+                    new_title_query.genres.append(genre_obj)
                 db.session.add(new_title_query)
                 db.session.commit()
             except Exception as e:
@@ -88,7 +99,7 @@ def add_title_page():
             print("Invalid file type")
             flash('Invalid file type. (Allowed only JPG, JPEG, PNG)', 'error')
             return redirect(url_for('webapp.add_title_page'))
-    genres = Book_type.query.all()
+    genres = Genre.query.all()
     context = {'genres':genres}
     if current_user.is_authenticated:
         context['user_initial'] = str(current_user)[0:2].upper()
@@ -97,6 +108,124 @@ def add_title_page():
         flash('You have to be logged in to your account.', 'error')
         return redirect(url_for('webapp.login_page'))
     return render_template('new-title.html', context=context)
+
+######## update titles
+@webapp.route("/book/<int:id>/edit/", methods=['GET', 'POST'])
+def update_title_page(id):
+    if request.method == 'POST':
+        current_details = db.session.query(Book).filter_by(id=id)
+        update_title = request.form['new-title']
+        update_alt_title = request.form['new-alt-title']
+        update_title_cover = request.files['new-title-cover']
+        update_title_synopsis = request.form['new-title-synopsis']
+        update_title_genre = request.form.getlist('new-title-genre')
+        update_title_status = request.form['new-title-status']
+        update_title_lang = request.form['new-title-lang']
+        update_title_author = request.form['new-title-author']
+        genre_obj_list = db.session.query(Genre).filter(Genre.id.in_(update_title_genre)).all()
+        if update_title_cover:
+            if allowed_file(update_title_cover.filename, 'image'):
+                filename = secure_filename(update_title_cover.filename)
+                split_tup = os.path.splitext(filename)
+                dest_filename = db.session.query(Book).filter_by(id=id).first().cover_img
+                try:
+                    update_title_cover.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),UPLOAD_FOLDER, dest_filename))
+                    current_details.update({
+                        Book.cover_img: dest_filename,
+                        Book.title: update_title, 
+                        Book.alt_title: update_alt_title, 
+                        Book.synopsis: update_title_synopsis,
+                        Book.status: update_title_status, 
+                        Book.language: update_title_lang, 
+                        Book.author_name: update_title_author
+                        })
+                    db.session.commit()
+                    current_details = db.session.query(Book).filter_by(id=id).first()
+                    current_genre_list = []
+                    for i in current_details.genres:
+                        current_genre_list.append(i)
+                    for item1 in current_genre_list:
+                        #print(f'remove{item1.title}')
+                        current_details.genres.remove(item1)
+                    for item2 in genre_obj_list:
+                        #print(f'add{item2.title}')
+                        current_details.genres.append(item2)
+                    db.session.commit()
+                    flash('Update title successful.', 'success')
+                    return redirect(url_for('webapp.book_page', id=id))
+                except Exception as e:
+                    flash('An error occured while saving the cover image. Please try again later.', 'error')
+                    print(e)
+                    return redirect(url_for('webapp.book_page', id=id))
+            else:
+                flash('Invalid file type. (Allowed only JPG, JPEG, PNG)', 'error')
+                return redirect(url_for('webapp.book_page', id=id))
+        else:
+            print("non-image here")
+            try:
+                current_details.update({
+                    Book.title: update_title, 
+                    Book.alt_title: update_alt_title, 
+                    Book.synopsis: update_title_synopsis,
+                    Book.status: update_title_status, 
+                    Book.language: update_title_lang, 
+                    Book.author_name: update_title_author
+                    })
+                db.session.commit()
+                current_details = db.session.query(Book).filter_by(id=id).first()
+                current_genre_list = []
+                for i in current_details.genres:
+                    current_genre_list.append(i)
+                for item1 in current_genre_list:
+                    #print(f'remove{item1.title}')
+                    current_details.genres.remove(item1)
+                for item2 in genre_obj_list:
+                    #print(f'add{item2.title}')
+                    current_details.genres.append(item2)
+                db.session.commit()
+                flash('Update title successful.', 'success')
+                return redirect(url_for('webapp.book_page', id=id))
+            except Exception as e:
+                flash('An error occured while updating the database. Please try again later.', 'error')
+                print(e)
+                return redirect(url_for('webapp.book_page', id=id))
+    genres = Genre.query.all()
+    book_details = Book.query.get_or_404(id)
+    context = {
+        'book_details': book_details,
+        'genres':genres,
+        'status_types':status_types,
+        'lang_types':lang_types,
+    }
+    if current_user.is_authenticated:
+        context['user_initial'] = str(current_user)[0:2].upper()
+        context['user_name'] = current_user.username
+    else:
+        flash('You have to be logged in to your account.', 'error')
+        return redirect(url_for('webapp.login_page'))
+    if current_user.email == book_details.draft_user_email:
+        return render_template('update-title.html', context=context)
+    else:
+        flash('You are not authorized for this action.', 'error')
+        return redirect(url_for('webapp.home_page'))
+
+######## quick search titles/ajax endpoint
+@webapp.route("/search/titles/", methods=['POST'])
+def title_quick_search():
+    data = request.get_json()
+    search_by  = data['data']
+    results = db.session.query(Book).filter(or_(
+        Book.title.ilike(f'%{search_by}%'), 
+        Book.alt_title.ilike(f'%{search_by}%'), 
+        Book.synopsis.ilike(f'%{search_by}%'), 
+        Book.author_name.ilike(f'%{search_by}%'))).all()
+    #results = db.session.query(Book).all()
+    print()
+    context={
+        "result": "success",
+        "value": book_obj_to_dist(results),
+    }
+    return jsonify(context)
 
 ######## search titles
 @webapp.route("/titles/", methods=['GET', 'POST'])
@@ -107,13 +236,9 @@ def titles_page():
 ######## view title
 @webapp.route("/book/<int:id>/", methods=['GET', 'POST'])
 def book_page(id):
-    chapter_uploader_details = db.session.query(Book, Chapter, User).join(Book, Book.id==Chapter.book_id).join(User, User.email==Chapter.uploaded_by).order_by(Chapter.order).all()
     book_details = Book.query.get_or_404(id)
-    book_type = Book_type.query.get_or_404(book_details.type_id)
     context = {
         'book_details': book_details,
-        'book_type': book_type,
-        'upload_details': chapter_uploader_details,
         }
     if current_user.is_authenticated:
         context['user_initial'] = str(current_user)[0:2].upper()
@@ -147,7 +272,7 @@ def upload_chapter(id):
                     )
                     db.session.add(new_chapter_query)
                     db.session.commit()
-                    flash('New Chapter added successfully!.', 'success')
+                    flash('New Chapter added successfully!', 'success')
                     return redirect(url_for('webapp.book_page', id=chapter_title_id))
                 except Exception as e:
                     flash('An error occured while updating the database. Please try again later.', 'error')
@@ -166,6 +291,26 @@ def upload_chapter(id):
         flash('You have to be logged in to your account.', 'error')
         return redirect(url_for('webapp.login_page'))
     return render_template('new-chapter.html', context=context)
+
+######## Delete chapter
+@webapp.route("/book/<int:book_id>/delete/<int:chapter_id>/", methods=['POST'])
+def update_chapter(book_id,chapter_id):
+    if request.method == 'POST':
+        if current_user.is_authenticated:
+            try:
+                #os.remove(f"/static/uploads/chapters/{db.session.query(Chapter).filter_by(id=chapter_id).first().audio_url}")
+                db.session.query(Chapter).filter_by(id=chapter_id).delete()
+                db.session.commit()
+                flash('Chapter deleted successfully!', 'success')
+                return jsonify({'status': 'success'})
+            except Exception as e:
+                flash('An error occured deleting the chapter. Please try again later.', 'error')
+                print(e)
+                abort(400, 'Error: File delete Failed.')
+        else:
+            print('Invalid Request: Authentication Failed')
+            flash('Authentication Failed!', 'error')
+            abort(400, 'Error: Authentication Failed.')
 
 ######## user login page 
 @webapp.route("/login/", methods=['GET', 'POST'])

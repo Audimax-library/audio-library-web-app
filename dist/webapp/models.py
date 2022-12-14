@@ -1,10 +1,11 @@
 from webapp import db
 from admin.models import User, Userlevel
 
-#book_genre = db.Table('book_genre',
-#  db.Column('book_id', db.Integer, db.ForeignKey('book.id')),
-#  db.Column('genre_id', db.Integer, db.ForeignKey('genre.id')),
-#)
+
+book_genres = db.Table("book_genres",
+  db.Column("book_id", db.Integer, db.ForeignKey("book.id"), primary_key=True),
+  db.Column("genre_id", db.Integer, db.ForeignKey("genre.id"), primary_key=True)
+)
 
 class Book(db.Model):
   id = db.Column(db.Integer, autoincrement=True, primary_key=True)
@@ -12,7 +13,6 @@ class Book(db.Model):
   alt_title = db.Column(db.String(200), nullable=True, unique=False)
   cover_img = db.Column(db.String(100), nullable=False, unique=False, server_default="default_cover.jpg")
   synopsis = db.Column(db.String(1000), nullable=True, unique=False)
-  type_id = db.Column(db.Integer, db.ForeignKey('book_type.id'),nullable=False)
   status = db.Column(db.String(50), nullable=False, unique=False)
   language = db.Column(db.String(50), nullable=False, unique=False)
   views = db.Column(db.Integer, nullable=False, default=0)
@@ -22,15 +22,21 @@ class Book(db.Model):
   is_approved = db.Column(db.Boolean, unique=False, default=0)
   draft_user_email = db.Column(db.String(200), db.ForeignKey(User.email),nullable=False)
   chapters = db.relationship('Chapter', backref="book")
-  #genre_tags = db.relationship('Genre', secondary=book_genre, backref="tagged_books")
+  genres = db.relationship("Genre", secondary=book_genres, back_populates="books")
+  users = db.relationship(User, backref="book")
 
   def __repr__(self):
     return f'{self.title}'
 
-class Book_type(db.Model):
+class Genre(db.Model):
   id = db.Column(db.Integer, autoincrement=True, primary_key=True)
   title = db.Column(db.String(100), nullable=False, unique=True)
-  books = db.relationship('Book', backref='book_type')
+  created = db.Column(db.DateTime, server_default=db.func.now())
+  updated = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
+  books = db.relationship("Book", secondary=book_genres, back_populates="genres")
+
+  def __repr__(self):
+    return f'{self.id}-{self.title}'
 
 class Chapter(db.Model):
   id = db.Column(db.Integer, autoincrement=True, primary_key=True)
@@ -44,6 +50,7 @@ class Chapter(db.Model):
   updated = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
   uploaded_by = db.Column(db.String(200), db.ForeignKey(User.email),nullable=False)
   book_id = db.Column(db.Integer, db.ForeignKey('book.id'),nullable=False)
+  users = db.relationship(User, backref="chapter")
 
   def __repr__(self):
     return f'Chapter-{self.display_number}'
@@ -51,15 +58,6 @@ class Chapter(db.Model):
   @property
   def elapsed_time(self):
     return (self.updated.strftime("%d/%m/%Y"))
-
-class Genre(db.Model):
-  id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-  title = db.Column(db.String(50), nullable=False, unique=True)
-  created = db.Column(db.DateTime, server_default=db.func.now())
-  updated = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
-
-  def __repr__(self):
-    return f'{self.title}'
 
 """ class Author(db.Model):
   id = db.Column(db.Integer, autoincrement=True, primary_key=True)
@@ -93,27 +91,27 @@ adminlvl = Userlevel(id=1, title="admin")
 db.session.add(memberlvl)
 db.session.add(adminlvl)
 objects = [
-    Book_type(title="Action and Adventure"),
-    Book_type(title="Classics"),
-    Book_type(title="Graphic Novel"),
-    Book_type(title="Detective and Mystery"),
-    Book_type(title="Fantasy"),
-    Book_type(title="Horror"),
-    Book_type(title="Literary Fiction"),
-    Book_type(title="Romance"),
-    Book_type(title="Women's Fiction"),
-    Book_type(title="Biographies and Autobiographies"),
-    Book_type(title="Science Fiction (Sci-Fi)"),
-    Book_type(title="Short Stories"),
-    Book_type(title="Suspense and Thrillers"),
-    Book_type(title="Historical Fiction"),
-    Book_type(title="Cookbooks"),
-    Book_type(title="Essays"),
-    Book_type(title="History"),
-    Book_type(title="Memoir"),
-    Book_type(title="Poetry"),
-    Book_type(title="Self-Help"),
-    Book_type(title="True Crime")
+    Genre(title="Action and Adventure"),
+    Genre(title="Classics"),
+    Genre(title="Graphic Novel"),
+    Genre(title="Detective and Mystery"),
+    Genre(title="Fantasy"),
+    Genre(title="Horror"),
+    Genre(title="Literary Fiction"),
+    Genre(title="Romance"),
+    Genre(title="Women's Fiction"),
+    Genre(title="Biographies and Autobiographies"),
+    Genre(title="Science Fiction (Sci-Fi)"),
+    Genre(title="Short Stories"),
+    Genre(title="Suspense and Thrillers"),
+    Genre(title="Historical Fiction"),
+    Genre(title="Cookbooks"),
+    Genre(title="Essays"),
+    Genre(title="History"),
+    Genre(title="Memoir"),
+    Genre(title="Poetry"),
+    Genre(title="Self-Help"),
+    Genre(title="True Crime")
 ]
 db.session.bulk_save_objects(objects)
 db.session.commit() """

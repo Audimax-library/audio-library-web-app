@@ -78,7 +78,7 @@
       <div class="tag-detail mb-8">
         <div class="grid grid-cols-4 gap-4">
           <div class="col-span-2 md:col-span-1">
-            <p class="font-bold">Author {{context.book_details.draft_user_email.username}}</p>
+            <p class="font-bold">Author</p>
             <div class="tags-list">
               <span class="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 whitespace-nowrap">{{context.book_details.author_name}}</span>
             </div>
@@ -86,7 +86,9 @@
           <div class="col-span-2 md:col-span-1">
             <p class="font-bold">Type</p>
             <div class="tags-list">
-              <span class="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 whitespace-nowrap">{{context.book_type.title}}</span>
+              {% for genre in context.book_details.genres|sort(attribute='title') %}
+              <span class="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 whitespace-nowrap">{{genre.title}}</span>
+              {% endfor %}
             </div>
           </div>
           <!-- <div class="col-span-2 xl:col-span-1">
@@ -106,21 +108,34 @@
           </div>
         </div>
       </div>
-      <div class="chapter-list grid grid-cols-2 gap-4 p-8">
-        {% for chapter in context.upload_details%}
-        <a href="{{chapter[0].id}}/listen/{{chapter[1].id}}/">
-          <div class="chapter-list-item col-span-2 md:col-span-1 bg-BGColorLight hover:bg-BGColorDarkLight border-l-4 rounded border-themeMain py-2 px-4">
-            <div class="flex flex-col sm:flex-row">
-              <div class="flex-auto">
-                <div class="font-bold text-sm">Chapter {{chapter[1].display_number}}</div>
-              </div>
-              <div class="flex-auto">
-                <div class="text-xs text-right italic">{{chapter[1].elapsed_time}}</div>
+      <div class="chapter-list grid grid-cols-1 md:grid-cols-2 gap-4 p-8">
+        {% for chapter in context.book_details.chapters|sort(attribute='order', reverse=True) %}
+        <div class="chapter-list-item col-span-2 md:col-span-1 bg-BGColorLight hover:bg-BGColorDarkLight border-l-4 rounded border-themeMain py-2 px-4">
+          <div class="flex flex-col sm:flex-row">
+            <div class="flex-auto">
+              <a href="listen/{{chapter.id}}/" title="Start Listening">
+                <div class="font-bold text-sm">Chapter {{chapter.display_number}}</div>
+              </a>
+            </div>
+            <div class="flex-auto">
+              <div class="text-xs text-right italic">{{chapter.elapsed_time}}</div>
+            </div>
+          </div>
+          <div class="flex flex-col sm:flex-row">
+            <div class="flex-auto">
+              <div class="text-sm">By: {{chapter.users.username}}</div>
+            </div>
+            {% if current_user.email==chapter.users.email %}
+            <div class="flex-auto">
+              <div class="text-xs text-right">
+                <a href="" id="{{chapter.id}}" onclick="deleteChapter(this)" title="Delete Chapter">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(255, 255, 255, 1); display: inline;"><path d="M5 20a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8h2V6h-4V4a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2v2H3v2h2zM9 4h6v2H9zM8 8h9v12H7V8z"></path><path d="M9 10h2v8H9zm4 0h2v8h-2z"></path></svg>
+                </a>
               </div>
             </div>
-            <div class=" text-sm">{{chapter[2].username}}</div>
+            {% endif %}
           </div>
-        </a>
+        </div>
         {% endfor %}
       </div>
     </div>
@@ -130,6 +145,23 @@
 
 {% endblock %}
 {% block scripts %}
+<script>
+  function deleteChapter(chapter){
+    if (confirm("Do you really want to delete this chapter?") == true) {
+      $.ajax({
+        type: 'POST',
+        url: "{{ url_for(request.endpoint, id=context.book_details.id)+'delete/'}}" + chapter.id,
+        data: {},
+        success: function(response) {
+          location.reload();
+        },
+        fail: function(xhr, status, error) {
+          alert("Something went wrong. Please try again later.");
+        }
+      });
+    }
+  }
+</script>
 <script type="module">
   var swiper = new Swiper('.swiper', {
     slidesPerView: 'auto',
