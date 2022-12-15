@@ -233,6 +233,15 @@ def titles_page():
     query = request.args.get('q')
     return f'<h1>{query}</h1>'
 
+######## newsletter data
+@webapp.route("/newsletter/", methods=['POST'])
+def newsletter_endpoint():
+    if request.method == 'POST':
+        data = request.get_json()
+        user_email = data['data']
+        print(user_email)
+        return jsonify({'user_email':user_email})
+
 ######## view title
 @webapp.route("/book/<int:id>/", methods=['GET', 'POST'])
 def book_page(id):

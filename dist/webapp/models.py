@@ -82,6 +82,11 @@ class Rating(db.Model):
     return f'Movie{self.book_id}-User{self.user_id}-score{self.score}'
 
 
+#newsletter model
+#id - autoincrement
+#email - unique/primary key
+#creadted - date on create
+
 #db.create_all()
 
 #skeleton data

@@ -55,7 +55,6 @@ class Genre(db.Model):
   def __repr__(self):
     return f'{self.id}-{self.title}'
 
-
 class Chapter(db.Model):
   id = db.Column(db.Integer, autoincrement=True, primary_key=True)
   order = db.Column(db.Integer, nullable=False, unique=True)

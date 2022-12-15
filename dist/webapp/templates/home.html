@@ -298,10 +298,10 @@
             <img src="{{ url_for('webapp.static', filename='img/newsletter.svg') }}" class="mx-auto pt-4" style="max-width: 380px; width: 100%;" alt="">
           </div>
           <div class="pl-6 flex items-center col-span-full lg:col-span-2" id="newsletter-form">
-            <form action="" method="post" class="w-full text-center">
+            <form action="/newsletter/" method="POST" id="newsletter-form" class="w-full text-center">
               <h2 class="font-header text-2xl font-semibold mb-2">Sign Up for Newsletter</h2>
               <p class="text-sm text-gray-400">Subscribe to our monthly newsletter and stay up to date with our latest releases and promotions.</p>
-              <input type="email" name="newsletter-email" class="mt-4">
+              <input type="email" name="newsletter-email" id="newsletter-email" class="mt-4">
               <button class="rounded relative md-btn flex items-center px-3 my-4 justify-center text-black bg-themeMain hover:themeLight glow px-4 px-6" style="min-height: 48px; min-width: 100%;">
                 <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;">Sign Me Up</span>
               </button>
@@ -315,6 +315,24 @@
 </div>
 {% endblock %}
 {% block scripts %}
+<script>
+  $('#newsletter-form').on('submit', function(e) {
+    e.preventDefault();
+    var emailValue = $('#newsletter-email').val();
+    $.ajax({
+      type: "POST",
+      url: "/newsletter/",
+      data: JSON.stringify({ data: emailValue}),
+      contentType: "application/json",
+      success: function(response) {
+        console.log(response);
+      }, 
+      error: function(XMLHttpRequest, textStatus, errorThrown) {
+        alert("Error");
+      }
+    });
+  });
+</script>
 <script type="module">
   var swiper = new Swiper('.swiper', {
     slidesPerView: 'auto',
