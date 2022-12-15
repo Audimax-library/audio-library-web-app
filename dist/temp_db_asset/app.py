@@ -94,12 +94,23 @@ class Rating(db.Model):
 
   users = db.relationship(User, backref=db.backref("rating", order_by=rating_id))
   books = db.relationship(Book, backref=db.backref("rating", order_by=rating_id))
-  
+
   def __repr__(self):
     return f'Movie{self.book_id}-User{self.user_id}-score{self.score}'
 
+class NewsLetterSubscription(db.Model):
+    subscription_id = db.Column(db.Integer, autoincrement=True)
+    email = db.Column(db.String(80), nullable=False, unique=True, primary_key=True)
+    created_date = db.Column(db.DateTime, server_default=db.func.now())
 
-""" db.drop_all()
+    # id - autoincrement
+    # email - unique/primary key
+    # created - date on create
+    def __repr__(self):
+        return f'MailID-{self.subscription_id}'  # set return value as id
+
+
+db.drop_all()
 db.create_all()
 
 #skeleton data
@@ -132,4 +143,4 @@ objects = [
     Genre(title="True Crime")
 ]
 db.session.bulk_save_objects(objects)
-db.session.commit() """
+db.session.commit()

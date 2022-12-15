@@ -237,10 +237,11 @@ def titles_page():
 @webapp.route("/newsletter/", methods=['POST'])
 def newsletter_endpoint():
     if request.method == 'POST':
-        data = request.get_json()
-        user_email = data['data']
+        news_letter_data = request.get_json()
+        user_email = news_letter_data['mail']
         print(user_email)
-        return jsonify({'user_email':user_email})
+
+        return jsonify({'hrll user_email': user_email})
 
 ######## view title
 @webapp.route("/book/<int:id>/", methods=['GET', 'POST'])
