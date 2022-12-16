@@ -11,7 +11,7 @@ from admin.models import User
 import datetime, json
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import desc, or_
-from .models import Genre, Book, Chapter
+from .models import Genre, Book, Chapter, NewsLetterSubscription
 
 webapp = Blueprint('webapp', __name__, static_folder="static", static_url_path='/webapp/static' , template_folder='templates')
 UPLOAD_FOLDER = "static/uploads/"
@@ -240,8 +240,30 @@ def newsletter_endpoint():
         news_letter_data = request.get_json()
         user_email = news_letter_data['mail']
         print(user_email)
+        data_base_result = NewsLetterSubscription.query.filter_by(email = user_email).all()
+        print(data_base_result)
+        if data_base_result == []:
+                tempNewsletter = NewsLetterSubscription(
+                    email=user_email
+                )
+                db.session.add(tempNewsletter)
+                db.session.commit()
+                
+                return jsonify({'user_email': user_email,'exist': False})
+        else:
+            return jsonify({'user_email': user_email,'exist': True})
 
-        return jsonify({'hrll user_email': user_email})
+
+
+
+
+
+        # print(tempNewsletter)
+        # if data_base_result.email == user_email:
+        #     return jsonify({user_email:'Already in the data base.'})
+        # else:
+        #     return jsonify({'user_email': user_email})
+
 
 ######## view title
 @webapp.route("/book/<int:id>/", methods=['GET', 'POST'])

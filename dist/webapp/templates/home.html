@@ -322,18 +322,29 @@
     e.preventDefault();  {# preventing the defult page refreshing #}
     var emailValue = $('#newsletter-email').val();
     $('#newsletter-email').val("");
-    $.ajax({
+    if (emailValue !== ""){
+        $.ajax({
       type: "POST",
       url: "/newsletter/",
       data: JSON.stringify({ mail: emailValue}),
       contentType: "application/json",
       success: function(response) {
-        console.log(response);
-      }, 
+          {#var responseObj = JSON.prase(response);#}
+          if (response.exist == false){
+              alert(response.user_email+" is successfully subscribed for news letter,\nThank You.");
+          }else{
+              alert(response.user_email+" is already subscribed for news letter,\nThank You.");
+          }
+          console.log(response);
+      },
       error: function(XMLHttpRequest, textStatus, errorThrown) {
-        alert("Error");
+        alert("Error Occurred");
       }
     });
+    }else{
+        alert("Enter Valid E-mail");
+    }
+
   });
 </script>
 <script type="module">

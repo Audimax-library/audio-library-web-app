@@ -88,7 +88,7 @@ class Rating(db.Model):
 
 # newsletter model
 class NewsLetterSubscription(db.Model):
-    subscription_id = db.Column(db.Integer, autoincrement=True)
+    subscription_id = db.Column(db.Integer, autoincrement=True, nullable=False, unique=True, primary_key=True)
     email = db.Column(db.String(80), nullable=False, unique=True, primary_key=True)
     created_date = db.Column(db.DateTime, server_default=db.func.now())
 
