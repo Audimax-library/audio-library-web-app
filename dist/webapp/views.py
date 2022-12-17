@@ -11,7 +11,9 @@ from admin.models import User
 import datetime, json
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import desc, or_
-from .models import Genre, Book, Chapter
+from .models import Genre, Book, Chapter, NewsLetterSubscription
+from .send_email import send_mail
+
 
 webapp = Blueprint('webapp', __name__, static_folder="static", static_url_path='/webapp/static' , template_folder='templates')
 UPLOAD_FOLDER = "static/uploads/"
@@ -22,6 +24,11 @@ login_manager.login_view = "webapp.login_page"
 status_types = ['Ongoing', 'Completed', 'Hiatus', 'Discontinued']
 lang_types = ['Sinhala', 'English']
 
+# load_dotenv()
+# email_sender = os.getenv('Gmail')
+# email_password = os.getenv('Gmail-Password')
+# subject = 'Audimax NewsLetter'
+# body ='subscribed to news Letter'
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -237,10 +244,22 @@ def titles_page():
 @webapp.route("/newsletter/", methods=['POST'])
 def newsletter_endpoint():
     if request.method == 'POST':
-        data = request.get_json()
-        user_email = data['data']
+        news_letter_data = request.get_json()
+        user_email = news_letter_data['mail']
         print(user_email)
-        return jsonify({'user_email':user_email})
+        data_base_result = NewsLetterSubscription.query.filter_by(email = user_email).all()
+        print(data_base_result)
+        if data_base_result == []:
+            tempNewsletter = NewsLetterSubscription(
+                email=user_email
+            )
+            db.session.add(tempNewsletter)
+            db.session.commit()
+            send_mail(Reciver_email=user_email)
+            return jsonify({'user_email': user_email,'exist': False})
+        else:
+            return jsonify({'user_email': user_email,'exist': True})
+
 
 ######## view title
 @webapp.route("/book/<int:id>/", methods=['GET', 'POST'])
