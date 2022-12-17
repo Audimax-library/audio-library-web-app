@@ -306,8 +306,8 @@
               <button class="rounded relative md-btn flex items-center px-3 my-4 justify-center text-black bg-themeMain hover:themeLight glow px-4 px-6" style="min-height: 48px; min-width: 100%;">
                 <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;">Sign Me Up</span>
               </button>
+              <span id="subscription-return"></span>
             </form>
-
           </div>
         </div>
       </div>
@@ -319,30 +319,30 @@
 {% block scripts %}
 <script>
   $('#newsletter-form').on('submit', function(e) {
-    e.preventDefault();  {# preventing the defult page refreshing #}
+    e.preventDefault(); 
     var emailValue = $('#newsletter-email').val();
     $('#newsletter-email').val("");
     if (emailValue !== ""){
-        $.ajax({
-      type: "POST",
-      url: "/newsletter/",
-      data: JSON.stringify({ mail: emailValue}),
-      contentType: "application/json",
-      success: function(response) {
-          {#var responseObj = JSON.prase(response);#}
-          if (response.exist == false){
-              alert(response.user_email+" is successfully subscribed for news letter,\nThank You.");
-          }else{
-              alert(response.user_email+" is already subscribed for news letter,\nThank You.");
+      $.ajax({
+        type: "POST",
+        url: "/newsletter/",
+        data: JSON.stringify({ mail: emailValue}),
+        contentType: "application/json",
+        success: function(response) {
+          if (response.exist == 'added'){
+            $('#subscription-return').append(`<div class="text-sm text-green-500 italic">*You have successfully subscribed to our newsletter.<br>Thank You.</div>`);
+          } else if(response.exist == 'error'){
+            $('#subscription-return').append(`<div class="text-sm text-slate-700 italic">*An error occured. Please try again later.</div>`);
+          } else{
+            $('#subscription-return').append(`<div class="text-sm text-slate-700 italic">*You have already subscribed to our newsletter.</div>`);
           }
-          console.log(response);
-      },
-      error: function(XMLHttpRequest, textStatus, errorThrown) {
-        alert("Error Occurred");
-      }
-    });
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          $('#subscription-return').append(`<div class="text-sm text-slate-700 italic">*An error occured. Please try again later.</div>`);
+        }
+      });
     }else{
-        alert("Enter Valid E-mail");
+      $('#subscription-return').append(`<div class="text-sm text-red-600 italic">*Invalid email format. Please check again.</div>`);
     }
 
   });

@@ -92,11 +92,8 @@ class NewsLetterSubscription(db.Model):
     email = db.Column(db.String(80), nullable=False, unique=True, primary_key=True)
     created_date = db.Column(db.DateTime, server_default=db.func.now())
 
-    # id - autoincrement
-    # email - unique/primary key
-    # created - date on create
     def __repr__(self):
-        return f'MailID-{self.subscription_id}'  # set return value as id
+        return f'MailID-{self.subscription_id}'
 
 
 # db.create_all()

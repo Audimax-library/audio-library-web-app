@@ -1,14 +1,13 @@
 from flask import Blueprint,render_template, redirect, session, url_for, request, make_response, jsonify, abort, flash
 from .forms import UploadFileForm
 from werkzeug.utils import secure_filename
-import os
 from uuid import uuid4
 from webapp import db
 from flask_login import login_required, login_user, logout_user, current_user
 from admin import db, login_manager, oauth, discord, bcrypt
 from admin.forms import LoginForm, RegistrationForm
 from admin.models import User
-import datetime, json
+import datetime, json, re, os, threading
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import desc, or_
 from .models import Genre, Book, Chapter, NewsLetterSubscription
@@ -23,12 +22,6 @@ ALLOWED_AUDIO_EXTENSIONS = {'mp3', 'wav'}
 login_manager.login_view = "webapp.login_page"
 status_types = ['Ongoing', 'Completed', 'Hiatus', 'Discontinued']
 lang_types = ['Sinhala', 'English']
-
-# load_dotenv()
-# email_sender = os.getenv('Gmail')
-# email_password = os.getenv('Gmail-Password')
-# subject = 'Audimax NewsLetter'
-# body ='subscribed to news Letter'
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -51,12 +44,18 @@ def book_obj_to_dist(obj):
         dist_list.append(dist_item)
     return dist_list
 
+def check_email(str_val):
+    pat = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+    if re.match(pat,str_val):
+        return True
+    else:
+        return False
+
 ######## home page
 @webapp.route("/", methods=['GET', 'POST'])
 @webapp.route("/home/", methods=['GET', 'POST'])
 def home_page():
     recent_books = Book.query.filter_by(is_approved=1).order_by(desc(Book.created)).limit(8).all()
-    print(recent_books)
     context = {'recent_books':recent_books}
     if current_user.is_authenticated:
         context['user_initial'] = str(current_user)[0:2].upper()
@@ -240,25 +239,28 @@ def titles_page():
     query = request.args.get('q')
     return f'<h1>{query}</h1>'
 
-######## newsletter data
+######## newsletter endpoint
 @webapp.route("/newsletter/", methods=['POST'])
 def newsletter_endpoint():
     if request.method == 'POST':
         news_letter_data = request.get_json()
         user_email = news_letter_data['mail']
-        print(user_email)
-        data_base_result = NewsLetterSubscription.query.filter_by(email = user_email).all()
-        print(data_base_result)
-        if data_base_result == []:
-            tempNewsletter = NewsLetterSubscription(
-                email=user_email
-            )
-            db.session.add(tempNewsletter)
-            db.session.commit()
-            send_mail(Reciver_email=user_email)
-            return jsonify({'user_email': user_email,'exist': False})
+        if check_email(user_email):
+            try:
+                tempNewsletter = NewsLetterSubscription(
+                    email=user_email
+                )
+                db.session.add(tempNewsletter)
+                db.session.commit()
+                thread = threading.Thread(target=send_mail, args=(user_email,))
+                thread.start()
+                return jsonify({'user_email': user_email,'exist': 'added'})
+            except IntegrityError:
+                return jsonify({'user_email': user_email,'exist': 'exists'})
+            except:
+                return jsonify({'user_email': user_email,'exist': 'error'})
         else:
-            return jsonify({'user_email': user_email,'exist': True})
+            return jsonify({'user_email': user_email,'exist': 'error'})
 
 
 ######## view title
