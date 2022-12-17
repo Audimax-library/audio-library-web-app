@@ -236,8 +236,21 @@ def title_quick_search():
 ######## search titles
 @webapp.route("/titles/", methods=['GET', 'POST'])
 def titles_page():
-    query = request.args.get('q')
-    return f'<h1>{query}</h1>'
+    param1 = request.args.get('q')
+    param2 = request.args.getlist('status')
+    param3 = request.args.getlist('genres')
+    print(f'{param1}\n{param2}\n{param3}\n')
+    genre_list = Genre.query.all()
+    context = {
+        'search_query': param1,
+        'status_query': param2,
+        'genres': genre_list,
+        'status_types': status_types,
+    }
+    if current_user.is_authenticated:
+        context['user_initial'] = str(current_user)[0:2].upper()
+        context['user_name'] = current_user.username
+    return render_template('search-titles.html', context=context)
 
 ######## newsletter endpoint
 @webapp.route("/newsletter/", methods=['POST'])

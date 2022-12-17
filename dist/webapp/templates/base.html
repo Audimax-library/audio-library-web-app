@@ -166,7 +166,7 @@
               </div>
   
               <div class="flex flex-shrink-0 justify-end items-center" style="flex-basis: 0px;">
-                <button class="rounded relative md-btn flex items-center px-3 ml-auto justify-center px-0 lg:hidden" aria-label="Search" style="min-height: 40px; min-width: 40px;">
+                <button onclick="toggleModal(this)" data-modal-toggle="search-modal" class="rounded relative md-btn flex items-center px-3 ml-auto justify-center px-0 lg:hidden" aria-label="Search" style="min-height: 40px; min-width: 40px;">
                   <div class="bg opacity-0 hover:opacity-30 active:opacity-10"></div> 
                   <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-currentColor icon"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm10 2-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
                 </button>
@@ -231,7 +231,7 @@
           </a>
         </div>
         <div class="flex items-center p-6 space-x-2 rounded-b border-t border-gray-600">
-            <a href="/logout/" class="text-white focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 bg-themeMain hover:bg-themeMainLight focus:outline-none focus:ring-teal-800">Log Out</a>
+            <a href="/logout/" class="text-white focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 bg-themeMain hover:bg-themeDarkLight focus:outline-none focus:ring-teal-800">Log Out</a>
             <button onclick="toggleModal(this)" data-modal-toggle="profile-modal" type="button" class="focus:ring-4 focus:outline-none rounded-lg border text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 bg-gray-700 text-gray-300 border-gray-500 hover:text-white hover:bg-gray-600 focus:ring-gray-600">Close</button>
         </div>
       </div>
@@ -244,8 +244,8 @@
       <div class="relative bg-BGColor rounded-lg box-shadow">
         <div class="flex justify-between items-start p-4 rounded-t">
           <div class="items-center rounded-full cursor-pointer text-white mr-2">
-            <form action="/titles/" method="GET" class="inputwrap">
-              <input placeholder="Search" title="Search" name="q" class="" autofocus id="main_search_field"> 
+            <form action="/titles/" method="GET" class="inputwrap" id="quick-search-bar">
+              <input placeholder="Search" title="Search" name="q" class="" id="main_search_field"> 
               <div class="search-icon">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-icon-white text-false icon"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm10 2-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
               </div>
@@ -299,11 +299,10 @@
     //onclick modal close function
     function toggleModal(btn){
       let modalName = $(btn).data('modalToggle');
-      /* if(modalName == 'search-modal'){
-        $("#main_search_field").trigger('focus');
-        console.log("csc");
-      } */
       $('#'+modalName).fadeToggle('fast');
+      if(modalName == 'search-modal'){
+        $("#main_search_field").focus();
+      }
     }
     //realtime search function
     $('#main_search_field').keyup(function() {
@@ -345,7 +344,7 @@
     function dismissToast(elem) {
       $(elem).parent().fadeToggle("fast")
     }
-    //sidemenu open close funstions
+    //sidemenu open close functions
     $("#side-menu-close").click(function(){
       $('#side-menu').toggle('hidden');
       $('#side-menu-open').toggle('hidden');
