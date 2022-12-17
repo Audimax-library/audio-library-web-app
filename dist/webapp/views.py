@@ -12,10 +12,8 @@ import datetime, json
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import desc, or_
 from .models import Genre, Book, Chapter, NewsLetterSubscription
-from email.message import EmailMessage
-import ssl
-import smtplib
-from dotenv import load_dotenv
+from .send_email import send_mail
+
 
 webapp = Blueprint('webapp', __name__, static_folder="static", static_url_path='/webapp/static' , template_folder='templates')
 UPLOAD_FOLDER = "static/uploads/"
@@ -26,11 +24,11 @@ login_manager.login_view = "webapp.login_page"
 status_types = ['Ongoing', 'Completed', 'Hiatus', 'Discontinued']
 lang_types = ['Sinhala', 'English']
 
-load_dotenv()
-email_sender = os.getenv('Gmail')
-email_password = os.getenv('Gmail-Password')
-subject = 'Re: Audimax News Letter'
-body ='subscribed to news Letter'
+# load_dotenv()
+# email_sender = os.getenv('Gmail')
+# email_password = os.getenv('Gmail-Password')
+# subject = 'Audimax NewsLetter'
+# body ='subscribed to news Letter'
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -257,15 +255,7 @@ def newsletter_endpoint():
             )
             db.session.add(tempNewsletter)
             db.session.commit()
-            em = EmailMessage()
-            em['From'] = email_sender
-            em['To'] = user_email
-            em['Subject']= subject
-            em.set_content(body)
-            context = ssl.create_default_context()
-            with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
-                smtp.login(email_sender, email_password)
-                smtp.sendmail(email_sender,user_email, em.as_string ())
+            send_mail(Reciver_email=user_email)
             return jsonify({'user_email': user_email,'exist': False})
         else:
             return jsonify({'user_email': user_email,'exist': True})
