@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -7,46 +8,110 @@
   <title>Cloud Guage | Assisted Mode</title>
   <link rel="stylesheet" href="{{ url_for('webapp.static', filename='css/style.css') }}">
   <style>
-    body{
-      /*background-image: url("{{ url_for('assisted.static', filename='asst-bg.jpg') }}");*/
+    .bgcolor{
+      background:#001d30;
+      height: 100%;
+      width: 100%;
+    }
+    .mydiv{
+    top: 0%;
+    display:inherit;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    }
+
+    @keyframes changeBg {
+      to {
+        filter: hue-rotate(360deg);
+      }
+    }
+
+    .loader {
+      position:absolute;
+      width: 450px;
+      height: 450px;
+      background: linear-gradient(to top, #001d30, #51eeee);
+      border-radius: 50%;
+      animation: rotate 5s linear infinite;
+    }
+
+    @keyframes rotate {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loader::after {
+      content: '';
+      position: absolute;
+      top: 390px;
+      left: 280px;
+      width: 70px;
+      height: 70px;
+      background: #51eeee;
+      border-radius: 50%;
+      box-shadow: 
+        0 0 5px #51eeee,
+        0 0 25px #51eeee, 
+        0 0 50px #51eeee, 
+        0 0 75px #51eeee;
+
+    }
+
+    .loader::before {
+      content: '';
+      position: absolute;
+      background: #001d30;
+      inset: 30px 30px 0px 0px;
+      border-radius: 50%;
     }
   </style>
 </head>
-<body class="bg-BGColor text-white">
-  <div class="fixed h-full w-full -z-10">
-    <img src="{{ url_for('assisted.static', filename='asst-bg.jpg') }}" class="h-full mx-auto" alt="">
-  </div>
-  <div class="container mx-auto text-center my-8 pt-8 pb-16 px-4 rounded-lg bg-slate-700/50">
-    <h1 class="font-mono">Assisted Mode</h1>
-    <h1 class="text-3xl my-4">Welcome to <b>Audimax</b></h1>
-    <p>Audimax is an online audio library and you are currently using the assisted mode specially developed for visually impaired people.</p>
-    <p>If you think you are at the wrong place either press 'Esc' button on your keyboard or click <a href="/" class="text-themeMain underline">Here</a> to redirect back to main site.</p>
-  </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js" integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script>
-      let speech = new SpeechSynthesisUtterance();
-      speech.lang = "en-US";
-      
-      let voices = [];
-      window.speechSynthesis.onvoiceschanged = () => {
-        voices = window.speechSynthesis.getVoices();
-        speech.voice = voices[2];
-        console.log(voices);
-      };
-      speech.rate = 1;
-      speech.volume = 0.5;
-      speech.pitch = 1;
-      
-      speech.text = "Audimax is an online audio library and you are currently using the assisted mode specially developed for visually impaired people."
-      
-      $(document).on('click keypress', () => {
-        window.speechSynthesis.speak(speech);
-      }); 
-      
-      window.onload = function() {
-        var startButton = document.getElementById("start");
-        startButton.click();
-      }; 
-    </script>
-  </body>
+
+<body class="bg-BGColor99 text-white"> 
+    <div class="container mx-auto text-center my-8 pt-8 pb-16 px-4 rounded-lg bg-slate-700/50">
+      <h1 class="font-mono">Assisted Mode</h1>
+      <h1 class="text-3xl my-4">Welcome to <b>Audimax</b></h1>
+      <p>Audimax is an online audio library and you are currently using the assisted mode specially developed for
+        visually impaired people.</p>
+      <p>If you think you are at the wrong place either press 'Esc' button on your keyboard or click <a href="/"
+          class="text-themeMain underline">Here</a> to redirect back to main site.</p>
+    </div>
+
+    <div class="fixed -z-10 mydiv bgcolor">
+      <!-- <img src="{{ url_for('assisted.static', filename='asst-bg.jpg') }}" class="h-full mx-auto" alt=""> -->
+        <div class ="loader"></div>
+    </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js"
+    integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script>
+    let speech = new SpeechSynthesisUtterance();
+    speech.lang = "en-US";
+
+    let voices = [];
+    window.speechSynthesis.onvoiceschanged = () => {
+      voices = window.speechSynthesis.getVoices();
+      speech.voice = voices[2];
+      console.log(voices);
+    };
+    speech.rate = 1;
+    speech.volume = 0.5;
+    speech.pitch = 1;
+
+    speech.text = "Audimax is an online audio library and you are currently using the assisted mode specially developed for visually impaired people."
+
+    $(document).on('click keypress', () => {
+      window.speechSynthesis.speak(speech);
+    });
+
+    window.onload = function () {
+      var startButton = document.getElementById("start");
+      startButton.click();
+    }; 
+  </script>
+</body>
+
 </html>

@@ -645,7 +645,6 @@ video {
 .-z-10{
   z-index: -10;
 }
-
 .z-50{
   z-index: 50;
 }
@@ -1799,6 +1798,73 @@ video {
   box-shadow: 0 0.2rem 1rem rgb(66 157 159 / 30%);
 }
 
+<<<<<<< Updated upstream
+=======
+.PillList-item {
+  cursor: pointer;
+  display: inline-block;
+  float: left;
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 20px;
+  margin: 0 12px 12px 0;
+  text-transform: capitalize;
+}
+
+.PillList-item input[type="checkbox"] {
+  display: none;
+}
+
+.PillList-item input[type="checkbox"]:checked + .PillList-label {
+  background-color: #46CDCF;
+  border: 1px solid #46CDCF;
+  color: #fff;
+  padding-right: 16px;
+  padding-left: 16px;
+}
+
+.PillList-label {
+  border: 1px solid #46CDCF;
+  border-radius: 20px;
+  color: #3ab2b4;
+  display: block;
+  padding: 7px 28px;
+  text-decoration: none;
+}
+
+.PillList-item
+  input[type="checkbox"]:checked
+  + .PillList-label
+  .Icon--checkLight {
+  display: inline-block;
+}
+
+.PillList-item input[type="checkbox"]:checked + .PillList-label .Icon--addLight,
+.PillList-label .Icon--checkLight,
+.PillList-children {
+  display: none;
+}
+
+.PillList-label .Icon {
+  width: 12px;
+  height: 12px;
+  margin: 0 0 0 12px;
+}
+
+.Icon--smallest {
+  font-size: 12px;
+  line-height: 12px;
+}
+
+.Icon {
+  background: transparent;
+  display: inline-block;
+  font-style: normal;
+  vertical-align: baseline;
+  position: relative;
+}
+
+>>>>>>> Stashed changes
 .focus-within\:outline-white:focus-within{
   outline-color: #fff;
 }
@@ -2041,7 +2107,7 @@ video {
   .lg\:fixed{
     position: fixed;
   }
-
+  
   .lg\:relative{
     position: relative;
   }
@@ -2095,4 +2161,82 @@ video {
   .xl\:h-64{
     height: 16rem;
   }
+<<<<<<< Updated upstream
+=======
+}
+
+.bg-BGColor99{
+  margin: 0;
+  padding: 0;
+  display:flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  animation: changeBg 5s linear infinite; 
+  background: #1d2a32;   
+  /* background-color: rgb(25 26 28 / var(--tw-bg-opacity)); */
+}
+@keyframes changeBg {
+  to {
+    filter: hue-rotate(360deg);
+  }
+}
+.bgcolor{
+  background:#001d30;
+  height: 100%;
+  width: 100%;
+}
+.mydiv{
+top: 0%;
+display:inherit;
+justify-content: center;
+align-items: center;
+min-height: 100vh;
+}
+
+@keyframes changeBg {
+  to {
+    filter: hue-rotate(360deg);
+  }
+}
+
+.loader {
+  position:absolute;
+  width: 450px;
+  height: 450px;
+  background: linear-gradient(to top, #001d30, #51eeee);
+  border-radius: 50%;
+  animation: rotate 5s linear infinite;
+}
+
+@keyframes rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loader::after {
+  content: '';
+  position: absolute;
+  top: 390px;
+  left: 280px;
+  width: 70px;
+  height: 70px;
+  background: #51eeee;
+  border-radius: 50%;
+  box-shadow: 
+    0 0 5px #51eeee,
+    0 0 25px #51eeee, 
+    0 0 50px #51eeee, 
+    0 0 75px #51eeee;
+
+}
+
+.loader::before {
+  content: '';
+  position: absolute;
+  background: #001d30;
+  inset: 30px 30px 0px 0px;
+  border-radius: 50%;
+>>>>>>> Stashed changes
 }
