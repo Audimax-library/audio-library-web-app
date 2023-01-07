@@ -335,6 +335,22 @@ def upload_chapter(id):
         return redirect(url_for('webapp.login_page'))
     return render_template('new-chapter.html', context=context)
 
+######## View Chapter
+@webapp.route("/book/<int:book_id>/listen/<int:chapter_id>/", methods=['GET', 'POST'])
+def view_chapter(book_id,chapter_id):
+    book_details = Book.query.get_or_404(book_id)
+    chapter_details = Chapter.query.get_or_404(chapter_id)
+
+    context = {
+        "book_details": book_details,
+        "chapter_details": chapter_details,
+    }
+    if current_user.is_authenticated:
+        context['user_initial'] = str(current_user)[0:2].upper()
+        context['user_name'] = current_user.username
+    return render_template('player.html', context=context)
+
+
 ######## Delete chapter
 @webapp.route("/book/<int:book_id>/delete/<int:chapter_id>/", methods=['POST'])
 def update_chapter(book_id,chapter_id):
