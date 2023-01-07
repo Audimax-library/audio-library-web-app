@@ -9,7 +9,9 @@
   </div>
   <div class="grid grid-cols-3 gap-4 text-center">
     <div class="self-center bg-gradient-to-r from-slate-100 to-cyan-500 hover:from-cyan-500 hover:to-blue-500 rounded-2xl hover:brightness-75 transition-all cursor-pointer">
-      <span><svg class="mx-auto h-auto w-full md:w-3/4 lg:w-8/12 xl:w-1/2 p-4 lg:p-16" type="sec-back" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(255, 255, 255, 1);"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"></path><path d="M11 16V8l-5 4zm6 0V8l-5 4z"></path></svg></span>
+      <span onclick="secback()">
+        <svg class="mx-auto h-auto w-full md:w-3/4 lg:w-8/12 xl:w-1/2 p-4 lg:p-16" type="sec-back" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(255, 255, 255, 1);"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"></path><path d="M11 16V8l-5 4zm6 0V8l-5 4z"></path></svg>
+      </span>
     </div>
     <div class="row-span-2 self-center bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-blue-500 hover:to-violet-500 rounded-2xl hover:brightness-75 transition-all cursor-pointer">
       <span title="Play" id="play-btn" onclick="play()">
@@ -20,7 +22,7 @@
       </span>
     </div>
     <div class="self-center bg-gradient-to-r from-blue-500 to-violet-500 hover:from-violet-500 hover:to-purple-500 rounded-2xl hover:brightness-75 transition-all cursor-pointer">
-      <span>
+      <span onclick="secfore()">
         <svg class="mx-auto h-auto w-full md:w-3/4 lg:w-8/12 xl:w-1/2 p-4 lg:p-16" type="sec-fore" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(255, 255, 255, 1);"><path d="M12 2C6.486 2 2 6.486 2 12s4.486 10 10 10 10-4.486 10-10S17.514 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8z"></path><path d="m13 16 5-4-5-4zm-6 0 5-4-5-4z"></path></svg>
       </span>
     </div>
@@ -138,8 +140,10 @@
     audio_source.volume = default_volume;
     if(playlist.children[current_song+1] === undefined){
       $(".next-track").html("End of Playlist");
+      $("#chapter-name").html(playlist.children[current_song].getAttribute("title"));
     } else{
       $(".next-track").html(playlist.children[current_song+1].getAttribute("title"));
+      $("#chapter-name").html(playlist.children[current_song].getAttribute("title"));
     }
   }
   init()
@@ -203,8 +207,22 @@
   }
   function volume(e){
     //audio_source.volume = e.target.value;
-    $(".volume-count").html(Math.round((e.target.value*100)/3),1);
-    gain_node.gain.value = e.target.value;
+    $(".volume-count").html(Math.round((parseFloat($("#audio-vol").val())*100)/3),1);
+    gain_node.gain.value = parseFloat($("#audio-vol").val());
+  }
+  function secback(){
+    if(audio_source.currentTime-5 <= 0){
+      audio_source.currentTime = 0;
+    } else{
+      audio_source.currentTime -= 5;
+    }
+  }
+  function secfore(){
+    if(audio_source.currentTime+5 >= audio_source.duration){
+      audio_source.currentTime = audio_source.duration;
+    } else{
+      audio_source.currentTime += 5;
+    }
   }
   function seek(e){
     audio_source.currentTime = (e.target.value/100) * audio_source.duration;
@@ -232,6 +250,51 @@
       next();
     }
   }
+  //Shortcut keys
+  $(document).keydown(function(e) {
+    if (e.keyCode == 32) {  // Space key
+      e.preventDefault();
+      if(pause_btn.hasClass('hidden')){
+        play();
+      } else{
+        pause();
+      }
+    }
+    if (e.keyCode == 37) {  // Left arrow key
+      secback();
+    }
+    if (e.keyCode == 39) {  // Right arrow key
+      secfore();
+    }
+    if (e.keyCode == 38) {  // Up arrow key
+      e.preventDefault();
+      var volume_bar = $("#audio-vol");
+      if(parseFloat(volume_bar.val())+0.15 >= 3){
+        volume_bar.val(3);
+      } else{
+        volume_bar.val((parseFloat(volume_bar.val())+0.15));
+      }
+      volume(volume_bar);
+    }
+    if (e.keyCode == 40) {  // Down arrow key
+      e.preventDefault();
+      var volume_bar = $("#audio-vol");
+      if(parseFloat(volume_bar.val())-0.15 <= 0){
+        volume_bar.val(0);
+      } else{
+        volume_bar.val((parseFloat(volume_bar.val())-0.15));
+      }
+      volume(volume_bar);
+    }
+    if (e.keyCode == 33) {  // pageup
+      e.preventDefault();
+      prev();
+    }
+    if (e.keyCode == 34) {  // pagedown
+      e.preventDefault();
+      next();
+    }
+  });
 
 
 </script>
