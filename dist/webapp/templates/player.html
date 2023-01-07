@@ -57,7 +57,7 @@
     </div>
     <ul id="audio-playlist" class="text-start ml-4">
       {% for chapter in context.book_details.chapters %}
-      <li style="cursor:pointer;" title="Chapter {{chapter.display_number}}" path="{{ url_for('webapp.static', filename='uploads/chapters/'+chapter.audio_url) }}">
+      <li style="cursor:pointer;" title="Chapter {{chapter.display_number}}" index="{{loop.index}}" path="{{ url_for('webapp.static', filename='uploads/chapters/'+chapter.audio_url) }}">
         ▶ Chapter {{chapter.display_number}}
       </li>
       {% endfor %}
@@ -149,8 +149,8 @@
   init()
   
   playlist.addEventListener('click', function(e){
-    var path = e.target.getAttribute("path");
-    song(path);
+    current_song = parseInt(e.target.getAttribute("index"))-1 ;
+    init();
     play();
   });
   
