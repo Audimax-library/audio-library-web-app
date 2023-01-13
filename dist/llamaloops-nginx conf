@@ -1,6 +1,7 @@
 server{
 	listen 80;
 	server_name 192.168.8.102;
+	client_max_body_size 64M;
 
 	location ^~ /static/ {
 		include /etc/nginx/mime.types;

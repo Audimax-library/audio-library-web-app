@@ -7,7 +7,7 @@ from flask_login import login_required, login_user, logout_user, current_user
 from admin import db, login_manager, oauth, discord, bcrypt
 from admin.forms import LoginForm, RegistrationForm
 from admin.models import User
-import datetime, json, re, os, threading
+import datetime, json, re, os, threading, phonetics
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import desc, or_
 from .models import Genre, Book, Chapter, NewsLetterSubscription
@@ -40,7 +40,7 @@ def allowed_file(filename, filetype):
 def book_obj_to_dist(obj):
     dist_list = []
     for item in obj:
-        dist_item = {"id": item.id, "title":item.title, "cover_img":item.cover_img, "status":item.status}
+        dist_item = {"id": item.id, "title":item.title, "cover_img":item.cover_img, "status":item.status, "no_chapters": len(item.chapters)}
         dist_list.append(dist_item)
     return dist_list
 
@@ -226,7 +226,6 @@ def title_quick_search():
         Book.synopsis.ilike(f'%{search_by}%'), 
         Book.author_name.ilike(f'%{search_by}%'))).all()
     #results = db.session.query(Book).all()
-    print()
     context={
         "result": "success",
         "value": book_obj_to_dist(results),
@@ -239,7 +238,7 @@ def titles_page():
     param1 = request.args.get('q')
     param2 = request.args.getlist('status')
     param3 = request.args.getlist('genres')
-    print(f'{param1}\n{param2}\n{param3}\n')
+    #print(f'{param1}\n{param2}\n{param3}\n')
     genre_list = Genre.query.all()
     context = {
         'search_query': param1,
@@ -435,3 +434,51 @@ def logout():
 @webapp.route("/music/") #released music
 def music_page():
     return "<p>Hello, World!</p>"
+
+####### API functions
+
+@webapp.route("/v1/books/", methods=['GET'])
+def book_api():
+    results = Book.query.filter_by(is_approved=1).order_by(desc(Book.created)).all()
+    if request.method == 'GET':
+        param1 = request.args.get('query')
+        if not param1 is None:
+            book_list = []
+            for word in param1.split(" "):
+                phonetic_key = phonetics.dmetaphone(word)
+                #print(f"{phonetic_key}")
+                for book in results:
+                    for chapter_title in book.title.split(" "):
+                        title_key = phonetics.dmetaphone(chapter_title)
+                        #print(f"{title_key[0]} - {phonetic_key[0]}")
+                        if title_key[0] == phonetic_key[0]:
+                            book_list.append(book)
+                            continue
+            filtered_book_list = list(set(book_list))
+            filtered_json = book_obj_to_dist(filtered_book_list[:9])
+            return jsonify({
+                'status': '200',
+                'books': filtered_json,
+            })  
+    return jsonify({
+        'status': '200',
+        'books': book_obj_to_dist(results[:9]),
+    })
+
+@webapp.route("/v1/books/<int:book_id>/", methods=['GET'])
+def book_details_api(book_id):
+    book_details = Book.query.get(book_id)
+    #print(book_details)
+    if not book_details is None:
+        dist_sub_item = []
+        for chapter in book_details.chapters:
+            dist_sub_item.append({"id": chapter.id, "order_number":chapter.display_number, "audio_url":"/webapp/static/uploads/chapters/"+chapter.audio_url})
+        book_detail_dict = {"id": book_details.id, "title":book_details.title, "cover_img":book_details.cover_img, "status":book_details.status, "chapters": dist_sub_item}
+        return jsonify({
+            'status': '200',
+            'books': book_detail_dict,
+        })
+    return jsonify({
+        'status': '400',
+        'messages': "A valid book id is required.",
+    })
