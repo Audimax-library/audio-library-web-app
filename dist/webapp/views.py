@@ -12,6 +12,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy import desc, or_
 from .models import Genre, Book, Chapter, NewsLetterSubscription
 from .send_email import send_mail
+from urllib.parse import parse_qs
 
 
 webapp = Blueprint('webapp', __name__, static_folder="static", static_url_path='/webapp/static' , template_folder='templates')
@@ -50,6 +51,28 @@ def check_email(str_val):
         return True
     else:
         return False
+
+def filter_books(obj, status_list, genre_list):
+    return_book_list = []
+    for book in obj:
+        book_genre_list = book.genres
+        if status_list == []:
+           for genre in book_genre_list:
+                if(str(genre.id) in genre_list):
+                    return_book_list.append(book)
+                    break
+        else:
+            print(book_genre_list)
+            if(book.status in status_list):
+                if genre_list == []:
+                    return_book_list.append(book)
+                    continue
+                for genre in book_genre_list:
+                    if(str(genre.id) in genre_list):
+                        return_book_list.append(book)
+                        break
+    return return_book_list
+
 
 ######## home page
 @webapp.route("/", methods=['GET', 'POST'])
@@ -235,6 +258,28 @@ def title_quick_search():
 ######## search titles
 @webapp.route("/titles/", methods=['GET', 'POST'])
 def titles_page():
+    if request.method == 'POST':
+        data = request.get_json()['data']
+        data_dict = parse_qs(data)
+        search_by = request.get_json()['query']
+        results = db.session.query(Book).filter(or_(
+            Book.title.ilike(f'%{search_by}%'), 
+            Book.alt_title.ilike(f'%{search_by}%'), 
+            Book.synopsis.ilike(f'%{search_by}%'), 
+            Book.author_name.ilike(f'%{search_by}%'))).all()
+        if "status" in data_dict and "genres" in data_dict:
+            filtered_books = filter_books(results, data_dict['status'], data_dict['genres'])
+        elif "status" in data_dict:
+            filtered_books = filter_books(results, data_dict['status'], [])
+        elif "genres" in data_dict:
+            filtered_books = filter_books(results, [], data_dict['genres'])
+        else:
+            filtered_books = results
+        json_context={
+            "result": "success",
+            "value": book_obj_to_dist(filtered_books),
+        }
+        return jsonify(json_context)
     param1 = request.args.get('q')
     param2 = request.args.getlist('status')
     param3 = request.args.getlist('genres')
@@ -243,9 +288,27 @@ def titles_page():
     context = {
         'search_query': param1,
         'status_query': param2,
+        'genres_query': param3,
         'genres': genre_list,
         'status_types': status_types,
     }
+    if param1:
+        results = db.session.query(Book).filter(or_(
+            Book.title.ilike(f'%{param1}%'), 
+            Book.alt_title.ilike(f'%{param1}%'), 
+            Book.synopsis.ilike(f'%{param1}%'), 
+            Book.author_name.ilike(f'%{param1}%'))).all()
+    else:
+        results = Book.query.filter_by(is_approved=1).order_by(desc(Book.created)).limit(15).all()
+    if param2 != [] and param3 != []:
+        filtered_books = filter_books(results, param2, param3)
+    elif param2 != []:
+        filtered_books = filter_books(results, param2, [])
+    elif param3 != []:
+        filtered_books = filter_books(results, [], param3)
+    else:
+        filtered_books = results
+    context['results'] = filtered_books
     if current_user.is_authenticated:
         context['user_initial'] = str(current_user)[0:2].upper()
         context['user_name'] = current_user.username
