@@ -76,6 +76,14 @@ class Chapter(db.Model):
   def elapsed_time(self):
     return (self.updated.strftime("%d/%m/%Y"))
 
+
+class Library(db.Model):
+  book_id = db.Column(db.Integer, db.ForeignKey('book.id'),nullable=False, primary_key=True)
+  user_email = db.Column(db.String(200), db.ForeignKey(User.email),nullable=False, primary_key=True)
+
+  def __repr__(self):
+    return f'Library-{self.book_id}-{self.user_email}'
+
 """ class Author(db.Model):
   id = db.Column(db.Integer, autoincrement=True, primary_key=True)
   name = db.Column(db.String(200), nullable=False, unique=True)

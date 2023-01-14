@@ -10,7 +10,7 @@ from admin.models import User
 import datetime, json, re, os, threading, phonetics
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import desc, or_
-from .models import Genre, Book, Chapter, NewsLetterSubscription
+from .models import Genre, Book, Chapter, NewsLetterSubscription, Library
 from .send_email import send_mail
 from urllib.parse import parse_qs
 
@@ -331,6 +331,7 @@ def newsletter_endpoint():
                 thread.start()
                 return jsonify({'user_email': user_email,'exist': 'added'})
             except IntegrityError:
+                db.session.rollback()
                 return jsonify({'user_email': user_email,'exist': 'exists'})
             except:
                 return jsonify({'user_email': user_email,'exist': 'error'})
@@ -346,6 +347,9 @@ def book_page(id):
         'book_details': book_details,
         }
     if current_user.is_authenticated:
+        library_data = Library.query.filter_by(book_id=id,user_email=str(current_user)).first()
+        if library_data:
+            context['library_added'] = True
         context['user_initial'] = str(current_user)[0:2].upper()
         context['user_name'] = current_user.username
     return render_template('book.html', context=context)
@@ -432,6 +436,32 @@ def update_chapter(book_id,chapter_id):
             print('Invalid Request: Authentication Failed')
             flash('Authentication Failed!', 'error')
             abort(400, 'Error: Authentication Failed.')
+
+######## add to library
+@webapp.route("/book/add-to-library/", methods=['POST'])
+def add_to_library():
+    if request.method == 'POST':
+        if current_user.is_authenticated:
+            data = request.get_json()['book_id']
+            try:
+                tempLibrary = Library(
+                    book_id=data,
+                    user_email=str(current_user),
+                )
+                db.session.add(tempLibrary)
+                db.session.commit()
+                return jsonify({'status': 'success', 'value':'added'})
+            except IntegrityError:
+                db.session.rollback()
+                db.session.query(Library).filter_by(book_id=data,user_email=str(current_user)).delete()
+                db.session.commit()
+                return jsonify({'status': 'success', 'value':'removed'})
+            except:
+                abort(400, 'Error: Insert DB error.')
+        else:
+            print('Invalid Request: You have to login to add books to library!')
+            flash('You have to login to add books to library!', 'error')
+            return jsonify({'status': 'success', 'value':'redirect'})
 
 ######## user login page 
 @webapp.route("/login/", methods=['GET', 'POST'])

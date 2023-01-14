@@ -23,8 +23,14 @@
         </div>
         <div class="col-span-2">
           <div class="flex gap-2 sm:mb-0 mb-2 flex-wrap">
-            <button class="rounded relative flex items-center px-3 flex flex-grow-0 whitespace-nowrap px-2 sm:px-3 justify-center text-white bg-themeMain hover:bg-themeLight glow px-6" style="min-height: 48px; min-width: 220px;">
-              <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;">Add To Library</span>
+            <button onclick="addToLibrary(this)" data-book-value="{{context.book_details.id}}" class="rounded relative flex items-center px-3 flex flex-grow-0 whitespace-nowrap px-2 sm:px-3 justify-center text-white bg-themeMain hover:bg-themeLight glow px-6" style="min-height: 48px; min-width: 220px;">
+              <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;">
+                {% if context.library_added %}
+                Remove from Library
+                {% else %}
+                Add to Library
+                {% endif %}
+              </span>
             </button>
             <button class="rounded relative flex items-center px-3 justify-center text-white bg-BGColorLight hover:bg-BGColorDarkLight px-0" style="min-height: 48px; min-width: 48px;">
               <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;">
@@ -100,14 +106,6 @@
               {% endfor %}
             </div>
           </div>
-          <!-- <div class="col-span-2 xl:col-span-1">
-            <p class="font-bold">Genres</p>
-            <div class="tags-list">
-              <span class="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 whitespace-nowrap">Adventure</span>
-              <span class="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 whitespace-nowrap">History</span>
-              <span class="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 whitespace-nowrap">Fantacy</span>
-            </div>
-          </div> -->
           <div class="col-span-2 md:col-span-1">
             <p class="font-bold">Formats</p>
             <div class="tags-list">
@@ -150,11 +148,34 @@
     </div>
   </div>
 </div>
+<!-- toast section -->
+<div class="fixed bottom-4 right-4 z-30">
+  <div class="toast-message special-toast-message flex items-center p-4 mb-4 w-full max-w-xs text-gray-500 bg-BGColorLight rounded-lg drop-shadow" role="alert" style="display: none;">
+    <div class="inline-flex flex-shrink-0 justify-center items-center w-8 h-8 text-slate-200 bg-slate-600 rounded-lg">
+      <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+      <span class="sr-only">Check icon</span>
+    </div>
+    <div class="ml-3 text-sm font-normal pr-4" id="special-toast-content">Hi</div>
+    <button type="button" onclick="dismissToast(this)" class="ml-auto -mx-1.5 -my-1.5 bg-BGColorDarkLight text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8" aria-label="Close">
+      <span class="sr-only">Close</span>
+      <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+    </button>
+  </div>
+</div>
+<!-- END toast section -->
 
 
 {% endblock %}
 {% block scripts %}
 <script>
+  function invokeToast(msg){
+    $('#special-toast-content').html(msg);
+    $('.special-toast-message').fadeIn('fast');
+    setTimeout(function(){
+      $('.special-toast-message').fadeOut('slow');
+    }, 5000);
+  }
+
   function deleteChapter(chapter){
     if (confirm("Do you really want to delete this chapter?") == true) {
       $.ajax({
@@ -170,19 +191,30 @@
       });
     }
   }
-</script>
-<script type="module">
-  var swiper = new Swiper('.swiper', {
-    slidesPerView: 'auto',
-    mousewheel: true,
-    pagination: {
-      el: '.swiper-pagination',
-      clickable: true,
-    },
-    autoplay: {
-      delay: 2500,
-      disableOnInteraction: false,
-    },
-  });
+
+  function addToLibrary(elem){
+    let bookID = $(elem).data('bookValue');
+    var btn_span = $(elem).children();
+    $.ajax({
+      type: 'POST',
+      url: "{{ url_for('webapp.add_to_library') }}",
+      data: JSON.stringify({'book_id': bookID}),
+      contentType: "application/json",
+      success: function(response) {
+        if(response.value == 'redirect'){
+          window.location.href = "{{ url_for('webapp.login_page') }}";
+        } else if(response.value == 'added'){
+          btn_span.html("Remove from Library");
+          invokeToast("Book successfully added to your library.");
+        } else if(response.value == 'removed'){
+          btn_span.html("Add to Library");
+          invokeToast("Book successfully removed from your library.");
+        }
+      },
+      fail: function(xhr, status, error) {
+        invokeToast("Something went wrong. Please try again later.");
+      }
+    });
+  }
 </script>
 {% endblock %}
