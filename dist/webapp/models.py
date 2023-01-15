@@ -68,29 +68,25 @@ class Library(db.Model):
 
   def __repr__(self):
     return f'Library-{self.book_id}-{self.user_email}'
-""" class Author(db.Model):
-  id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-  name = db.Column(db.String(200), nullable=False, unique=True)
-  created = db.Column(db.DateTime, server_default=db.func.now())
-  updated = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
-  books = db.relationship('Book', backref="author")
-
-  def __repr__(self):
-    return f'{self.name}' """
-
 
 class Rating(db.Model):
-    rating_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-    book_id = db.Column(db.Integer, db.ForeignKey(Book.id), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=False)
-    score = db.Column(db.Integer, nullable=False)
+  book_id = db.Column(db.Integer, db.ForeignKey('book.id'),nullable=False, primary_key=True)
+  user_email = db.Column(db.String(200), db.ForeignKey(User.email),nullable=False, primary_key=True)
+  rate_score = db.Column(db.Integer, nullable=False)
 
-    users = db.relationship(User, backref=db.backref("rating", order_by=rating_id))
-    books = db.relationship(Book, backref=db.backref("rating", order_by=rating_id))
+  def __repr__(self):
+    return f'Rating-{self.book_id}-{self.user_email}-score{self.rate_score}'
 
-    def __repr__(self):
-        return f'Movie{self.book_id}-User{self.user_id}-score{self.score}'
+class ReportBook(db.Model):
+  id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+  user_email = db.Column(db.String(200), db.ForeignKey(User.email),nullable=False)
+  title = db.Column(db.String(100), nullable=False, unique=False)
+  subject = db.Column(db.String(1000), nullable=True, unique=False)
+  is_read = db.Column(db.Boolean, unique=False, default=0)
+  created_date = db.Column(db.DateTime, server_default=db.func.now())
 
+  def __repr__(self):
+    return f'Report-{self.id}-{self.title}-{self.user_email}'
 
 # newsletter model
 class NewsLetterSubscription(db.Model):

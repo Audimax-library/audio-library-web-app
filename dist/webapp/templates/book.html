@@ -32,7 +32,7 @@
                 {% endif %}
               </span>
             </button>
-            <button class="rounded relative flex items-center px-3 justify-center text-white bg-BGColorLight hover:bg-BGColorDarkLight px-0" style="min-height: 48px; min-width: 48px;">
+            <button onclick="toggleModal(this)" data-modal-toggle="rate-modal" class="rounded relative flex items-center px-3 justify-center text-white bg-BGColorLight hover:bg-BGColorDarkLight px-0" style="min-height: 48px; min-width: 48px;">
               <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
               </span>
@@ -52,7 +52,7 @@
               </span>
             </a>
             {% endif %}
-            <button class="rounded relative flex items-center px-3 justify-center text-white bg-BGColorLight hover:bg-BGColorDarkLight px-6" style="min-height: 48px; min-width: 0px;">
+            <button onclick="toggleModal(this)" data-modal-toggle="report-modal" class="rounded relative flex items-center px-3 justify-center text-white bg-BGColorLight hover:bg-BGColorDarkLight px-6" style="min-height: 48px; min-width: 0px;">
               <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon mr-4"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zm0 7v-7"></path></svg> 
                 Report
@@ -68,20 +68,22 @@
         </div>
         <div class="col-span-2">
           <div class="flex space-x-2 pt-6 pb-4">
-            <div class="flex items-center space-x-1 text-sm py-1 px-2 bg-green-200 text-green-800 rounded-full">
-              <div style="width: 0.4rem; height: 0.4rem" class="bg-green-500 rounded-full"></div>
-              <div>{{context.book_details.status}}</div>
-            </div>
+            <a href="{{ url_for('webapp.titles_page')+'?status='+context.book_details.status}}">
+              <div class="flex items-center space-x-1 text-sm py-1 px-2 bg-green-200 text-green-800 rounded-full">
+                <div style="width: 0.4rem; height: 0.4rem" class="bg-green-500 rounded-full"></div>
+                <div>{{context.book_details.status}}</div>
+              </div>
+            </a>
           </div>
           <div class="stats-list">
             <div class="flex gap-2 flex-wrap items-center text-sm sm:text-base">
               <span title="7.6818 (Average)" class="text-themeMain flex items-center relative group" style="cursor: pointer;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1 rel text-currentColor icon"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg> 
-                7.98
+                {{context.rating_avg}}
               </span>
               <span class="text-secondary flex items-center" style="cursor: pointer;" title="425">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="mr-1 rel text-currentColor icon"><path d="m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg> 
-                425
+                {{context.library_total}}
               </span>
             </div>
           </div>
@@ -102,7 +104,9 @@
             <p class="font-bold">Type</p>
             <div class="tags-list">
               {% for genre in context.book_details.genres|sort(attribute='title') %}
-              <span class="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 whitespace-nowrap">{{genre.title}}</span>
+              <a href="{{ url_for('webapp.titles_page')+'?genres='+genre.id|string}}">
+                <span class="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 whitespace-nowrap">{{genre.title}}</span>
+              </a>
               {% endfor %}
             </div>
           </div>
@@ -148,6 +152,137 @@
     </div>
   </div>
 </div>
+<!-- Report Modal section -->
+<div id="report-modal" class="fixed top-0 left-0 z-30 bg-slate-900/50 w-full h-full backdrop-blur-sm hidden">
+  <div class="relative p-4 pt-10 w-full max-w-2xl h-full md:h-auto mx-auto">
+    <div class="relative bg-BGColor rounded-lg box-shadow">
+      <div class="flex justify-between items-start p-4 rounded-t border-b border-gray-600">
+        <h3 class="text-xl font-semibold text-white">
+          Report an issue
+        </h3>
+        <button type="button" onclick="toggleModal(this)" data-modal-toggle="report-modal" class="ml-auto -mx-1.5 -my-1.5 bg-BGColorDarkLight text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8" aria-label="Close">
+          <span class="sr-only">Close</span>
+          <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+        </button>
+      </div>
+      <form action="{{ url_for('webapp.report_book', id=context.book_details.id) }}" method="POST">
+        <div class="gridgrid-col-1 gap-4 p-6">
+          <div class="relative z-0 w-full mb-6 group">
+            {% if current_user.is_authenticated %}
+            <input type="email" name="report-email" id="floating_email" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-slate-600 focus:outline-none focus:ring-0 focus:border-slate-600 peer" placeholder="" value="{{current_user|string}}" required readonly />
+            <label for="floating_email" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-slate-600 peer-focus:dark:text-slate-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Email address</label>
+            {% else %}
+            <input type="email" name="floating_email" id="floating_email" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-slate-600 focus:outline-none focus:ring-0 focus:border-slate-600 peer" placeholder="" value="" required readonly />
+            <label for="floating_email" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-slate-600 peer-focus:dark:text-slate-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Email address</label>
+            {% endif %}
+          </div>
+          <div class="relative z-0 w-full mb-6 group">
+            <input type="text" name="report-title" id="floating_text" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-slate-600 focus:outline-none focus:ring-0 focus:border-slate-600 peer" placeholder="" value="{{context.book_details.title}}" required readonly />
+            <label for="floating_text" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-slate-600 peer-focus:dark:text-slate-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Subject</label>
+          </div>
+          <label for="message" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your message</label>
+          <textarea id="message" maxlength="1000" name="report-subject" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-themeMain focus:border-themeMain dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-themeMain dark:focus:border-themeMain" placeholder="Explain the issue(s)..." required></textarea>
+        </div>
+        <div class="flex items-center p-6 space-x-2 rounded-b border-t border-gray-600">
+          {% if current_user.is_authenticated %}
+          <button type="submit" class="text-white focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 bg-red-600 hover:bg-red-900 focus:outline-none focus:ring-read-800 transition-colors">Report</button>
+          {% endif %}
+          <button onclick="toggleModal(this)" data-modal-toggle="report-modal" type="button" class="focus:ring-4 focus:outline-none rounded-lg border text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 bg-gray-700 text-gray-300 border-gray-500 hover:text-white hover:bg-gray-600 focus:ring-gray-600 transition-colors">Close</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- END Report Modal section -->
+<!-- Rate Modal section -->
+<div id="rate-modal" class="fixed top-0 left-0 z-30 bg-slate-900/50 w-full h-full backdrop-blur-sm hidden">
+  <div class="relative p-4 pt-10 w-full max-w-2xl h-full md:h-auto mx-auto">
+    <div class="relative bg-BGColor rounded-lg box-shadow">
+      <div class="flex justify-between items-start p-4 rounded-t border-b border-gray-600">
+        <h3 class="text-xl font-semibold text-white">
+          Rate {{context.book_details.title}}
+        </h3>
+        <button type="button" onclick="toggleModal(this)" data-modal-toggle="rate-modal" class="ml-auto -mx-1.5 -my-1.5 bg-BGColorDarkLight text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8" aria-label="Close">
+          <span class="sr-only">Close</span>
+          <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+        </button>
+      </div>
+      <div class="grid sm:grid-cols-2 grid-col-1 gap-4 p-6">
+
+        <ul class="w-48 mx-auto text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+          <li class="w-full border-b hover:bg-themeDark border-gray-200 rounded-t-lg dark:border-gray-600">
+            <div class="flex items-center pl-3">
+              <input id="list-radio-1" type="radio" value="1" name="rate-radio" class="w-4 h-4 text-themeMain focus:ring-blue-600 ring-offset-gray-700 focus:ring-offset-gray-700 focus:ring-2 bg-gray-600 border-gray-500">
+              <label for="list-radio-1" class="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">(1) Appalling </label>
+            </div>
+          </li>
+          <li class="w-full border-b hover:bg-themeDark border-gray-200 dark:border-gray-600">
+            <div class="flex items-center pl-3">
+              <input id="list-radio-2" type="radio" value="2" name="rate-radio" class="w-4 h-4 text-themeMain focus:ring-blue-600 ring-offset-gray-700 focus:ring-offset-gray-700 focus:ring-2 bg-gray-600 border-gray-500">
+              <label for="list-radio-2" class="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">(2) Horrible </label>
+            </div>
+          </li>
+          <li class="w-full border-b hover:bg-themeDark border-gray-200 dark:border-gray-600">
+            <div class="flex items-center pl-3">
+              <input id="list-radio-3" type="radio" value="3" name="rate-radio" class="w-4 h-4 text-themeMain focus:ring-blue-600 ring-offset-gray-700 focus:ring-offset-gray-700 focus:ring-2 bg-gray-600 border-gray-500">
+              <label for="list-radio-3" class="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">(3) Very Bad</label>
+            </div>
+          </li>
+          <li class="w-full border-b hover:bg-themeDark border-gray-200 dark:border-gray-600">
+            <div class="flex items-center pl-3">
+              <input id="list-radio-4" type="radio" value="4" name="rate-radio" class="w-4 h-4 text-themeMain focus:ring-blue-600 ring-offset-gray-700 focus:ring-offset-gray-700 focus:ring-2 bg-gray-600 border-gray-500">
+              <label for="list-radio-4" class="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">(4) Bad </label>
+            </div>
+          </li>
+          <li class="w-full hover:bg-themeDark border-gray-200 rounded-b-lg dark:border-gray-600">
+            <div class="flex items-center pl-3">
+              <input id="list-radio-5" type="radio" value="5" name="rate-radio" class="w-4 h-4 text-themeMain focus:ring-blue-600 ring-offset-gray-700 focus:ring-offset-gray-700 focus:ring-2 bg-gray-600 border-gray-500">
+              <label for="list-radio-5" class="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">(5) Average </label>
+            </div>
+          </li>
+        </ul>
+        <ul class="w-48 mx-auto text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+          <li class="w-full border-b hover:bg-themeDark border-gray-200 rounded-t-lg dark:border-gray-600">
+            <div class="flex items-center pl-3">
+              <input id="list-radio-6" type="radio" value="6" name="rate-radio" class="w-4 h-4 text-themeMain focus:ring-blue-600 ring-offset-gray-700 focus:ring-offset-gray-700 focus:ring-2 bg-gray-600 border-gray-500">
+              <label for="list-radio-6" class="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">(6) Fine </label>
+            </div>
+          </li>
+          <li class="w-full border-b hover:bg-themeDark border-gray-200 dark:border-gray-600">
+            <div class="flex items-center pl-3">
+              <input id="list-radio-7" type="radio" value="7" name="rate-radio" class="w-4 h-4 text-themeMain focus:ring-blue-600 ring-offset-gray-700 focus:ring-offset-gray-700 focus:ring-2 bg-gray-600 border-gray-500">
+              <label for="list-radio-7" class="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">(7) Good </label>
+            </div>
+          </li>
+          <li class="w-full border-b hover:bg-themeDark border-gray-200 dark:border-gray-600">
+            <div class="flex items-center pl-3">
+              <input id="list-radio-8" type="radio" value="8" name="rate-radio" class="w-4 h-4 text-themeMain focus:ring-blue-600 ring-offset-gray-700 focus:ring-offset-gray-700 focus:ring-2 bg-gray-600 border-gray-500">
+              <label for="list-radio-8" class="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">(8) Very Good </label>
+            </div>
+          </li>
+          <li class="w-full border-b hover:bg-themeDark border-gray-200 dark:border-gray-600">
+            <div class="flex items-center pl-3">
+              <input id="list-radio-9" type="radio" value="9" name="rate-radio" class="w-4 h-4 text-themeMain focus:ring-blue-600 ring-offset-gray-700 focus:ring-offset-gray-700 focus:ring-2 bg-gray-600 border-gray-500">
+              <label for="list-radio-9" class="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">(9) Great </label>
+            </div>
+          </li>
+          <li class="w-full hover:bg-themeDark border-gray-200 rounded-b-lg dark:border-gray-600">
+            <div class="flex items-center pl-3">
+              <input id="list-radio-10" type="radio" value="10" name="rate-radio" class="w-4 h-4 text-themeMain focus:ring-blue-600 ring-offset-gray-700 focus:ring-offset-gray-700 focus:ring-2 bg-gray-600 border-gray-500">
+              <label for="list-radio-10" class="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">(10) Masterpiece </label>
+            </div>
+          </li>
+        </ul>
+
+      </div>
+      <div class="flex items-center p-6 space-x-2 rounded-b border-t border-gray-600">
+          <button onclick="rateThisBook(this)" data-book-value="{{context.book_details.id}}" class="text-white focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 bg-themeMain hover:bg-themeDarkLight focus:outline-none focus:ring-teal-800 transition-colors">Save</button>
+          <button onclick="toggleModal(this)" data-modal-toggle="rate-modal" type="button" class="focus:ring-4 focus:outline-none rounded-lg border text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 bg-gray-700 text-gray-300 border-gray-500 hover:text-white hover:bg-gray-600 focus:ring-gray-600 transition-colors">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- END Rate Modal section -->
 <!-- toast section -->
 <div class="fixed bottom-4 right-4 z-30">
   <div class="toast-message special-toast-message flex items-center p-4 mb-4 w-full max-w-xs text-gray-500 bg-BGColorLight rounded-lg drop-shadow" role="alert" style="display: none;">
@@ -168,6 +303,13 @@
 {% endblock %}
 {% block scripts %}
 <script>
+// @ts-nocheck
+  {% if context.book_rating %}
+  $(function() {
+    $("#list-radio-{{context.book_rating}}").prop("checked", true);
+  });
+  {% endif %}
+
   function invokeToast(msg){
     $('#special-toast-content').html(msg);
     $('.special-toast-message').fadeIn('fast');
@@ -215,6 +357,31 @@
         invokeToast("Something went wrong. Please try again later.");
       }
     });
+  }
+
+  function rateThisBook(elem){
+    let bookID = $(elem).data('bookValue');
+    let rateVal = $('input[name="rate-radio"]:checked').val();
+    //console.log(bookID + " - " + rateVal);
+    $.ajax({
+      type: 'POST',
+      url: "{{ url_for('webapp.rate_book') }}",
+      data: JSON.stringify({'book_id': bookID, 'rate_val': rateVal}),
+      contentType: "application/json",
+      success: function(response) {
+        if(response.value == 'redirect'){
+          window.location.href = "{{ url_for('webapp.login_page') }}";
+        } else if(response.value == 'rated'){
+          invokeToast("Book rated successfully.");
+        } else if(response.value == 'updated'){
+          invokeToast("Book rating updated successfully.");
+        }
+      },
+      fail: function(xhr, status, error) {
+        invokeToast("Something went wrong. Please try again later.");
+      }
+    });
+    $('#rate-modal').fadeToggle('fast');
   }
 </script>
 {% endblock %}

@@ -9,8 +9,9 @@ from admin.forms import LoginForm, RegistrationForm
 from admin.models import User
 import datetime, json, re, os, threading, phonetics
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import desc, or_
-from .models import Genre, Book, Chapter, NewsLetterSubscription, Library
+from sqlalchemy import desc, or_, func
+from sqlalchemy.dialects.mysql import insert #only works with mysql
+from .models import Genre, Book, Chapter, NewsLetterSubscription, Library, Rating, ReportBook
 from .send_email import send_mail
 from urllib.parse import parse_qs
 
@@ -85,6 +86,30 @@ def home_page():
         #user = User.query.filter_by(email=str(current_user)).first()
         context['user_name'] = current_user.username
     return render_template('home.html', context=context)
+
+######## newsletter endpoint
+@webapp.route("/newsletter/", methods=['POST'])
+def newsletter_endpoint():
+    if request.method == 'POST':
+        news_letter_data = request.get_json()
+        user_email = news_letter_data['mail']
+        if check_email(user_email):
+            try:
+                tempNewsletter = NewsLetterSubscription(
+                    email=user_email
+                )
+                db.session.add(tempNewsletter)
+                db.session.commit()
+                thread = threading.Thread(target=send_mail, args=(user_email,))
+                thread.start()
+                return jsonify({'user_email': user_email,'exist': 'added'})
+            except IntegrityError:
+                db.session.rollback()
+                return jsonify({'user_email': user_email,'exist': 'exists'})
+            except:
+                return jsonify({'user_email': user_email,'exist': 'error'})
+        else:
+            return jsonify({'user_email': user_email,'exist': 'error'})
 
 ######## add new title
 @webapp.route("/add-titles/", methods=['GET', 'POST'])
@@ -314,42 +339,31 @@ def titles_page():
         context['user_name'] = current_user.username
     return render_template('search-titles.html', context=context)
 
-######## newsletter endpoint
-@webapp.route("/newsletter/", methods=['POST'])
-def newsletter_endpoint():
-    if request.method == 'POST':
-        news_letter_data = request.get_json()
-        user_email = news_letter_data['mail']
-        if check_email(user_email):
-            try:
-                tempNewsletter = NewsLetterSubscription(
-                    email=user_email
-                )
-                db.session.add(tempNewsletter)
-                db.session.commit()
-                thread = threading.Thread(target=send_mail, args=(user_email,))
-                thread.start()
-                return jsonify({'user_email': user_email,'exist': 'added'})
-            except IntegrityError:
-                db.session.rollback()
-                return jsonify({'user_email': user_email,'exist': 'exists'})
-            except:
-                return jsonify({'user_email': user_email,'exist': 'error'})
-        else:
-            return jsonify({'user_email': user_email,'exist': 'error'})
-
 
 ######## view title
 @webapp.route("/book/<int:id>/", methods=['GET', 'POST'])
 def book_page(id):
     book_details = Book.query.get_or_404(id)
+    library_count = Library.query.filter_by(book_id=id).count()
+    rating_total = db.session.query(
+        func.sum(Rating.rate_score).label('rating_sum'),
+        func.count().label('no_rows')
+        ).filter_by(book_id=id).first()
+    rating_avg = 0
+    if rating_total.no_rows:
+        rating_avg = rating_total.rating_sum/rating_total.no_rows
     context = {
         'book_details': book_details,
+        'library_total': library_count,
+        'rating_avg': rating_avg,
         }
     if current_user.is_authenticated:
         library_data = Library.query.filter_by(book_id=id,user_email=str(current_user)).first()
+        rating_data = Rating.query.filter_by(book_id=id,user_email=str(current_user)).first()
         if library_data:
             context['library_added'] = True
+        if rating_data:
+            context['book_rating'] = rating_data.rate_score
         context['user_initial'] = str(current_user)[0:2].upper()
         context['user_name'] = current_user.username
     return render_template('book.html', context=context)
@@ -459,9 +473,65 @@ def add_to_library():
             except:
                 abort(400, 'Error: Insert DB error.')
         else:
-            print('Invalid Request: You have to login to add books to library!')
-            flash('You have to login to add books to library!', 'error')
+            print('Invalid Request: You have to be logged in to add books to library!')
+            flash('You have to be logged in to add books to library!', 'error')
             return jsonify({'status': 'success', 'value':'redirect'})
+
+
+######## Rate Book
+@webapp.route("/book/rate/", methods=['POST'])
+def rate_book():
+    if request.method == 'POST':
+        if current_user.is_authenticated:
+            data_book_id = request.get_json()['book_id']
+            data_rate_val = request.get_json()['rate_val']
+            try:
+                tempRating = Rating(
+                    book_id=data_book_id, 
+                    user_email=str(current_user), 
+                    rate_score=data_rate_val
+                )
+                db.session.add(tempRating)
+                db.session.commit()
+                return jsonify({'status': 'success', 'value':'rated'})
+            except IntegrityError:
+                db.session.rollback()
+                ratingRec = db.session.query(Rating).filter_by(book_id=data_book_id,user_email=str(current_user)).first()
+                ratingRec.rate_score = data_rate_val
+                db.session.commit()
+                return jsonify({'status': 'success', 'value':'updated'})
+            except:
+                abort(400, 'Error: Insert DB error.')
+        else:
+            print('Invalid Request: You have to be logged in to rate books!')
+            flash('You have to be logged in to rate books!', 'error')
+            return jsonify({'status': 'success', 'value':'redirect'})
+
+######## Report Book
+@webapp.route("/book/report/<int:id>/", methods=['POST'])
+def report_book(id):
+    if request.method == 'POST':
+        if current_user.is_authenticated:
+            try:
+                user_email = request.form['report-email']
+                report_title = request.form['report-title']
+                subject = request.form['report-subject']
+                tempReport = ReportBook(
+                    user_email=user_email,
+                    title=report_title,
+                    subject=subject,
+                )
+                db.session.add(tempReport)
+                db.session.commit()
+                flash('Issue reported successfully, an admin will contact you via email if needed.', 'success')
+                return redirect(url_for('webapp.book_page', id=id))
+            except:
+                flash('An error occured while reporting the issue. Please try again later.', 'error')
+                return redirect(url_for('webapp.book_page', id=id))
+        else:
+            flash('User has to be logged in to report issues.', 'error')
+            return redirect(url_for('webapp.login_page'))
+    return redirect(url_for('webapp.book_page', id=id))
 
 ######## user login page 
 @webapp.route("/login/", methods=['GET', 'POST'])
@@ -491,6 +561,7 @@ def login_page():
     context = {"form": form}
     return render_template('user-login.html', context=context)
 
+######## user sign up page 
 @webapp.route("/sign-up/", methods=['GET', 'POST'])
 def register_page():
     if current_user.is_authenticated:
@@ -513,6 +584,7 @@ def register_page():
     context = {"form": form}
     return render_template('user-register.html', context=context)
 
+######## user logout redirect 
 @webapp.route("/logout/", methods=['GET', 'POST'])
 @login_required
 def logout():
@@ -523,10 +595,6 @@ def logout():
     logout_user()
     flash('Log Out Successful.', 'success')
     return redirect(url_for('webapp.login_page'))
-
-@webapp.route("/music/") #released music
-def music_page():
-    return "<p>Hello, World!</p>"
 
 ####### API functions
 

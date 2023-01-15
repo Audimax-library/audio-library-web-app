@@ -76,7 +76,6 @@ class Chapter(db.Model):
   def elapsed_time(self):
     return (self.updated.strftime("%d/%m/%Y"))
 
-
 class Library(db.Model):
   book_id = db.Column(db.Integer, db.ForeignKey('book.id'),nullable=False, primary_key=True)
   user_email = db.Column(db.String(200), db.ForeignKey(User.email),nullable=False, primary_key=True)
@@ -84,27 +83,26 @@ class Library(db.Model):
   def __repr__(self):
     return f'Library-{self.book_id}-{self.user_email}'
 
-""" class Author(db.Model):
-  id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-  name = db.Column(db.String(200), nullable=False, unique=True)
-  created = db.Column(db.DateTime, server_default=db.func.now())
-  updated = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
-  books = db.relationship('Book', backref="author")
-
-  def __repr__(self):
-    return f'{self.name}' """
-
 class Rating(db.Model):
-  rating_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-  book_id = db.Column(db.Integer, db.ForeignKey(Book.id), nullable=False)
-  user_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=False)
-  score = db.Column(db.Integer, nullable=False)
-
-  users = db.relationship(User, backref=db.backref("rating", order_by=rating_id))
-  books = db.relationship(Book, backref=db.backref("rating", order_by=rating_id))
+  book_id = db.Column(db.Integer, db.ForeignKey('book.id'),nullable=False, primary_key=True)
+  user_email = db.Column(db.String(200), db.ForeignKey(User.email),nullable=False, primary_key=True)
+  rate_score = db.Column(db.Integer, nullable=False)
+  created_date = db.Column(db.DateTime, server_default=db.func.now())
+  updated = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
 
   def __repr__(self):
-    return f'Movie{self.book_id}-User{self.user_id}-score{self.score}'
+    return f'Rating-{self.book_id}-{self.user_email}-score{self.rate_score}'
+
+class ReportBook(db.Model):
+  id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+  user_email = db.Column(db.String(200), db.ForeignKey(User.email),nullable=False)
+  title = db.Column(db.String(100), nullable=False, unique=False)
+  subject = db.Column(db.String(1000), nullable=True, unique=False)
+  is_read = db.Column(db.Boolean, unique=False, default=0)
+  created_date = db.Column(db.DateTime, server_default=db.func.now())
+
+  def __repr__(self):
+    return f'Report-{self.id}-{self.title}-{self.user_email}'
 
 class NewsLetterSubscription(db.Model):
     subscription_id = db.Column(db.Integer, autoincrement=True, nullable=False, unique=True, primary_key=True)
@@ -122,8 +120,10 @@ db.create_all()
 
 memberlvl = Userlevel(id=0, title="member")
 adminlvl = Userlevel(id=1, title="admin")
+
 db.session.add(memberlvl)
 db.session.add(adminlvl)
+
 objects = [
     Genre(title="Action and Adventure"),
     Genre(title="Classics"),
@@ -149,3 +149,23 @@ objects = [
 ]
 db.session.bulk_save_objects(objects)
 db.session.commit()
+
+##### Optional
+user1 = User(username="Dulan Pabasara", email="dulan9595531@gmail.com", password="$2b$12$Ay2Ln/FGK5lfD.DSrT3/7uIWUUudC8KFSrB5FSoeVEDafMx/BnTtW")
+book1 = Book(
+  title='Oliver Twist', 
+  alt_title="The Parish Boy's Progress", 
+  cover_img="689698d5-ac26-4e76-a97b-a0d7d9cece7a-new_title_cover.png", 
+  synopsis="Oliver Twist is a young orphan. His life in the workhouse is lonely and sad. Oliver becomes an apprentice for an undertaker but runs away after he gets into a fight with another apprentice. When Oliver arrives in London, he meets Jack, also known as the Artful Dodger, who offers him a place to stay.", 
+  status="Completed", 
+  language="English", 
+  author_name="Charles Dickens", 
+  draft_user_email="dulan9595531@gmail.com",
+  is_approved=1)
+genre_obj = db.session.query(Genre).filter_by(id=2).first()
+book1.genres.append(genre_obj)
+db.session.add(user1)
+db.session.commit()
+db.session.add(book1)
+db.session.commit()
+######
