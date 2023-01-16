@@ -552,7 +552,7 @@ def login_page():
                     login_user(user, remember=True, duration=datetime.timedelta(days=30))
                 else:
                     login_user(user)
-                flash('Login Successful.', 'success')
+                flash(f'Welcome back, {user.username}.', 'success')
                 return redirect(url_for('webapp.home_page'))
             else:
                 flash('Invalid Password.', 'error')
@@ -583,6 +583,44 @@ def register_page():
 
     context = {"form": form}
     return render_template('user-register.html', context=context)
+
+#### google OAuth
+@webapp.route('/oauth')
+def oauth_login():
+    GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
+    GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
+     
+    CONF_URL = 'https://accounts.google.com/.well-known/openid-configuration'
+    oauth.register(
+        name='google',
+        client_id=GOOGLE_CLIENT_ID,
+        client_secret=GOOGLE_CLIENT_SECRET,
+        server_metadata_url=CONF_URL,
+        client_kwargs={
+            'scope': 'openid email profile'
+        }
+    )
+     
+    # Redirect to google_auth function
+    redirect_uri = url_for('webapp.authorize', _external=True)
+    return oauth.google.authorize_redirect(redirect_uri)
+
+
+@webapp.route('/authorize')
+def authorize():
+    token = oauth.google.authorize_access_token()
+    user = oauth.google.userinfo()
+    session['profile'] = user
+    userQuery = User.query.filter_by(email=user['email']).first()
+    if(userQuery):
+        login_user(userQuery, remember=True, duration=datetime.timedelta(days=7))
+        flash(f'Welcome back, {userQuery.username}.', 'success')
+        if userQuery.userlevel == 0:
+            return redirect(url_for('webapp.home_page'))
+        elif userQuery.userlevel in [1, 2]:
+            return redirect(url_for('admin.dashboard_page'))
+    flash('This email is not a registered email. Please sign up first to use SSO.', 'error')
+    return redirect(url_for('webapp.login_page'))
 
 ######## user logout redirect 
 @webapp.route("/logout/", methods=['GET', 'POST'])

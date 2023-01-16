@@ -19,16 +19,14 @@
     <div class="swiper">
       <div class="swiper-wrapper">
         {% for item in context.recent_books%}
-        <a href="{{url_for('webapp.book_page', id=item.id)}}">
-          <div class="swiper-slide">
-            <div class="grid grid-flow-col grid-cols-4 rounded bg-BGColorLight latest-card">
-              <div>
-                <img src="{{ url_for('webapp.static', filename='uploads/'+item.cover_img) }}" class=" rounded-l w-full h-full object-cover" alt="" loading="lazy">
-              </div>
-              <div class="col-start-2 col-span-3 p-4 text-left">
-                <h1 class="font-base font-bold truncate">{{item.title}}</h1>
-                <p class="text-base text-clip">{{item.synopsis[:174]}}...</p>
-              </div>
+        <a class="swiper-slide" href="{{url_for('webapp.book_page', id=item.id)}}">
+          <div class="grid grid-flow-col grid-cols-4 rounded bg-BGColorLight latest-card">
+            <div>
+              <img src="{{ url_for('webapp.static', filename='uploads/'+item.cover_img) }}" class=" rounded-l w-full h-full object-cover" alt="" loading="lazy">
+            </div>
+            <div class="col-start-2 col-span-3 p-4 text-left">
+              <h1 class="font-base font-bold truncate">{{item.title}}</h1>
+              <p class="text-base text-clip">{{item.synopsis[:174]}}...</p>
             </div>
           </div>
         </a>

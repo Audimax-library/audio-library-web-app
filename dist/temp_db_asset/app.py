@@ -162,10 +162,36 @@ book1 = Book(
   author_name="Charles Dickens", 
   draft_user_email="dulan9595531@gmail.com",
   is_approved=1)
-genre_obj = db.session.query(Genre).filter_by(id=2).first()
-book1.genres.append(genre_obj)
+book2 = Book(
+  title='A Tale of Two Cities', 
+  alt_title="A Tale of Two Cities (1997)", 
+  cover_img="689698d5-ac26-4e76-a97b-a0d7d9cece7a-new_title_cover.png", 
+  synopsis="A Tale of Two Cities is a historical novel published in 1859 by Charles Dickens, set in London and Paris before and during the French Revolution.", 
+  status="Completed", 
+  language="English", 
+  author_name="Charles Dickens", 
+  draft_user_email="dulan9595531@gmail.com",
+  is_approved=1)
+book3 = Book(
+  title='A Study in Scarlet', 
+  alt_title="A Study in Scarlet (1987)", 
+  cover_img="689698d5-ac26-4e76-a97b-a0d7d9cece7a-new_title_cover.png", 
+  synopsis="A Study in Scarlet is an 1887 detective novel by British writer Arthur Conan Doyle. The story marks the first appearance of Sherlock Holmes and Dr. Watson, who would become the most famous detective duo in literature.", 
+  status="Completed", 
+  language="English", 
+  author_name="Arthur Conan Doyle", 
+  draft_user_email="dulan9595531@gmail.com",
+  is_approved=1)
+genre_obj_classics = db.session.query(Genre).filter_by(id=2).first()
+genre_obj_mystery = db.session.query(Genre).filter_by(id=4).first()
+book1.genres.append(genre_obj_classics)
+book2.genres.append(genre_obj_classics)
+book3.genres.append(genre_obj_classics)
+book3.genres.append(genre_obj_mystery)
 db.session.add(user1)
 db.session.commit()
 db.session.add(book1)
+db.session.add(book2)
+db.session.add(book3)
 db.session.commit()
 ######
