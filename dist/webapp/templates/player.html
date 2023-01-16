@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}Now Listening... | Audimax{% endblock %}
+{% block title %}Now Listening... | Audimax Audio Player{% endblock %}
 {% block content %}
 
 <div class="container mx-auto mb-16">
@@ -57,7 +57,7 @@
     </div>
     <ul id="audio-playlist" class="text-start ml-4">
       {% for chapter in context.book_details.chapters %}
-      <li style="cursor:pointer;" title="Chapter {{chapter.display_number}}" index="{{loop.index}}" path="{{ url_for('webapp.static', filename='uploads/chapters/'+chapter.audio_url) }}">
+      <li style="cursor:pointer;" title="Chapter {{chapter.display_number}}" data-chapter-id="{{chapter.id}}" index="{{loop.index}}" path="{{ url_for('webapp.static', filename='uploads/chapters/'+chapter.audio_url) }}">
         ▶ Chapter {{chapter.display_number}}
       </li>
       {% endfor %}
@@ -137,6 +137,7 @@
 
   function init(){
     audio_source.src = playlist.children[current_song].getAttribute("path");
+    var playingChapterID = playlist.children[current_song].getAttribute("data-chapter-id");
     audio_source.volume = default_volume;
     if(playlist.children[current_song+1] === undefined){
       $(".next-track").html("End of Playlist");
@@ -145,6 +146,9 @@
       $(".next-track").html(playlist.children[current_song+1].getAttribute("title"));
       $("#chapter-name").html(playlist.children[current_song].getAttribute("title"));
     }
+    {% if current_user.is_authenticated %}
+    addTohistory(parseInt(playingChapterID))
+    {% endif %}
   }
   init()
   
@@ -296,7 +300,20 @@
     }
   });
 
-
+  function addTohistory(chapterID){
+    $.ajax({
+      type: 'POST',
+      url: "{{ url_for('webapp.add_history') }}",
+      data: JSON.stringify({'chapter_id': chapterID}),
+      contentType: "application/json",
+      success: function(response) {
+        console.log("Playback history updated.");
+      },
+      fail: function(xhr, status, error) {
+        console.log("Something went wrong with updating the history. Please try again later.");
+      }
+    });
+  }
 </script>
 
 {% endblock %}

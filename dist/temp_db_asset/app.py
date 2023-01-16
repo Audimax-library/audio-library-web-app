@@ -105,12 +105,21 @@ class ReportBook(db.Model):
     return f'Report-{self.id}-{self.title}-{self.user_email}'
 
 class NewsLetterSubscription(db.Model):
-    subscription_id = db.Column(db.Integer, autoincrement=True, nullable=False, unique=True, primary_key=True)
-    email = db.Column(db.String(80), nullable=False, unique=True, primary_key=True)
-    created_date = db.Column(db.DateTime, server_default=db.func.now())
+  subscription_id = db.Column(db.Integer, autoincrement=True, nullable=False, unique=True, primary_key=True)
+  email = db.Column(db.String(80), nullable=False, unique=True, primary_key=True)
+  created_date = db.Column(db.DateTime, server_default=db.func.now())
 
-    def __repr__(self):
-        return f'MailID-{self.subscription_id}'
+  def __repr__(self):
+    return f'MailID-{self.subscription_id}'
+
+class ListenHistory(db.Model):
+  user_email = db.Column(db.String(200), db.ForeignKey(User.email), nullable=False, primary_key=True)
+  chapter_id = db.Column(db.Integer, db.ForeignKey(Chapter.id), nullable=False, primary_key=True)
+  first_heard_on = db.Column(db.DateTime, server_default=db.func.now())
+  last_heard_on = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
+
+  def __repr__(self):
+    return f'History-{self.user_email}-{self.chapter_id}-{self.last_heard_on}'
 
 
 db.drop_all()

@@ -11,7 +11,7 @@ import datetime, json, re, os, threading, phonetics, requests
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import desc, or_, func
 from sqlalchemy.dialects.mysql import insert #only works with mysql
-from .models import Genre, Book, Chapter, NewsLetterSubscription, Library, Rating, ReportBook
+from .models import Genre, Book, Chapter, NewsLetterSubscription, Library, Rating, ReportBook, ListenHistory
 from .send_email import send_mail
 from urllib.parse import parse_qs
 
@@ -477,7 +477,7 @@ def add_to_library():
         else:
             print('Invalid Request: You have to be logged in to add books to library!')
             flash('You have to be logged in to add books to library!', 'error')
-            return jsonify({'status': 'success', 'value':'redirect'})
+            return jsonify({'status': 'unauthorized', 'value':'redirect'})
 
 
 ######## Rate Book
@@ -507,7 +507,7 @@ def rate_book():
         else:
             print('Invalid Request: You have to be logged in to rate books!')
             flash('You have to be logged in to rate books!', 'error')
-            return jsonify({'status': 'success', 'value':'redirect'})
+            return jsonify({'status': 'unauthorized', 'value':'redirect'})
 
 ######## Report Book
 @webapp.route("/book/report/<int:id>/", methods=['POST'])
@@ -536,6 +536,33 @@ def report_book(id):
             flash('User has to be logged in to report issues.', 'error')
             return redirect(url_for('webapp.login_page'))
     return redirect(url_for('webapp.book_page', id=id))
+
+######## add to playback history
+@webapp.route("/book/history/", methods=['POST'])
+def add_history():
+    if request.method == 'POST':
+        if current_user.is_authenticated:
+            data_chapter_id = request.get_json()['chapter_id']
+            try:
+                tempHistory = ListenHistory(
+                    user_email=str(current_user), 
+                    chapter_id=int(data_chapter_id)
+                )
+                db.session.add(tempHistory)
+                db.session.commit()
+                return jsonify({'status': 'success', 'value':'added'})
+            except IntegrityError:
+                db.session.rollback()
+                historyRec = db.session.query(ListenHistory).filter_by(user_email=str(current_user),chapter_id=int(data_chapter_id)).first()
+                historyRec.last_heard_on = db.func.now()
+                db.session.commit()
+                return jsonify({'status': 'success', 'value':'updated'})
+            except:
+                abort(400, 'Error: Insert DB error.')
+        else:
+            print('Invalid Request: You have to be logged in to keep playback history!')
+            flash('You have to be logged in to keep playback history!', 'error')
+            return jsonify({'status': 'unauthorized', 'value':'redirect'})
 
 ######## user login page 
 @webapp.route("/login/", methods=['GET', 'POST'])
