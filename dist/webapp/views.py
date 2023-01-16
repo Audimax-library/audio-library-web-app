@@ -7,7 +7,7 @@ from flask_login import login_required, login_user, logout_user, current_user
 from admin import db, login_manager, oauth, discord, bcrypt
 from admin.forms import LoginForm, RegistrationForm
 from admin.models import User
-import datetime, json, re, os, threading, phonetics
+import datetime, json, re, os, threading, phonetics, requests
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import desc, or_, func
 from sqlalchemy.dialects.mysql import insert #only works with mysql
@@ -21,6 +21,7 @@ UPLOAD_FOLDER = "static/uploads/"
 CHAPTER_UPLOAD_FOLDER = "static/uploads/chapters/"
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 ALLOWED_AUDIO_EXTENSIONS = {'mp3', 'wav'}
+RECAPTCHA_VERIFY_URL='https://www.google.com/recaptcha/api/siteverify'
 login_manager.login_view = "webapp.login_page"
 status_types = ['Ongoing', 'Completed', 'Hiatus', 'Discontinued']
 lang_types = ['Sinhala', 'English']
@@ -356,6 +357,7 @@ def book_page(id):
         'book_details': book_details,
         'library_total': library_count,
         'rating_avg': rating_avg,
+        'site_key': os.getenv('RECAPTCHA_SITE_KEY'),
         }
     if current_user.is_authenticated:
         library_data = Library.query.filter_by(book_id=id,user_email=str(current_user)).first()
@@ -511,7 +513,9 @@ def rate_book():
 @webapp.route("/book/report/<int:id>/", methods=['POST'])
 def report_book(id):
     if request.method == 'POST':
-        if current_user.is_authenticated:
+        secret_response = request.form['g-recaptcha-response']
+        verify_response = requests.post(url=f'{RECAPTCHA_VERIFY_URL}?secret={os.getenv("RECAPTCHA_SECRET_KEY")}&response={secret_response}').json()
+        if current_user.is_authenticated and verify_response['success'] == True:
             try:
                 user_email = request.form['report-email']
                 report_title = request.form['report-title']
