@@ -1,6 +1,7 @@
 from flask import Blueprint,render_template, redirect, url_for, session
 from .forms import RegistrationForm, LoginForm
 from .models import User 
+from .decorators import is_allowed
 from admin import db, login_manager, oauth, discord, bcrypt
 from flask_login import login_required, login_user, logout_user, current_user
 import os
@@ -59,6 +60,7 @@ def logout():
 
 @admin.route('/dashboard', methods=['GET', 'POST'])
 @login_required
+@is_allowed(current_user, allowed_roles=[1,2])
 def dashboard_page():
     context = {'user':current_user}
     return render_template('dashboard.html', context=context)
@@ -93,7 +95,10 @@ def authorize():
     userQuery = User.query.filter_by(email=user['email']).first()
     if(userQuery):
         login_user(userQuery)
-        return redirect(url_for('admin.dashboard_page'))
+        if userQuery.userlevel == 0:
+            return redirect(url_for('webapp.home_page'))
+        elif userQuery.userlevel in [1, 2]:
+            return redirect(url_for('admin.dashboard_page'))
     return redirect(url_for('admin.home_page'))  # make the session permanant so it keeps existing after broweser gets closed
 
 #### Discord OAuth
