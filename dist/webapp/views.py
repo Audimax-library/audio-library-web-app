@@ -7,13 +7,13 @@ from flask_login import login_required, login_user, logout_user, current_user
 from admin import db, login_manager, oauth, discord, bcrypt
 from admin.forms import LoginForm, RegistrationForm
 from admin.models import User
-import datetime, json, re, os, threading, phonetics, requests
+import datetime, json, re, os, threading, phonetics, requests, random
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import desc, or_, func
 from sqlalchemy.dialects.mysql import insert #only works with mysql
 from .models import Genre, Book, Chapter, NewsLetterSubscription, Library, Rating, ReportBook, ListenHistory
 from .send_email import send_mail
-from urllib.parse import parse_qs
+from urllib.parse import parse_qs, urlparse
 
 
 webapp = Blueprint('webapp', __name__, static_folder="static", static_url_path='/webapp/static' , template_folder='templates')
@@ -81,7 +81,11 @@ def filter_books(obj, status_list, genre_list):
 @webapp.route("/home/", methods=['GET', 'POST'])
 def home_page():
     recent_books = Book.query.filter_by(is_approved=1).order_by(desc(Book.created)).limit(8).all()
-    context = {'recent_books':recent_books}
+    recent_chapters = Chapter.query.order_by(desc(Chapter.created)).limit(20).all()
+    context = {
+        'recent_books':recent_books,
+        'recent_chapters':recent_chapters,
+    }
     if current_user.is_authenticated:
         context['user_initial'] = str(current_user)[0:2].upper()
         #user = User.query.filter_by(email=str(current_user)).first()
@@ -340,6 +344,17 @@ def titles_page():
         context['user_name'] = current_user.username
     return render_template('search-titles.html', context=context)
 
+
+######## random title
+@webapp.route("/titles/random/", methods=['GET', 'POST'])
+def random_title():
+    book_details = Book.query.all()
+    if(book_details != []):
+        random_book = random.choice(book_details)
+        return redirect(url_for('webapp.book_page', id=random_book.id))
+    else:
+        flash("There's no books to get a random book title.", 'error')
+        return redirect(url_for('webapp.home_page'))
 
 ######## view title
 @webapp.route("/book/<int:id>/", methods=['GET', 'POST'])
@@ -649,7 +664,7 @@ def authorize():
         if userQuery.userlevel == 0:
             return redirect(url_for('webapp.home_page'))
         elif userQuery.userlevel in [1, 2]:
-            return redirect(url_for('admin.dashboard_page'))
+            return redirect(url_for('admin.home_page'))
     flash('This email is not a registered email. Please sign up first to use SSO.', 'error')
     return redirect(url_for('webapp.login_page'))
 
@@ -699,6 +714,7 @@ def book_api():
 def book_details_api(book_id):
     book_details = Book.query.get(book_id)
     #print(book_details)
+    #print(request.remote_addr)
     if not book_details is None:
         dist_sub_item = []
         for chapter in book_details.chapters:

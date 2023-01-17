@@ -67,20 +67,20 @@
             </a>
           </div>
           <div class="px-4 pt-2 flex flex-col flex-shrink-0">
-            <div class="px-2 py-1 rounded-md font-bold flex">
+            <!-- <div class="px-2 py-1 rounded-md font-bold flex">
               <div class="flex-none"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-currentColor icon"><path d="m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></div> 
               <div class="mx-2 flex-none">Follows</div>
-            </div>
+            </div> -->
             <a href="/">
               <div class="px-2 py-1 rounded-md hover:bg-BGColor hover:text-white transition-colors">
                 <div class="mx-3 flex-none">Library</div>
               </div>
             </a>
-            <a href="/">
+            <!-- <a href="/">
               <div class="px-2 py-1 rounded-md hover:bg-BGColor hover:text-white transition-colors">
                 <div class="mx-3 flex-none">Lists</div>
               </div>
-            </a>
+            </a> -->
             <a href="/">
               <div class="px-2 py-1 rounded-md hover:bg-BGColor hover:text-white transition-colors">
                 <div class="mx-3 flex-none">History</div>
@@ -98,17 +98,17 @@
                 <div class="mx-3 flex-none">Add New Title</div>
               </div>
             </a>
-            <a href="/">
+            <a href="{{url_for('webapp.titles_page')}}">
               <div class="px-2 py-1 rounded-md hover:bg-BGColor hover:text-white transition-colors">
                 <div class="mx-3 flex-none">Advanced Search</div>
               </div>
             </a>
-            <a href="/">
+            <!-- <a href="/">
               <div class="px-2 py-1 rounded-md hover:bg-BGColor hover:text-white transition-colors">
                 <div class="mx-3 flex-none">Recently Added</div>
               </div>
-            </a>
-            <a href="/">
+            </a> -->
+            <a href="{{url_for('webapp.random_title')}}">
               <div class="px-2 py-1 rounded-md hover:bg-BGColor hover:text-white transition-colors">
                 <div class="mx-3 flex-none">Random</div>
               </div>

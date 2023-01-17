@@ -3,7 +3,7 @@ from flask_login import UserMixin
 
 class User(db.Model, UserMixin):
   id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-  userlevel = db.Column(db.Integer, db.ForeignKey('userlevel.id'),nullable=False, default=0)
+  userlevel = db.Column(db.Integer, db.ForeignKey('userlevel.id', onupdate='CASCADE', ondelete='CASCADE'),nullable=False, default=0)
   username = db.Column(db.String(200), nullable=False)
   email = db.Column(db.String(80), nullable=False, unique=True)
   password = db.Column(db.String(64), nullable=False)

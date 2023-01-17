@@ -1,7 +1,6 @@
-from flask import Blueprint,render_template, redirect, url_for, session
+from flask import Blueprint,render_template, redirect, url_for, session, flash
 from .forms import RegistrationForm, LoginForm
-from .models import User 
-from .decorators import is_allowed
+from .models import User
 from admin import db, login_manager, oauth, discord, bcrypt
 from flask_login import login_required, login_user, logout_user, current_user
 import os
@@ -9,6 +8,11 @@ import os
 admin = Blueprint('admin', __name__, static_folder="static", static_url_path="/admin/static" , template_folder='templates')
 login_manager.login_view = "admin.home_page"
 
+def is_allowed(user, allowed_roles=[]):
+    if not(user.userlevel in allowed_roles):
+        flash('Invalid URL.', 'error')
+        return False
+    return True
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -32,7 +36,7 @@ def home_page():
     context = {"form": form}
     return render_template('login.html', context=context)
 
-@admin.route("/register", methods=['GET', 'POST'])
+@admin.route("/register/", methods=['GET', 'POST'])
 def register_page():
     if current_user.is_authenticated:
         return redirect(url_for('admin.dashboard_page'))
@@ -48,7 +52,7 @@ def register_page():
     context = {"form": form}
     return render_template('register.html', context=context)
 
-@admin.route("/logout", methods=['GET', 'POST'])
+@admin.route("/logout/", methods=['GET', 'POST'])
 @login_required
 def logout():
     discord.revoke()
@@ -58,10 +62,11 @@ def logout():
     logout_user()
     return redirect(url_for('admin.home_page'))
 
-@admin.route('/dashboard', methods=['GET', 'POST'])
+@admin.route('/dashboard/', methods=['GET', 'POST'])
 @login_required
-@is_allowed(current_user, allowed_roles=[1,2])
 def dashboard_page():
+    if not(is_allowed(current_user, allowed_roles=[1,2])):
+        return redirect(url_for('webapp.home_page'))
     context = {'user':current_user}
     return render_template('dashboard.html', context=context)
 
