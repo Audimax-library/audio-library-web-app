@@ -14,6 +14,7 @@ from sqlalchemy.dialects.mysql import insert #only works with mysql
 from .models import Genre, Book, Chapter, NewsLetterSubscription, Library, Rating, ReportBook, ListenHistory
 from .send_email import send_mail
 from urllib.parse import parse_qs, urlparse
+from admin.views import is_allowed
 
 
 webapp = Blueprint('webapp', __name__, static_folder="static", static_url_path='/webapp/static' , template_folder='templates')
@@ -171,6 +172,8 @@ def add_title_page():
 ######## update titles
 @webapp.route("/book/<int:id>/edit/", methods=['GET', 'POST'])
 def update_title_page(id):
+    if not(is_allowed(current_user, allowed_roles=[1,2])):
+        return redirect(url_for('webapp.home_page'))
     if request.method == 'POST':
         current_details = db.session.query(Book).filter_by(id=id)
         update_title = request.form['new-title']
@@ -196,7 +199,8 @@ def update_title_page(id):
                         Book.synopsis: update_title_synopsis,
                         Book.status: update_title_status, 
                         Book.language: update_title_lang, 
-                        Book.author_name: update_title_author
+                        Book.author_name: update_title_author,
+                        Book.is_approved: 1
                         })
                     db.session.commit()
                     current_details = db.session.query(Book).filter_by(id=id).first()
@@ -228,7 +232,8 @@ def update_title_page(id):
                     Book.synopsis: update_title_synopsis,
                     Book.status: update_title_status, 
                     Book.language: update_title_lang, 
-                    Book.author_name: update_title_author
+                    Book.author_name: update_title_author,
+                    Book.is_approved: 1
                     })
                 db.session.commit()
                 current_details = db.session.query(Book).filter_by(id=id).first()
@@ -360,6 +365,9 @@ def random_title():
 @webapp.route("/book/<int:id>/", methods=['GET', 'POST'])
 def book_page(id):
     book_details = Book.query.get_or_404(id)
+    if book_details.is_approved == 0:
+        flash("You are not authorized to view this page.", 'error')
+        return redirect(url_for('webapp.home_page'))
     library_count = Library.query.filter_by(book_id=id).count()
     rating_total = db.session.query(
         func.sum(Rating.rate_score).label('rating_sum'),
@@ -661,10 +669,7 @@ def authorize():
     if(userQuery):
         login_user(userQuery, remember=True, duration=datetime.timedelta(days=7))
         flash(f'Welcome back, {userQuery.username}.', 'success')
-        if userQuery.userlevel == 0:
-            return redirect(url_for('webapp.home_page'))
-        elif userQuery.userlevel in [1, 2]:
-            return redirect(url_for('admin.home_page'))
+        return redirect(url_for('webapp.home_page'))
     flash('This email is not a registered email. Please sign up first to use SSO.', 'error')
     return redirect(url_for('webapp.login_page'))
 

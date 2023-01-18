@@ -1,0 +1,109 @@
+{% extends 'dashboard_base.html' %}
+{% block title %}Manage Books & Chapters | Audimax{% endblock %}
+{% block style %}
+<style>
+  
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5" style="padding-bottom: 5rem;">
+  <h2 class="mb-4">Manage Books & Chapters</h2>
+  {% if context.draft_book_count != 0 %}
+  <div class="alert alert-info" role="alert">
+    There are {{context.draft_book_count}} unreviewed title drafts. <a href="{{url_for('admin.drafts_page')}}" class="alert-link">Take a look</a>.
+  </div>
+  {% endif %}
+  <div class="col-12 col-xl-4 col-lg-4 col-md-6 col-sm-10">
+    <div class="input-group mb-3">
+      <span class="input-group-text" id="search-addon">Search</span>
+      <input type="text" id="search-input" class="form-control" aria-label="Search" aria-describedby="search-addon"">
+    </div>
+  </div>
+  <div class="book-container">
+    {% for draft in context.approved_books %}
+    <div class="row justify-content-center border border-2 rounded border-dark p-2 my-2 bg-light book-item">
+      <div class="col-md-4 col-sm-12 text-center">
+        <img src="{{ url_for('webapp.static', filename='uploads/'+draft.cover_img )}}" alt="" style="height: 300px;">
+      </div>
+      <div class="col-md-6 col-sm-12 p-2">
+        <ul>
+          <li><b>Title:</b> {{draft.title}}</li>
+          <li><b>Alt Title(s):</b> {{draft.alt_title}}</li>
+          <li><b>Synopsis:</b> {{draft.synopsis}}</li>
+          <li><b>Status:</b> {{draft.status}}</li>
+          <li><b>Genres:</b> 
+            {% for genre in draft.genres %}
+            <span class="badge bg-secondary">{{genre.title}}</span>
+            {% endfor %}
+          </li>
+          <li><b>Language:</b> {{draft.language}}</li>
+          <li><b>Created:</b> {{draft.created}}</li>
+          <li><b>Author:</b> {{draft.author_name}}</li>
+          <li><b>Submitted by:</b> {{draft.draft_user_email}}</li>
+        </ul>
+        <div class="collapse my-2" id="collapse-book-{{draft.id}}">
+          <div class="card card-body">
+            <div class="row">
+              {% if draft.chapters %}
+              {% for chapter in draft.chapters %}
+                <div class="col-auto border border-2 py-2 rounded">
+                  <a href="{{url_for('webapp.view_chapter', book_id=draft.id, chapter_id=chapter.id)}}" target="_blank">Chapter - {{chapter.display_number}} <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgb(40, 40, 40);"><path d="m13 3 3.293 3.293-7 7 1.414 1.414 7-7L21 11V3z"></path><path d="M19 19H5V5h7l-2-2H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2v-5l-2-2v7z"></path></svg></a>
+                  <a href="{{url_for('admin.delete_page', type='Chapter', id=chapter.id)}}" class="btn btn-danger">Delete</a>
+                  <p class="text-muted m-0">{{chapter.elapsed_time}}</p>
+                </div>
+              {% endfor %}
+              {% else %}
+                <p class="text-muted fst-italic">No Chapters...</p>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-success" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-book-{{draft.id}}" aria-expanded="false" aria-controls="collapse-book-{{draft.id}}">Chapters</button>
+        <a href="{{url_for('webapp.update_title_page', id=draft.id)}}" class="btn btn-warning" target="_blank">Edit <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgb(0, 0, 0);"><path d="m13 3 3.293 3.293-7 7 1.414 1.414 7-7L21 11V3z"></path><path d="M19 19H5V5h7l-2-2H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2v-5l-2-2v7z"></path></svg></a>
+        <select class="form-select w-auto d-inline" id="change-state" data-book-id="{{draft.id}}">
+          <option value="1" selected>Approved</option>
+          <option value="0">Pending</option>
+        </select>
+        <a href="{{url_for('admin.delete_page', type='Title', id=draft.id)}}" class="btn btn-danger">Delete</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  $("#search-input").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    $(".book-container .book-item ul").filter(function() {
+      $(this).parent().parent().toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+
+  $('#change-state').change(function() {
+    var change_val = $('#change-state').val();
+    var book_id = $('#change-state').data('bookId');
+    if (confirm("This will will add this book back to the drafts. Are you sure?") == true) {
+      $.ajax({
+        type: "POST",
+        url: "{{url_for('admin.manage_books_page')}}",
+        data: JSON.stringify({ 'change_val': change_val, 'book_id': book_id}),
+        contentType: "application/json",
+        success: function(response) {
+          if(response.value == 'updated'){
+            location.reload();
+          }
+        }, 
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          console.log("Internal Server Error: 500");
+        }
+      });
+      console.log("good");
+    } else{
+      $('#change-state').val(1);
+    }
+  });
+</script>
+{% endblock %}

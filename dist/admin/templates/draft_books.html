@@ -1,0 +1,51 @@
+{% extends 'dashboard_base.html' %}
+{% block title %}Title Drafts | Audimax{% endblock %}
+{% block style %}
+<style>
+  
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5" style="padding-bottom: 5rem;">
+  <h2>User Submitted Drafts</h2>
+  <div class="draft-container">
+    {% if context.draft_books %}
+    {% for draft in context.draft_books %}
+    <div class="row justify-content-center border border-2 rounded border-dark p-2 my-2 bg-light">
+      <div class="col-md-4 col-sm-12 text-center">
+        <img src="{{ url_for('webapp.static', filename='uploads/'+draft.cover_img )}}" alt="" style="height: 300px;">
+      </div>
+      <div class="col-md-6 col-sm-12 p-2">
+        <ul>
+          <li><b>Title:</b> {{draft.title}}</li>
+          <li><b>Alt Title(s):</b> {{draft.alt_title}}</li>
+          <li><b>Synopsis:</b> {{draft.synopsis}}</li>
+          <li><b>Status:</b> {{draft.status}}</li>
+          <li><b>Genres:</b> 
+            {% for genre in draft.genres %}
+            <span class="badge bg-secondary">{{genre.title}}</span>
+            {% endfor %}
+          </li>
+          <li><b>Language:</b> {{draft.language}}</li>
+          <li><b>Created:</b> {{draft.created}}</li>
+          <li><b>Author:</b> {{draft.author_name}}</li>
+          <li><b>Submitted by:</b> {{draft.draft_user_email}}</li>
+        </ul>
+        <form class="d-inline" action="" method="post">
+          <input type="hidden" name="book_id" value="{{draft.id}}">
+          <button type="submit" class="btn btn-success">Approve</button>
+        </form>
+        <a href="{{url_for('webapp.update_title_page', id=draft.id)}}" class="btn btn-warning" target="_blank">Edit <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgb(0, 0, 0);"><path d="m13 3 3.293 3.293-7 7 1.414 1.414 7-7L21 11V3z"></path><path d="M19 19H5V5h7l-2-2H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2v-5l-2-2v7z"></path></svg></a>
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <h5 class="text-muted fst-italic">There are no draft titles to be reviewed...</h5>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}

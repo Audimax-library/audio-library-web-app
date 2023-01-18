@@ -1,8 +1,10 @@
-from flask import Blueprint,render_template, redirect, url_for, session, flash
+from flask import Blueprint,render_template, redirect, url_for, session, flash, request, jsonify
 from .forms import RegistrationForm, LoginForm
 from .models import User
+from webapp.models import Book, Chapter
 from admin import db, login_manager, oauth, discord, bcrypt
 from flask_login import login_required, login_user, logout_user, current_user
+from sqlalchemy import desc
 import os
 
 admin = Blueprint('admin', __name__, static_folder="static", static_url_path="/admin/static" , template_folder='templates')
@@ -69,6 +71,94 @@ def dashboard_page():
         return redirect(url_for('webapp.home_page'))
     context = {'user':current_user}
     return render_template('dashboard.html', context=context)
+
+####### Title Drafts page
+@admin.route('/dashboard/drafts/', methods=['GET', 'POST'])
+@login_required
+def drafts_page():
+    if not(is_allowed(current_user, allowed_roles=[1,2])):
+        return redirect(url_for('webapp.home_page'))
+    if request.method == 'POST':
+        try:
+            new_title = request.form['book_id']
+            current_details = db.session.query(Book).filter_by(id=new_title).first()
+            current_details.is_approved = 1
+            db.session.commit()
+            flash('Title Approved successfully.', 'success')
+            return redirect(url_for('admin.drafts_page'))
+        except:
+            flash('An error occured while updating the database.', 'error')
+            return redirect(url_for('admin.dashboard_page'))
+    draft_books = Book.query.filter_by(is_approved=0).order_by(desc(Book.created)).all()
+    context = {
+        'user':current_user,
+        'draft_books':draft_books,
+
+        }
+    return render_template('draft_books.html', context=context)
+
+####### Manage Books
+@admin.route('/dashboard/books/', methods=['GET', 'POST'])
+@login_required
+def manage_books_page():
+    if not(is_allowed(current_user, allowed_roles=[1,2])):
+        return redirect(url_for('webapp.home_page'))
+    if request.method == 'POST':
+        try:
+            data = request.get_json()
+            new_title = data['book_id']
+            new_state = data['change_val']
+            print(new_state)
+            print(new_title)
+            current_details = db.session.query(Book).filter_by(id=int(new_title)).first()
+            current_details.is_approved = int(new_state)
+            db.session.commit()
+            return jsonify({'status': 'success', 'value': 'updated'})
+        except:
+            return jsonify({'status': 'failed', 'value': 'failed'})
+    draft_books = Book.query.filter_by(is_approved=0).order_by(desc(Book.created)).count()
+    approved_books = Book.query.filter_by(is_approved=1).order_by(desc(Book.created)).all()
+    context = {
+        'user':current_user,
+        'draft_book_count':draft_books,
+        'approved_books':approved_books,
+        }
+    return render_template('manage_books.html', context=context)
+
+####### Delete Books & Chapters
+@admin.route('/dashboard/<string:type>/delete/<int:id>/', methods=['GET', 'POST'])
+@login_required
+def delete_page(type, id):
+    if not(is_allowed(current_user, allowed_roles=[1,2])):
+        return redirect(url_for('webapp.home_page'))
+    if request.method == 'POST':
+        item_type = request.form['item-type']
+        item_id = request.form['item-id']
+        if(item_type == "Title"):
+            try:
+                db.session.query(Book).filter_by(id=int(item_id)).delete()
+                db.session.commit()
+                flash('Title deleted successfully.', 'success')
+            except:
+                flash('An error occured while deleting from the database.', 'error')
+        elif(item_type == "Chapter"):
+            try:
+                db.session.query(Chapter).filter_by(id=int(item_id)).delete()
+                db.session.commit()
+                flash('Chapter deleted successfully.', 'success')
+            except:
+                flash('An error occured while deleting from the database.', 'error')
+        return redirect(url_for('admin.manage_books_page'))
+    if(type == "Title"):
+        item_details = db.session.query(Book).filter_by(id=int(id)).first()
+    elif(type == "Chapter"):
+        item_details = db.session.query(Chapter).filter_by(id=int(id)).first()
+    context = {
+        'user':current_user,
+        'type':type,
+        'item_details':item_details,
+        }
+    return render_template('delete_page.html', context=context)
 
 #### google OAuth
 @admin.route('/oauth')
