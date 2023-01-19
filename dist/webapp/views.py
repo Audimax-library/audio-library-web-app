@@ -1,18 +1,20 @@
 from flask import Blueprint,render_template, redirect, session, url_for, request, make_response, jsonify, abort, flash
 from .forms import UploadFileForm
 from werkzeug.utils import secure_filename
-import os
 from uuid import uuid4
 from webapp import db
 from flask_login import login_required, login_user, logout_user, current_user
 from admin import db, login_manager, oauth, discord, bcrypt
 from admin.forms import LoginForm, RegistrationForm
 from admin.models import User
-import datetime, json
+import datetime, json, re, os, threading, phonetics, requests, random
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import desc, or_
-from .models import Genre, Book, Chapter, NewsLetterSubscription
+from sqlalchemy import desc, or_, func
+from sqlalchemy.dialects.mysql import insert #only works with mysql
+from .models import Genre, Book, Chapter, NewsLetterSubscription, Library, Rating, ReportBook, ListenHistory
 from .send_email import send_mail
+from urllib.parse import parse_qs, urlparse
+from admin.views import is_allowed
 
 
 webapp = Blueprint('webapp', __name__, static_folder="static", static_url_path='/webapp/static' , template_folder='templates')
@@ -20,15 +22,10 @@ UPLOAD_FOLDER = "static/uploads/"
 CHAPTER_UPLOAD_FOLDER = "static/uploads/chapters/"
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 ALLOWED_AUDIO_EXTENSIONS = {'mp3', 'wav'}
+RECAPTCHA_VERIFY_URL='https://www.google.com/recaptcha/api/siteverify'
 login_manager.login_view = "webapp.login_page"
 status_types = ['Ongoing', 'Completed', 'Hiatus', 'Discontinued']
 lang_types = ['Sinhala', 'English']
-
-# load_dotenv()
-# email_sender = os.getenv('Gmail')
-# email_password = os.getenv('Gmail-Password')
-# subject = 'Audimax NewsLetter'
-# body ='subscribed to news Letter'
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -47,22 +44,78 @@ def allowed_file(filename, filetype):
 def book_obj_to_dist(obj):
     dist_list = []
     for item in obj:
-        dist_item = {"id": item.id, "title":item.title, "cover_img":item.cover_img, "status":item.status}
+        dist_item = {"id": item.id, "title":item.title, "cover_img":item.cover_img, "status":item.status, "no_chapters": len(item.chapters)}
         dist_list.append(dist_item)
     return dist_list
+
+def check_email(str_val):
+    pat = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+    if re.match(pat,str_val):
+        return True
+    else:
+        return False
+
+def filter_books(obj, status_list, genre_list):
+    return_book_list = []
+    for book in obj:
+        book_genre_list = book.genres
+        if status_list == []:
+           for genre in book_genre_list:
+                if(str(genre.id) in genre_list):
+                    return_book_list.append(book)
+                    break
+        else:
+            print(book_genre_list)
+            if(book.status in status_list):
+                if genre_list == []:
+                    return_book_list.append(book)
+                    continue
+                for genre in book_genre_list:
+                    if(str(genre.id) in genre_list):
+                        return_book_list.append(book)
+                        break
+    return return_book_list
+
 
 ######## home page
 @webapp.route("/", methods=['GET', 'POST'])
 @webapp.route("/home/", methods=['GET', 'POST'])
 def home_page():
     recent_books = Book.query.filter_by(is_approved=1).order_by(desc(Book.created)).limit(8).all()
-    print(recent_books)
-    context = {'recent_books':recent_books}
+    recent_chapters = Chapter.query.order_by(desc(Chapter.created)).limit(20).all()
+    context = {
+        'recent_books':recent_books,
+        'recent_chapters':recent_chapters,
+    }
     if current_user.is_authenticated:
         context['user_initial'] = str(current_user)[0:2].upper()
         #user = User.query.filter_by(email=str(current_user)).first()
         context['user_name'] = current_user.username
     return render_template('home.html', context=context)
+
+######## newsletter endpoint
+@webapp.route("/newsletter/", methods=['POST'])
+def newsletter_endpoint():
+    if request.method == 'POST':
+        news_letter_data = request.get_json()
+        user_email = news_letter_data['mail']
+        if check_email(user_email):
+            try:
+                tempNewsletter = NewsLetterSubscription(
+                    email=user_email
+                )
+                db.session.add(tempNewsletter)
+                db.session.commit()
+                thread = threading.Thread(target=send_mail, args=(user_email,))
+                thread.start()
+                return jsonify({'user_email': user_email,'exist': 'added'})
+            except IntegrityError:
+                db.session.rollback()
+                return jsonify({'user_email': user_email,'exist': 'exists'})
+            except:
+                return jsonify({'user_email': user_email,'exist': 'error'})
+        else:
+            return jsonify({'user_email': user_email,'exist': 'error'})
 
 ######## add new title
 @webapp.route("/add-titles/", methods=['GET', 'POST'])
@@ -119,6 +172,8 @@ def add_title_page():
 ######## update titles
 @webapp.route("/book/<int:id>/edit/", methods=['GET', 'POST'])
 def update_title_page(id):
+    if not(is_allowed(current_user, allowed_roles=[1,2])):
+        return redirect(url_for('webapp.home_page'))
     if request.method == 'POST':
         current_details = db.session.query(Book).filter_by(id=id)
         update_title = request.form['new-title']
@@ -144,7 +199,8 @@ def update_title_page(id):
                         Book.synopsis: update_title_synopsis,
                         Book.status: update_title_status, 
                         Book.language: update_title_lang, 
-                        Book.author_name: update_title_author
+                        Book.author_name: update_title_author,
+                        Book.is_approved: 1
                         })
                     db.session.commit()
                     current_details = db.session.query(Book).filter_by(id=id).first()
@@ -176,7 +232,8 @@ def update_title_page(id):
                     Book.synopsis: update_title_synopsis,
                     Book.status: update_title_status, 
                     Book.language: update_title_lang, 
-                    Book.author_name: update_title_author
+                    Book.author_name: update_title_author,
+                    Book.is_approved: 1
                     })
                 db.session.commit()
                 current_details = db.session.query(Book).filter_by(id=id).first()
@@ -227,7 +284,6 @@ def title_quick_search():
         Book.synopsis.ilike(f'%{search_by}%'), 
         Book.author_name.ilike(f'%{search_by}%'))).all()
     #results = db.session.query(Book).all()
-    print()
     context={
         "result": "success",
         "value": book_obj_to_dist(results),
@@ -237,38 +293,102 @@ def title_quick_search():
 ######## search titles
 @webapp.route("/titles/", methods=['GET', 'POST'])
 def titles_page():
-    query = request.args.get('q')
-    return f'<h1>{query}</h1>'
-
-######## newsletter data
-@webapp.route("/newsletter/", methods=['POST'])
-def newsletter_endpoint():
     if request.method == 'POST':
-        news_letter_data = request.get_json()
-        user_email = news_letter_data['mail']
-        print(user_email)
-        data_base_result = NewsLetterSubscription.query.filter_by(email = user_email).all()
-        print(data_base_result)
-        if data_base_result == []:
-            tempNewsletter = NewsLetterSubscription(
-                email=user_email
-            )
-            db.session.add(tempNewsletter)
-            db.session.commit()
-            send_mail(Reciver_email=user_email)
-            return jsonify({'user_email': user_email,'exist': False})
+        data = request.get_json()['data']
+        data_dict = parse_qs(data)
+        search_by = request.get_json()['query']
+        results = db.session.query(Book).filter(or_(
+            Book.title.ilike(f'%{search_by}%'), 
+            Book.alt_title.ilike(f'%{search_by}%'), 
+            Book.synopsis.ilike(f'%{search_by}%'), 
+            Book.author_name.ilike(f'%{search_by}%'))).all()
+        if "status" in data_dict and "genres" in data_dict:
+            filtered_books = filter_books(results, data_dict['status'], data_dict['genres'])
+        elif "status" in data_dict:
+            filtered_books = filter_books(results, data_dict['status'], [])
+        elif "genres" in data_dict:
+            filtered_books = filter_books(results, [], data_dict['genres'])
         else:
-            return jsonify({'user_email': user_email,'exist': True})
+            filtered_books = results
+        json_context={
+            "result": "success",
+            "value": book_obj_to_dist(filtered_books),
+        }
+        return jsonify(json_context)
+    param1 = request.args.get('q')
+    param2 = request.args.getlist('status')
+    param3 = request.args.getlist('genres')
+    #print(f'{param1}\n{param2}\n{param3}\n')
+    genre_list = Genre.query.all()
+    context = {
+        'search_query': param1,
+        'status_query': param2,
+        'genres_query': param3,
+        'genres': genre_list,
+        'status_types': status_types,
+    }
+    if param1:
+        results = db.session.query(Book).filter(or_(
+            Book.title.ilike(f'%{param1}%'), 
+            Book.alt_title.ilike(f'%{param1}%'), 
+            Book.synopsis.ilike(f'%{param1}%'), 
+            Book.author_name.ilike(f'%{param1}%'))).all()
+    else:
+        results = Book.query.filter_by(is_approved=1).order_by(desc(Book.created)).limit(15).all()
+    if param2 != [] and param3 != []:
+        filtered_books = filter_books(results, param2, param3)
+    elif param2 != []:
+        filtered_books = filter_books(results, param2, [])
+    elif param3 != []:
+        filtered_books = filter_books(results, [], param3)
+    else:
+        filtered_books = results
+    context['results'] = filtered_books
+    if current_user.is_authenticated:
+        context['user_initial'] = str(current_user)[0:2].upper()
+        context['user_name'] = current_user.username
+    return render_template('search-titles.html', context=context)
 
+
+######## random title
+@webapp.route("/titles/random/", methods=['GET', 'POST'])
+def random_title():
+    book_details = Book.query.all()
+    if(book_details != []):
+        random_book = random.choice(book_details)
+        return redirect(url_for('webapp.book_page', id=random_book.id))
+    else:
+        flash("There's no books to get a random book title.", 'error')
+        return redirect(url_for('webapp.home_page'))
 
 ######## view title
 @webapp.route("/book/<int:id>/", methods=['GET', 'POST'])
 def book_page(id):
     book_details = Book.query.get_or_404(id)
+    if book_details.is_approved == 0:
+        flash("You are not authorized to view this page.", 'error')
+        return redirect(url_for('webapp.home_page'))
+    library_count = Library.query.filter_by(book_id=id).count()
+    rating_total = db.session.query(
+        func.sum(Rating.rate_score).label('rating_sum'),
+        func.count().label('no_rows')
+        ).filter_by(book_id=id).first()
+    rating_avg = 0
+    if rating_total.no_rows:
+        rating_avg = rating_total.rating_sum/rating_total.no_rows
     context = {
         'book_details': book_details,
+        'library_total': library_count,
+        'rating_avg': rating_avg,
+        'site_key': os.getenv('RECAPTCHA_SITE_KEY'),
         }
     if current_user.is_authenticated:
+        library_data = Library.query.filter_by(book_id=id,user_email=str(current_user)).first()
+        rating_data = Rating.query.filter_by(book_id=id,user_email=str(current_user)).first()
+        if library_data:
+            context['library_added'] = True
+        if rating_data:
+            context['book_rating'] = rating_data.rate_score
         context['user_initial'] = str(current_user)[0:2].upper()
         context['user_name'] = current_user.username
     return render_template('book.html', context=context)
@@ -320,6 +440,22 @@ def upload_chapter(id):
         return redirect(url_for('webapp.login_page'))
     return render_template('new-chapter.html', context=context)
 
+######## View Chapter
+@webapp.route("/book/<int:book_id>/listen/<int:chapter_id>/", methods=['GET', 'POST'])
+def view_chapter(book_id,chapter_id):
+    book_details = Book.query.get_or_404(book_id)
+    chapter_details = Chapter.query.get_or_404(chapter_id)
+
+    context = {
+        "book_details": book_details,
+        "chapter_details": chapter_details,
+    }
+    if current_user.is_authenticated:
+        context['user_initial'] = str(current_user)[0:2].upper()
+        context['user_name'] = current_user.username
+    return render_template('player.html', context=context)
+
+
 ######## Delete chapter
 @webapp.route("/book/<int:book_id>/delete/<int:chapter_id>/", methods=['POST'])
 def update_chapter(book_id,chapter_id):
@@ -340,6 +476,117 @@ def update_chapter(book_id,chapter_id):
             flash('Authentication Failed!', 'error')
             abort(400, 'Error: Authentication Failed.')
 
+######## add to library
+@webapp.route("/book/add-to-library/", methods=['POST'])
+def add_to_library():
+    if request.method == 'POST':
+        if current_user.is_authenticated:
+            data = request.get_json()['book_id']
+            try:
+                tempLibrary = Library(
+                    book_id=data,
+                    user_email=str(current_user),
+                )
+                db.session.add(tempLibrary)
+                db.session.commit()
+                return jsonify({'status': 'success', 'value':'added'})
+            except IntegrityError:
+                db.session.rollback()
+                db.session.query(Library).filter_by(book_id=data,user_email=str(current_user)).delete()
+                db.session.commit()
+                return jsonify({'status': 'success', 'value':'removed'})
+            except:
+                abort(400, 'Error: Insert DB error.')
+        else:
+            print('Invalid Request: You have to be logged in to add books to library!')
+            flash('You have to be logged in to add books to library!', 'error')
+            return jsonify({'status': 'unauthorized', 'value':'redirect'})
+
+
+######## Rate Book
+@webapp.route("/book/rate/", methods=['POST'])
+def rate_book():
+    if request.method == 'POST':
+        if current_user.is_authenticated:
+            data_book_id = request.get_json()['book_id']
+            data_rate_val = request.get_json()['rate_val']
+            try:
+                tempRating = Rating(
+                    book_id=data_book_id, 
+                    user_email=str(current_user), 
+                    rate_score=data_rate_val
+                )
+                db.session.add(tempRating)
+                db.session.commit()
+                return jsonify({'status': 'success', 'value':'rated'})
+            except IntegrityError:
+                db.session.rollback()
+                ratingRec = db.session.query(Rating).filter_by(book_id=data_book_id,user_email=str(current_user)).first()
+                ratingRec.rate_score = data_rate_val
+                db.session.commit()
+                return jsonify({'status': 'success', 'value':'updated'})
+            except:
+                abort(400, 'Error: Insert DB error.')
+        else:
+            print('Invalid Request: You have to be logged in to rate books!')
+            flash('You have to be logged in to rate books!', 'error')
+            return jsonify({'status': 'unauthorized', 'value':'redirect'})
+
+######## Report Book
+@webapp.route("/book/report/<int:id>/", methods=['POST'])
+def report_book(id):
+    if request.method == 'POST':
+        secret_response = request.form['g-recaptcha-response']
+        verify_response = requests.post(url=f'{RECAPTCHA_VERIFY_URL}?secret={os.getenv("RECAPTCHA_SECRET_KEY")}&response={secret_response}').json()
+        if current_user.is_authenticated and verify_response['success'] == True:
+            try:
+                user_email = request.form['report-email']
+                report_title = request.form['report-title']
+                subject = request.form['report-subject']
+                tempReport = ReportBook(
+                    user_email=user_email,
+                    title=report_title,
+                    subject=subject,
+                )
+                db.session.add(tempReport)
+                db.session.commit()
+                flash('Issue reported successfully, an admin will contact you via email if needed.', 'success')
+                return redirect(url_for('webapp.book_page', id=id))
+            except:
+                flash('An error occured while reporting the issue. Please try again later.', 'error')
+                return redirect(url_for('webapp.book_page', id=id))
+        else:
+            flash('User has to be logged in to report issues.', 'error')
+            return redirect(url_for('webapp.login_page'))
+    return redirect(url_for('webapp.book_page', id=id))
+
+######## add to playback history
+@webapp.route("/book/history/", methods=['POST'])
+def add_history():
+    if request.method == 'POST':
+        if current_user.is_authenticated:
+            data_chapter_id = request.get_json()['chapter_id']
+            try:
+                tempHistory = ListenHistory(
+                    user_email=str(current_user), 
+                    chapter_id=int(data_chapter_id)
+                )
+                db.session.add(tempHistory)
+                db.session.commit()
+                return jsonify({'status': 'success', 'value':'added'})
+            except IntegrityError:
+                db.session.rollback()
+                historyRec = db.session.query(ListenHistory).filter_by(user_email=str(current_user),chapter_id=int(data_chapter_id)).first()
+                historyRec.last_heard_on = db.func.now()
+                db.session.commit()
+                return jsonify({'status': 'success', 'value':'updated'})
+            except:
+                abort(400, 'Error: Insert DB error.')
+        else:
+            print('Invalid Request: You have to be logged in to keep playback history!')
+            flash('You have to be logged in to keep playback history!', 'error')
+            return jsonify({'status': 'unauthorized', 'value':'redirect'})
+
 ######## user login page 
 @webapp.route("/login/", methods=['GET', 'POST'])
 def login_page():
@@ -359,7 +606,7 @@ def login_page():
                     login_user(user, remember=True, duration=datetime.timedelta(days=30))
                 else:
                     login_user(user)
-                flash('Login Successful.', 'success')
+                flash(f'Welcome back, {user.username}.', 'success')
                 return redirect(url_for('webapp.home_page'))
             else:
                 flash('Invalid Password.', 'error')
@@ -368,6 +615,7 @@ def login_page():
     context = {"form": form}
     return render_template('user-login.html', context=context)
 
+######## user sign up page 
 @webapp.route("/sign-up/", methods=['GET', 'POST'])
 def register_page():
     if current_user.is_authenticated:
@@ -390,6 +638,42 @@ def register_page():
     context = {"form": form}
     return render_template('user-register.html', context=context)
 
+#### google OAuth
+@webapp.route('/oauth')
+def oauth_login():
+    GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID')
+    GOOGLE_CLIENT_SECRET = os.getenv('GOOGLE_CLIENT_SECRET')
+     
+    CONF_URL = 'https://accounts.google.com/.well-known/openid-configuration'
+    oauth.register(
+        name='google',
+        client_id=GOOGLE_CLIENT_ID,
+        client_secret=GOOGLE_CLIENT_SECRET,
+        server_metadata_url=CONF_URL,
+        client_kwargs={
+            'scope': 'openid email profile'
+        }
+    )
+     
+    # Redirect to google_auth function
+    redirect_uri = url_for('webapp.authorize', _external=True)
+    return oauth.google.authorize_redirect(redirect_uri)
+
+
+@webapp.route('/authorize')
+def authorize():
+    token = oauth.google.authorize_access_token()
+    user = oauth.google.userinfo()
+    session['profile'] = user
+    userQuery = User.query.filter_by(email=user['email']).first()
+    if(userQuery):
+        login_user(userQuery, remember=True, duration=datetime.timedelta(days=7))
+        flash(f'Welcome back, {userQuery.username}.', 'success')
+        return redirect(url_for('webapp.home_page'))
+    flash('This email is not a registered email. Please sign up first to use SSO.', 'error')
+    return redirect(url_for('webapp.login_page'))
+
+######## user logout redirect 
 @webapp.route("/logout/", methods=['GET', 'POST'])
 @login_required
 def logout():
@@ -401,6 +685,51 @@ def logout():
     flash('Log Out Successful.', 'success')
     return redirect(url_for('webapp.login_page'))
 
-@webapp.route("/music/") #released music
-def music_page():
-    return "<p>Hello, World!</p>"
+####### API functions
+
+@webapp.route("/v1/books/", methods=['GET'])
+def book_api():
+    results = Book.query.filter_by(is_approved=1).order_by(desc(Book.created)).all()
+    if request.method == 'GET':
+        param1 = request.args.get('query')
+        if not param1 is None:
+            book_list = []
+            for word in param1.split(" "):
+                phonetic_key = phonetics.dmetaphone(word)
+                #print(f"{phonetic_key}")
+                for book in results:
+                    for chapter_title in book.title.split(" "):
+                        title_key = phonetics.dmetaphone(chapter_title)
+                        #print(f"{title_key[0]} - {phonetic_key[0]}")
+                        if title_key[0] == phonetic_key[0]:
+                            book_list.append(book)
+                            continue
+            filtered_book_list = list(set(book_list))
+            filtered_json = book_obj_to_dist(filtered_book_list[:9])
+            return jsonify({
+                'status': '200',
+                'books': filtered_json,
+            })  
+    return jsonify({
+        'status': '200',
+        'books': book_obj_to_dist(results[:9]),
+    })
+
+@webapp.route("/v1/books/<int:book_id>/", methods=['GET'])
+def book_details_api(book_id):
+    book_details = Book.query.get(book_id)
+    #print(book_details)
+    #print(request.remote_addr)
+    if not book_details is None:
+        dist_sub_item = []
+        for chapter in book_details.chapters:
+            dist_sub_item.append({"id": chapter.id, "order_number":chapter.display_number, "audio_url":"/webapp/static/uploads/chapters/"+chapter.audio_url})
+        book_detail_dict = {"id": book_details.id, "title":book_details.title, "cover_img":book_details.cover_img, "status":book_details.status, "chapters": dist_sub_item}
+        return jsonify({
+            'status': '200',
+            'books': book_detail_dict,
+        })
+    return jsonify({
+        'status': '400',
+        'messages': "A valid book id is required.",
+    })

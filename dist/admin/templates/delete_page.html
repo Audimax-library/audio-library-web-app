@@ -1,0 +1,65 @@
+{% extends 'dashboard_base.html' %}
+{% block title %}Delete {{context.type}} | Audimax{% endblock %}
+{% block style %}
+<style>
+  
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5" style="padding-bottom: 5rem;">
+  {% if context.type == "Title" %}
+  <h2>Delete title <span class="fw-bold">{{context.item_details.title}}</span> ?</h2>
+
+  <div class="border border-1 border-dark bg-light p-4 rounded">
+    <p>Do you really want to delete this Title from this platform ?</p>
+    <img class="rounded mb-2" src="{{ url_for('webapp.static', filename='uploads/'+context.item_details.cover_img )}}" alt="" style="height: 200px;">
+    <ul>
+      <li><b>Title:</b> {{context.item_details.title}}</li>
+      <li><b>Alt Title(s):</b> {{context.item_details.alt_title}}</li>
+      <li><b>Synopsis:</b> {{context.item_details.synopsis}}</li>
+      <li><b>Status:</b> {{context.item_details.status}}</li>
+      <li><b>Genres:</b> 
+        {% for genre in context.item_details.genres %}
+        <span class="badge bg-secondary">{{genre.title}}</span>
+        {% endfor %}
+      </li>
+      <li><b>Language:</b> {{context.item_details.language}}</li>
+      <li><b>Created:</b> {{context.item_details.created}}</li>
+      <li><b>Author:</b> {{context.item_details.author_name}}</li>
+      <li><b>Submitted by:</b> {{context.item_details.draft_user_email}}</li>
+      <li class="text-bg-info"><b>No. of Chapters:</b> {{context.item_details.chapters|count}}</li>
+    </ul>
+    <form action="" method="post" class="d-inline">
+      <input type="hidden" name="item-type" value="{{context.type}}">
+      <input type="hidden" name="item-id" value="{{context.item_details.id}}">
+      <button type="submit" class="btn btn-success">Confirm</button>
+    </form>
+    <a href="{{url_for('admin.manage_books_page')}}" class="btn btn-warning">Deny</a>
+  </div>
+  {% elif context.type == "Chapter" %}
+  <h2>Delete <span class="fw-bold">Chapter {{context.item_details.display_number}}</span> of <span class="fw-bold">{{context.item_details.book_obj.title}}</span> ?</h2>
+  <div class="border border-1 border-dark bg-light p-4 rounded">
+    <img class="rounded mb-2" src="{{ url_for('webapp.static', filename='uploads/'+context.item_details.book_obj.cover_img )}}" alt="" style="height: 200px;">
+    <audio controls>
+      <source src="{{url_for('webapp.static', filename='uploads/chapters/'+context.item_details.audio_url)}}" type="audio/mpeg">
+      Your browser does not support the audio tag.
+    </audio>
+    <ul>
+      <li><b>Uploaded by:</b> {{context.item_details.uploaded_by}}</li>
+    </ul>
+    <form action="" method="post" class="d-inline">
+      <input type="hidden" name="item-type" value="{{context.type}}">
+      <input type="hidden" name="item-id" value="{{context.item_details.id}}">
+      <button type="submit" class="btn btn-success">Confirm</button>
+    </form>
+    <a href="{{url_for('admin.manage_books_page')}}" class="btn btn-warning">Deny</a>
+  </div>
+  {% endif %}
+
+  
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}

@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% block title %}Search Titles | Audimax Library{% endblock %}
+{% block content %}
+
+<div class="container mx-auto my-8">
+  <h1 class="text-3xl text-left font-bold">Advanced Search</h1>
+
+  <div class="items-center rounded-full cursor-pointer text-white px-4 my-8">
+    <form action="/titles/" method="GET" class="inputwrap" id="title-search-bar">
+      
+      <input placeholder="Search" id="title-search-field" title="Search" name="q" class="" {% if context.search_query != None %}value="{{context.search_query}}"{% endif %} autofocus> 
+      <div class="search-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-icon-white text-false icon"><path d="M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm10 2-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+      </div>
+    </form>
+    <button type="button" onclick="toggleModal(this)" data-modal-toggle="filter-modal" class="rounded relative flex items-center mt-4 px-3 flex-shrink justify-center text-white bg-BGColorLight hover:bg-BGColorDarkLight px-6" style="min-height: 48px; min-width: 0px;">
+      <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" style="fill: rgba(255, 255, 255, 1);margin-right:0.35rem;"><path d="M7 11h10v2H7zM4 7h16v2H4zm6 8h4v2h-4z"></path></svg>
+        Filter
+      </span>
+    </button>
+  </div>
+  <div id="search-result">
+
+    {% for book in context.results %}
+    <a href="{{url_for('webapp.book_page', id=book.id)}}" class="p-2 mb-2 flex items-center font-medium rounded text-white bg-BGColorDarkLight hover:bg-BGColorLight duration-100 ease-out">
+      <div style="width:50px; height:70px;" class="overflow-hidden rounded flex-none mr-4">
+        <img src="{{ url_for('webapp.static', filename='uploads/'+book.cover_img) }}" alt="{{book.title}}" class="w-auto h-full object-cover">
+      </div>
+      <div>
+        <span class="font-bold">{{book.title}}</span><br><span class="bg-green-100 text-white text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-700 dark:text-white whitespace-nowrap">{{book.status}}</span><span>No. Chapters: {{book.chapters|length}}</span>
+      </div>
+    </a>
+    {% endfor %}
+
+  </div>
+  
+</div>
+
+<!-- filter modal section -->
+<div id="filter-modal" class="fixed top-0 left-0 z-30 bg-slate-900/50 w-full h-full backdrop-blur-sm hidden overflow-y-auto">
+  <div class="relative p-4 pt-10 w-full max-w-2xl h-full md:h-auto mx-auto">
+    <div class="relative bg-BGColor rounded-lg box-shadow">
+      <div class="flex justify-between items-start p-4 rounded-t">
+
+        <div class="items-center rounded-full text-white mr-2">
+          <form action="" method="GET" id="filter-modal-form">
+            
+            <div class="flex flex-col">
+              <div class="w-full">
+                <p class="text-xl font-bold mb-4">Status</p>
+                {% for status in context.status_types %}
+                {% if status in context.status_query %}
+                <label class="PillList-item">
+                  <input type="checkbox" name="status" id="search-status" value="{{status}}" checked>
+                  <span class="PillList-label">{{status}}
+                    <span class="Icon Icon--checkLight Icon--smallest">⬤</span>
+                  </span>
+                </label>
+                {% else %}
+                <label class="PillList-item">
+                  <input type="checkbox" name="status" id="search-status" value="{{status}}">
+                  <span class="PillList-label">{{status}}
+                    <span class="Icon Icon--checkLight Icon--smallest">⬤</span>
+                  </span>
+                </label>
+                {% endif %}
+                {% endfor %}
+              </div>
+              <div class="w-full">
+                <p class="text-xl font-bold mb-4">Genres</p>
+                {% for genre in context.genres %}
+                {% if genre.id|string in context.genres_query %}
+                <label class="PillList-item">
+                  <input type="checkbox" name="genres" id="search-genres" value="{{genre.id}}" checked>
+                <span class="PillList-label">{{genre.title}}
+                  <span class="Icon Icon--checkLight Icon--smallest">⬤</span>
+                </span>
+                </label>
+                {% else %}
+                <label class="PillList-item">
+                  <input type="checkbox" name="genres" id="search-genres" value="{{genre.id}}">
+                <span class="PillList-label">{{genre.title}}
+                  <span class="Icon Icon--checkLight Icon--smallest">⬤</span>
+                </span>
+                </label>
+                {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+            <button type="submit" class="mt-4 text-white focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 bg-green-600 hover:bg-green-300 focus:outline-none focus:ring-teal-800">Filter</button>
+            <button onclick="toggleModal(this)" data-modal-toggle="filter-modal" type="button" class="focus:ring-4 focus:outline-none rounded-lg border text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 bg-gray-700 text-gray-300 border-gray-500 hover:text-white hover:bg-gray-600 focus:ring-gray-600">Close</button>
+          </form>
+        </div>
+
+        <button type="button" onclick="toggleModal(this)" data-modal-toggle="filter-modal" class="ml-auto mx-0 my-0 bg-BGColorDarkLight text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8" aria-label="Close">
+          <span class="sr-only">Close</span>
+          <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- filter modal section END -->
+
+{% endblock %}
+{% block scripts %}
+<script>
+  $('#filter-modal-form').on('submit', function(e){
+    e.preventDefault();
+    var formdata = $(this).serialize();
+    searchRequest(formdata);
+  });
+  $('#title-search-field').keyup(function(e) {
+    if($(this).val().length >= 3){
+      var formdata = $('#filter-modal-form').serialize();
+      searchRequest(formdata);
+    }
+  });
+
+  function searchRequest(formdata){
+    var formquery = $('#title-search-field').val();
+    var adv_book_container = $('#search-result');
+    adv_book_container.empty();
+    adv_book_container.append(`<div class="rounded bg-BGColorLight mx-4 p-4"><div class="text-center"><div role="status"><svg class="inline mr-2 w-10 h-10 text-gray-200 animate-spin dark:text-gray-600 fill-themeMain" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor"/><path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill"/></svg><span class="sr-only">Loading...</span></div></div></div>`);
+    $.ajax({
+      type: "POST",
+      url: "/titles/",
+      data: JSON.stringify({'data': formdata, 'query': formquery}),
+      contentType: "application/json",
+      success: function(response) {
+        //console.log(response)
+        adv_book_container.empty();
+        $.each(response.value, function( index, value ) {
+          adv_book_container.append('<a href="/book/'+value.id+'" class="p-2 mb-2 flex items-center font-medium rounded text-white bg-BGColorDarkLight hover:bg-BGColorLight duration-100 ease-out"><div style="width:50px; height:70px;" class="overflow-hidden rounded flex-none mr-4"><img src="/webapp/static/uploads/'+value.cover_img+'" alt="'+value.title+'" class="w-auto h-full object-cover"></div><div><span class="font-bold">'+value.title+'</span><br><span class="bg-green-100 text-white text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-700 dark:text-white whitespace-nowrap">'+value.status+'</span><span>No. Chapters: '+value.no_chapters+'</span></div></a>');
+        });
+        if (response.value === undefined || response.value.length == 0) {
+          adv_book_container.empty();
+          adv_book_container.append(`<div class="text-center"><p class="text-slate-600">There's no result for "`+formquery+`" that matches selected filters. Please try something else.</p></div>`);
+        }
+      }, 
+      error: function(XMLHttpRequest, textStatus, errorThrown) {
+        adv_book_container.empty();
+        adv_book_container.append(`<div class="text-center"><p class="text-slate-600">Encountered a server error. Please try again later.</p></div>`);
+      }
+    });
+    const nextState = { additionalInformation: 'Updated the browser URL.' };
+    var nextURL = location.protocol + '//' + location.host + location.pathname + '?q=' + formquery + '&' + formdata;
+    //console.log(nextURL);
+    var nextTitle = 'Audimax Title Search for: '+formquery;
+    window.history.pushState(nextState, nextTitle, nextURL);
+    $('#filter-modal').fadeOut('fast');
+  }
+</script>
+{% endblock %}

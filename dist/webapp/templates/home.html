@@ -8,10 +8,10 @@
 
   <section>
     <div class="flex items-center justify-center mb-4">
-      <a href="#" class="link">
+      <a href="{{url_for('webapp.titles_page')}}" class="link">
         <h2 class="font-header text-2xl font-semibold">Latest Books</h2>
       </a> 
-      <a href="#" class="ml-auto link" aria-label="View latest books list">
+      <a href="{{url_for('webapp.titles_page')}}" class="ml-auto link" aria-label="View latest books list">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"class="feather feather-arrow-right text-icon-black text-false icon"><path d="M5 12h14m-7-7 7 7-7 7"></path></svg>
       </a>
     </div>
@@ -19,23 +19,21 @@
     <div class="swiper">
       <div class="swiper-wrapper">
         {% for item in context.recent_books%}
-        <a href="{{url_for('webapp.book_page', id=item.id)}}">
-          <div class="swiper-slide">
-            <div class="grid grid-flow-col grid-cols-4 rounded bg-BGColorLight latest-card">
-              <div>
-                <img src="{{ url_for('webapp.static', filename='uploads/'+item.cover_img) }}" class=" rounded-l w-full h-full object-cover" alt="" loading="lazy">
-              </div>
-              <div class="col-start-2 col-span-3 p-4 text-left">
-                <h1 class="font-base font-bold truncate">{{item.title}}</h1>
-                <p class="text-base text-clip">{{item.synopsis[:174]}}...</p>
-              </div>
+        <a class="swiper-slide" href="{{url_for('webapp.book_page', id=item.id)}}">
+          <div class="grid grid-flow-col grid-cols-4 rounded bg-BGColorLight latest-card">
+            <div>
+              <img src="{{ url_for('webapp.static', filename='uploads/'+item.cover_img) }}" class=" rounded-l w-full h-full object-cover" alt="" loading="lazy">
+            </div>
+            <div class="col-start-2 col-span-3 p-4 text-left">
+              <h1 class="font-base font-bold truncate">{{item.title}}</h1>
+              <p class="text-base text-clip">{{item.synopsis[:174]}}...</p>
             </div>
           </div>
         </a>
         {% endfor %}
 
       </div>
-      <!-- Add Pagination -->
+
       <div class="swiper-pagination" style="bottom: -5px;"></div>
     </div>
 
@@ -43,10 +41,10 @@
 
   <section class="mt-20">
     <div class="flex items-center justify-center mb-4">
-      <a href="#" class="link">
+      <a href="{{url_for('webapp.titles_page')}}" class="link">
         <h2 class="font-header text-2xl font-semibold">Latest Chapters</h2>
       </a> 
-      <a href="#" class="ml-auto link" aria-label="View latest books list">
+      <a href="{{url_for('webapp.titles_page')}}" class="ml-auto link" aria-label="View latest books list">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"class="feather feather-arrow-right text-icon-black dark:text-icon-white text-false icon"><path d="M5 12h14m-7-7 7 7-7 7"></path></svg>
       </a>
     </div>
@@ -54,239 +52,133 @@
 
       <div class="rounded bg-BGColorLight px-4 py-2 col-span-10 xl:block xl:col-span-3 lg:block lg:col-span-4 md:block md:col-span-6 sm:block sm:col-span-12">
 
+        {% for chapter in context.recent_chapters %}
+        {% if loop.index <= 5 %}
         <div class="grid grid-cols-4 py-2">
           <div style="height: 73px;">
-            <img src="https://pbs.twimg.com/profile_images/882359057142562817/WMiNW4Wq_400x400.jpg" class=" rounded w-full h-full object-cover" alt="" loading="lazy">
+            <a href="{{url_for('webapp.book_page', id=chapter.book_obj.id)}}">
+              <img src="{{ url_for('webapp.static', filename='uploads/'+chapter.book_obj.cover_img) }}" class=" rounded w-full h-full object-cover" alt="" loading="lazy">
+            </a>
           </div>
           <div class="col-span-3 text-left ml-2">
-            <h1 class="text-base font-bold truncate">Lorem, ipsum dolor.</h1>
-            <p class="text-base"><span><img src="https://mangadex.org/flags/gb.svg" class="rounded h-6 inline" alt="" ></span> Chapter xx</p>
-            <p class="text-sm text-gray-400">xx seconds ago...</p>
+            <a href="{{url_for('webapp.book_page', id=chapter.book_obj.id)}}">
+              <h1 class="text-base font-bold truncate">{{chapter.book_obj.title}}</h1>
+            </a>
+            <a href="{{url_for('webapp.view_chapter', book_id=chapter.book_obj.id, chapter_id=chapter.id)}}">
+              <p class="text-base">
+                <span>
+                  {% if chapter.book_obj.language == 'English' %}
+                  <img src="{{ url_for('webapp.static', filename='img/english-flag.svg') }}" class="rounded h-6 inline" alt="" >
+                  {% elif chapter.book_obj.language == 'Sinhala' %}
+                  <img src="{{ url_for('webapp.static', filename='img/sinhala-flag.svg') }}" class="rounded h-6 inline" alt="" >
+                  {% endif %}
+                </span> Chapter {{chapter.display_number}}
+              </p>
+            </a>
+            <p class="text-sm text-gray-400">{{chapter.elapsed_time}}</p>
           </div>
         </div>
-
-        <div class="grid grid-cols-4 py-2">
-          <div style="height: 73px;">
-            <img src="https://media.tenor.com/images/f7f2b0e21222547c96f33c956342316a/tenor.png" class=" rounded w-full h-full object-cover" alt="" loading="lazy">
-          </div>
-          <div class="col-span-3 text-left ml-2">
-            <h1 class="text-base font-bold truncate">Lorem, ipsum dolor.</h1>
-            <p class="text-base"><span><img src="https://mangadex.org/flags/gb.svg" class="rounded h-6 inline" alt="" ></span> Chapter xx</p>
-            <p class="text-sm text-gray-400">xx seconds ago...</p>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-4 py-2">
-          <div style="height: 73px;">
-            <img src="https://cdn-0.generatormix.com/images/anime-character/katuski-bakugo.jpg" class=" rounded w-full h-full object-cover" alt="" loading="lazy">
-          </div>
-          <div class="col-span-3 text-left ml-2">
-            <h1 class="text-base font-bold truncate">Lorem, ipsum dolor.</h1>
-            <p class="text-base"><span><img src="https://mangadex.org/flags/gb.svg" class="rounded h-6 inline" alt="" ></span> Chapter xx</p>
-            <p class="text-sm text-gray-400">xx seconds ago...</p>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-4 py-2">
-          <div style="height: 73px;">
-            <img src="https://cdn-0.generatormix.com/images/anime-character/katuski-bakugo.jpg" class=" rounded w-full h-full object-cover" alt="" loading="lazy">
-          </div>
-          <div class="col-span-3 text-left ml-2">
-            <h1 class="text-base font-bold truncate">Lorem, ipsum dolor.</h1>
-            <p class="text-base"><span><img src="https://mangadex.org/flags/gb.svg" class="rounded h-6 inline" alt="" ></span> Chapter xx</p>
-            <p class="text-sm text-gray-400">xx seconds ago...</p>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-4 py-2">
-          <div style="height: 73px;">
-            <img src="https://cdn-0.generatormix.com/images/anime-character/katuski-bakugo.jpg" class=" rounded w-full h-full object-cover" alt="" loading="lazy">
-          </div>
-          <div class="col-span-3 text-left ml-2">
-            <h1 class="text-base font-bold truncate">Lorem, ipsum dolor.</h1>
-            <p class="text-base"><span><img src="https://mangadex.org/flags/gb.svg" class="rounded h-6 inline" alt="" ></span> Chapter xx</p>
-            <p class="text-sm text-gray-400">xx seconds ago...</p>
-          </div>
-        </div>
+        {% endif %}
+        {% endfor %}
 
       </div>
 
       <div class="rounded bg-BGColorLight px-4 py-2 hidden xl:block xl:col-span-3 lg:block lg:col-span-4 md:block md:col-span-6">
 
+        {% for chapter in context.recent_chapters %}
+        {% if loop.index > 5 and loop.index <= 10 %}
         <div class="grid grid-cols-4 py-2">
           <div style="height: 73px;">
-            <img src="https://pbs.twimg.com/profile_images/882359057142562817/WMiNW4Wq_400x400.jpg" class=" rounded w-full h-full object-cover" alt="" loading="lazy">
+            <a href="{{url_for('webapp.book_page', id=chapter.book_obj.id)}}">
+              <img src="{{ url_for('webapp.static', filename='uploads/'+chapter.book_obj.cover_img) }}" class=" rounded w-full h-full object-cover" alt="" loading="lazy">
+            </a>
           </div>
           <div class="col-span-3 text-left ml-2">
-            <h1 class="text-base font-bold truncate">Lorem, ipsum dolor.</h1>
-            <p class="text-base"><span><img src="https://mangadex.org/flags/gb.svg" class="rounded h-6 inline" alt="" ></span> Chapter xx</p>
-            <p class="text-sm text-gray-400">xx seconds ago...</p>
+            <a href="{{url_for('webapp.book_page', id=chapter.book_obj.id)}}">
+              <h1 class="text-base font-bold truncate">{{chapter.book_obj.title}}</h1>
+            </a>
+            <a href="{{url_for('webapp.view_chapter', book_id=chapter.book_obj.id, chapter_id=chapter.id)}}">
+              <p class="text-base">
+                <span>
+                  {% if chapter.book_obj.language == 'English' %}
+                  <img src="{{ url_for('webapp.static', filename='img/english-flag.svg') }}" class="rounded h-6 inline" alt="" >
+                  {% elif chapter.book_obj.language == 'Sinhala' %}
+                  <img src="{{ url_for('webapp.static', filename='img/sinhala-flag.svg') }}" class="rounded h-6 inline" alt="" >
+                  {% endif %}
+                </span> Chapter {{chapter.display_number}}
+              </p>
+            </a>
+            <p class="text-sm text-gray-400">{{chapter.elapsed_time}}</p>
           </div>
         </div>
-
-        <div class="grid grid-cols-4 py-2">
-          <div style="height: 73px;">
-            <img src="https://media.tenor.com/images/f7f2b0e21222547c96f33c956342316a/tenor.png" class=" rounded w-full h-full object-cover" alt="" loading="lazy">
-          </div>
-          <div class="col-span-3 text-left ml-2">
-            <h1 class="text-base font-bold truncate">Lorem, ipsum dolor.</h1>
-            <p class="text-base"><span><img src="https://mangadex.org/flags/gb.svg" class="rounded h-6 inline" alt="" ></span> Chapter xx</p>
-            <p class="text-sm text-gray-400">xx seconds ago...</p>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-4 py-2">
-          <div style="height: 73px;">
-            <img src="https://cdn-0.generatormix.com/images/anime-character/katuski-bakugo.jpg" class=" rounded w-full h-full object-cover" alt="" loading="lazy">
-          </div>
-          <div class="col-span-3 text-left ml-2">
-            <h1 class="text-base font-bold truncate">Lorem, ipsum dolor.</h1>
-            <p class="text-base"><span><img src="https://mangadex.org/flags/gb.svg" class="rounded h-6 inline" alt="" ></span> Chapter xx</p>
-            <p class="text-sm text-gray-400">xx seconds ago...</p>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-4 py-2">
-          <div style="height: 73px;">
-            <img src="https://cdn-0.generatormix.com/images/anime-character/katuski-bakugo.jpg" class=" rounded w-full h-full object-cover" alt="" loading="lazy">
-          </div>
-          <div class="col-span-3 text-left ml-2">
-            <h1 class="text-base font-bold truncate">Lorem, ipsum dolor.</h1>
-            <p class="text-base"><span><img src="https://mangadex.org/flags/gb.svg" class="rounded h-6 inline" alt="" ></span> Chapter xx</p>
-            <p class="text-sm text-gray-400">xx seconds ago...</p>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-4 py-2">
-          <div style="height: 73px;">
-            <img src="https://cdn-0.generatormix.com/images/anime-character/katuski-bakugo.jpg" class=" rounded w-full h-full object-cover" alt="" loading="lazy">
-          </div>
-          <div class="col-span-3 text-left ml-2">
-            <h1 class="text-base font-bold truncate">Lorem, ipsum dolor.</h1>
-            <p class="text-base"><span><img src="https://mangadex.org/flags/gb.svg" class="rounded h-6 inline" alt="" ></span> Chapter xx</p>
-            <p class="text-sm text-gray-400">xx seconds ago...</p>
-          </div>
-        </div>
+        {% endif %}
+        {% endfor %}
 
       </div>
       <div class="rounded bg-BGColorLight px-4 py-2 hidden xl:block xl:col-span-3 lg:block lg:col-span-4">
 
+        {% for chapter in context.recent_chapters %}
+        {% if loop.index > 10 and loop.index <= 15 %}
         <div class="grid grid-cols-4 py-2">
           <div style="height: 73px;">
-            <img src="https://pbs.twimg.com/profile_images/882359057142562817/WMiNW4Wq_400x400.jpg" class=" rounded w-full h-full object-cover" alt="" loading="lazy">
+            <a href="{{url_for('webapp.book_page', id=chapter.book_obj.id)}}">
+              <img src="{{ url_for('webapp.static', filename='uploads/'+chapter.book_obj.cover_img) }}" class=" rounded w-full h-full object-cover" alt="" loading="lazy">
+            </a>
           </div>
           <div class="col-span-3 text-left ml-2">
-            <h1 class="text-base font-bold truncate">Lorem, ipsum dolor.</h1>
-            <p class="text-base"><span><img src="https://mangadex.org/flags/gb.svg" class="rounded h-6 inline" alt="" ></span> Chapter xx</p>
-            <p class="text-sm text-gray-400">xx seconds ago...</p>
+            <a href="{{url_for('webapp.book_page', id=chapter.book_obj.id)}}">
+              <h1 class="text-base font-bold truncate">{{chapter.book_obj.title}}</h1>
+            </a>
+            <a href="{{url_for('webapp.view_chapter', book_id=chapter.book_obj.id, chapter_id=chapter.id)}}">
+              <p class="text-base">
+                <span>
+                  {% if chapter.book_obj.language == 'English' %}
+                  <img src="{{ url_for('webapp.static', filename='img/english-flag.svg') }}" class="rounded h-6 inline" alt="" >
+                  {% elif chapter.book_obj.language == 'Sinhala' %}
+                  <img src="{{ url_for('webapp.static', filename='img/sinhala-flag.svg') }}" class="rounded h-6 inline" alt="" >
+                  {% endif %}
+                </span> Chapter {{chapter.display_number}}
+              </p>
+            </a>
+            <p class="text-sm text-gray-400">{{chapter.elapsed_time}}</p>
           </div>
         </div>
-
-        <div class="grid grid-cols-4 py-2">
-          <div style="height: 73px;">
-            <img src="https://media.tenor.com/images/f7f2b0e21222547c96f33c956342316a/tenor.png" class=" rounded w-full h-full object-cover" alt="" loading="lazy">
-          </div>
-          <div class="col-span-3 text-left ml-2">
-            <h1 class="text-base font-bold truncate">Lorem, ipsum dolor.</h1>
-            <p class="text-base"><span><img src="https://mangadex.org/flags/gb.svg" class="rounded h-6 inline" alt="" ></span> Chapter xx</p>
-            <p class="text-sm text-gray-400">xx seconds ago...</p>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-4 py-2">
-          <div style="height: 73px;">
-            <img src="https://cdn-0.generatormix.com/images/anime-character/katuski-bakugo.jpg" class=" rounded w-full h-full object-cover" alt="" loading="lazy">
-          </div>
-          <div class="col-span-3 text-left ml-2">
-            <h1 class="text-base font-bold truncate">Lorem, ipsum dolor.</h1>
-            <p class="text-base"><span><img src="https://mangadex.org/flags/gb.svg" class="rounded h-6 inline" alt="" ></span> Chapter xx</p>
-            <p class="text-sm text-gray-400">xx seconds ago...</p>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-4 py-2">
-          <div style="height: 73px;">
-            <img src="https://cdn-0.generatormix.com/images/anime-character/katuski-bakugo.jpg" class=" rounded w-full h-full object-cover" alt="" loading="lazy">
-          </div>
-          <div class="col-span-3 text-left ml-2">
-            <h1 class="text-base font-bold truncate">Lorem, ipsum dolor.</h1>
-            <p class="text-base"><span><img src="https://mangadex.org/flags/gb.svg" class="rounded h-6 inline" alt="" ></span> Chapter xx</p>
-            <p class="text-sm text-gray-400">xx seconds ago...</p>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-4 py-2">
-          <div style="height: 73px;">
-            <img src="https://cdn-0.generatormix.com/images/anime-character/katuski-bakugo.jpg" class=" rounded w-full h-full object-cover" alt="" loading="lazy">
-          </div>
-          <div class="col-span-3 text-left ml-2">
-            <h1 class="text-base font-bold truncate">Lorem, ipsum dolor.</h1>
-            <p class="text-base"><span><img src="https://mangadex.org/flags/gb.svg" class="rounded h-6 inline" alt="" ></span> Chapter xx</p>
-            <p class="text-sm text-gray-400">xx seconds ago...</p>
-          </div>
-        </div>
+        {% endif %}
+        {% endfor %}
 
       </div>
       <div class="rounded bg-BGColorLight px-4 py-2 hidden xl:block xl:col-span-3">
 
+        {% for chapter in context.recent_chapters %}
+        {% if loop.index > 15 and loop.index <= 20 %}
         <div class="grid grid-cols-4 py-2">
           <div style="height: 73px;">
-            <img src="https://pbs.twimg.com/profile_images/882359057142562817/WMiNW4Wq_400x400.jpg" class=" rounded w-full h-full object-cover" alt="" loading="lazy">
+            <a href="{{url_for('webapp.book_page', id=chapter.book_obj.id)}}">
+              <img src="{{ url_for('webapp.static', filename='uploads/'+chapter.book_obj.cover_img) }}" class=" rounded w-full h-full object-cover" alt="" loading="lazy">
+            </a>
           </div>
           <div class="col-span-3 text-left ml-2">
-            <h1 class="text-base font-bold truncate">1Lorem, ipsum dolor. 1</h1>
-            <p class="text-base"><span><img src="https://mangadex.org/flags/gb.svg" class="rounded h-6 inline" alt="" ></span> Chapter xx</p>
-            <p class="text-sm text-gray-400">xx seconds ago...</p>
+            <a href="{{url_for('webapp.book_page', id=chapter.book_obj.id)}}">
+              <h1 class="text-base font-bold truncate">{{chapter.book_obj.title}}</h1>
+            </a>
+            <a href="{{url_for('webapp.view_chapter', book_id=chapter.book_obj.id, chapter_id=chapter.id)}}">
+              <p class="text-base">
+                <span>
+                  {% if chapter.book_obj.language == 'English' %}
+                  <img src="{{ url_for('webapp.static', filename='img/english-flag.svg') }}" class="rounded h-6 inline" alt="" >
+                  {% elif chapter.book_obj.language == 'Sinhala' %}
+                  <img src="{{ url_for('webapp.static', filename='img/sinhala-flag.svg') }}" class="rounded h-6 inline" alt="" >
+                  {% endif %}
+                </span> Chapter {{chapter.display_number}}
+              </p>
+            </a>
+            <p class="text-sm text-gray-400">{{chapter.elapsed_time}}</p>
           </div>
         </div>
-
-        <div class="grid grid-cols-4 py-2">
-          <div style="height: 73px;">
-            <img src="https://media.tenor.com/images/f7f2b0e21222547c96f33c956342316a/tenor.png" class=" rounded w-full h-full object-cover" alt="" loading="lazy">
-          </div>
-          <div class="col-span-3 text-left ml-2">
-            <h1 class="text-base font-bold truncate">Lorem, ipsum dolor.</h1>
-            <p class="text-base"><span><img src="https://mangadex.org/flags/gb.svg" class="rounded h-6 inline" alt="" ></span> Chapter xx</p>
-            <p class="text-sm text-gray-400">xx seconds ago...</p>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-4 py-2">
-          <div style="height: 73px;">
-            <img src="https://cdn-0.generatormix.com/images/anime-character/katuski-bakugo.jpg" class=" rounded w-full h-full object-cover" alt="" loading="lazy">
-          </div>
-          <div class="col-span-3 text-left ml-2">
-            <h1 class="text-base font-bold truncate">Lorem, ipsum dolor.</h1>
-            <p class="text-base"><span><img src="https://mangadex.org/flags/gb.svg" class="rounded h-6 inline" alt="" ></span> Chapter xx</p>
-            <p class="text-sm text-gray-400">xx seconds ago...</p>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-4 py-2">
-          <div style="height: 73px;">
-            <img src="https://cdn-0.generatormix.com/images/anime-character/katuski-bakugo.jpg" class=" rounded w-full h-full object-cover" alt="" loading="lazy">
-          </div>
-          <div class="col-span-3 text-left ml-2">
-            <h1 class="text-base font-bold truncate">Lorem, ipsum dolor.</h1>
-            <p class="text-base"><span><img src="https://mangadex.org/flags/gb.svg" class="rounded h-6 inline" alt="" ></span> Chapter xx</p>
-            <p class="text-sm text-gray-400">xx seconds ago...</p>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-4 py-2">
-          <div style="height: 73px;">
-            <img src="https://cdn-0.generatormix.com/images/anime-character/katuski-bakugo.jpg" class=" rounded w-full h-full object-cover" alt="" loading="lazy">
-          </div>
-          <div class="col-span-3 text-left ml-2">
-            <h1 class="text-base font-bold truncate">Lorem, ipsum dolor.</h1>
-            <p class="text-base"><span><img src="https://mangadex.org/flags/gb.svg" class="rounded h-6 inline" alt="" ></span> Chapter xx</p>
-            <p class="text-sm text-gray-400">xx seconds ago...</p>
-          </div>
-        </div>
+        {% endif %}
+        {% endfor %}
 
       </div>
-
-
     </div>
   </section>
 
@@ -306,8 +198,8 @@
               <button class="rounded relative md-btn flex items-center px-3 my-4 justify-center text-black bg-themeMain hover:themeLight glow px-4 px-6" style="min-height: 48px; min-width: 100%;">
                 <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;">Sign Me Up</span>
               </button>
+              <span id="subscription-return"></span>
             </form>
-
           </div>
         </div>
       </div>
@@ -319,30 +211,30 @@
 {% block scripts %}
 <script>
   $('#newsletter-form').on('submit', function(e) {
-    e.preventDefault();  {# preventing the defult page refreshing #}
+    e.preventDefault(); 
     var emailValue = $('#newsletter-email').val();
     $('#newsletter-email').val("");
     if (emailValue !== ""){
-        $.ajax({
-      type: "POST",
-      url: "/newsletter/",
-      data: JSON.stringify({ mail: emailValue}),
-      contentType: "application/json",
-      success: function(response) {
-          {#var responseObj = JSON.prase(response);#}
-          if (response.exist == false){
-              alert(response.user_email+" is successfully subscribed for news letter,\nThank You.");
-          }else{
-              alert(response.user_email+" is already subscribed for news letter,\nThank You.");
+      $.ajax({
+        type: "POST",
+        url: "/newsletter/",
+        data: JSON.stringify({ mail: emailValue}),
+        contentType: "application/json",
+        success: function(response) {
+          if (response.exist == 'added'){
+            $('#subscription-return').append(`<div class="text-sm text-green-500 italic">*You have successfully subscribed to our newsletter.<br>Thank You.</div>`);
+          } else if(response.exist == 'error'){
+            $('#subscription-return').append(`<div class="text-sm text-slate-700 italic">*An error occured. Please try again later.</div>`);
+          } else{
+            $('#subscription-return').append(`<div class="text-sm text-slate-700 italic">*You have already subscribed to our newsletter.</div>`);
           }
-          console.log(response);
-      },
-      error: function(XMLHttpRequest, textStatus, errorThrown) {
-        alert("Error Occurred");
-      }
-    });
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          $('#subscription-return').append(`<div class="text-sm text-slate-700 italic">*An error occured. Please try again later.</div>`);
+        }
+      });
     }else{
-        alert("Enter Valid E-mail");
+      $('#subscription-return').append(`<div class="text-sm text-red-600 italic">*Invalid email format. Please check again.</div>`);
     }
 
   });

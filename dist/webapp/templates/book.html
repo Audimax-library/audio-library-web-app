@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}{{context.book_details.title}} | Audimax{% endblock %}
 {% block content %}
-
+<script src="https://www.google.com/recaptcha/api.js"></script>
 <div class="page-cover relative">
   <div class="absolute w-full h-72 xl:h-64 overflow-hidden">
     <div class="blur">
@@ -23,21 +23,36 @@
         </div>
         <div class="col-span-2">
           <div class="flex gap-2 sm:mb-0 mb-2 flex-wrap">
-            <button class="rounded relative flex items-center px-3 flex flex-grow-0 whitespace-nowrap px-2 sm:px-3 justify-center text-white bg-themeMain hover:bg-themeLight glow px-6" style="min-height: 48px; min-width: 220px;">
-              <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;">Add To Library</span>
+            <button onclick="addToLibrary(this)" data-book-value="{{context.book_details.id}}" class="rounded relative flex items-center px-3 flex flex-grow-0 whitespace-nowrap px-2 sm:px-3 justify-center text-white bg-themeMain hover:bg-themeLight glow px-6" style="min-height: 48px; min-width: 220px;">
+              <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;">
+                {% if context.library_added %}
+                Remove from Library
+                {% else %}
+                Add to Library
+                {% endif %}
+              </span>
             </button>
-            <button class="rounded relative flex items-center px-3 justify-center text-white bg-BGColorLight hover:bg-BGColorDarkLight px-0" style="min-height: 48px; min-width: 48px;">
+            <button onclick="toggleModal(this)" data-modal-toggle="rate-modal" class="rounded relative flex items-center px-3 justify-center text-white bg-BGColorLight hover:bg-BGColorDarkLight px-0" style="min-height: 48px; min-width: 48px;">
               <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
               </span>
             </button>
-            <button class="rounded relative flex items-center px-3 flex-grow sm:flex-grow-0 justify-center text-white bg-BGColorLight hover:bg-BGColorDarkLight px-6" style="min-height: 48px; min-width: 0px;">
+            {% if context.book_details.chapters %}
+            <a href="listen/{{(context.book_details.chapters|sort(attribute='order', reverse=False)|first).id}}/" class="rounded relative flex items-center px-3 flex-grow sm:flex-grow-0 justify-center text-white bg-BGColorLight hover:bg-BGColorDarkLight px-6" style="min-height: 48px; min-width: 0px;">
               <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon mr-4"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zm20 0h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg> 
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(255, 255, 255, 1);transform: rotate(180deg);msFilter:progid:DXImageTransform.Microsoft.BasicImage(rotation=2);" class="icon mr-4"><path d="M16 21c3.527-1.547 5.999-4.909 5.999-9S19.527 4.547 16 3v2c2.387 1.386 3.999 4.047 3.999 7S18.387 17.614 16 19v2z"></path><path d="M16 7v10c1.225-1.1 2-3.229 2-5s-.775-3.9-2-5zM4 17h2.697l5.748 3.832a1.004 1.004 0 0 0 1.027.05A1 1 0 0 0 14 20V4a1 1 0 0 0-1.554-.832L6.697 7H4c-1.103 0-2 .897-2 2v6c0 1.103.897 2 2 2zm0-8h3c.033 0 .061-.016.093-.019a1.027 1.027 0 0 0 .38-.116c.026-.015.057-.017.082-.033L12 5.868v12.264l-4.445-2.964c-.025-.017-.056-.02-.082-.033a.986.986 0 0 0-.382-.116C7.059 15.016 7.032 15 7 15H4V9z"></path></svg>
               Start Listening
               </span>
-            </button> 
-            <button class="rounded relative flex items-center px-3 justify-center text-white bg-BGColorLight hover:bg-BGColorDarkLight px-6" style="min-height: 48px; min-width: 0px;">
+            </a>
+            {% else %}
+            <a href="" class="pointer-events-none rounded relative flex items-center px-3 flex-grow sm:flex-grow-0 justify-center text-white bg-BGColorLight brightness-50 px-6" style="min-height: 48px; min-width: 0px;">
+              <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(255, 255, 255, 1);transform: rotate(180deg);msFilter:progid:DXImageTransform.Microsoft.BasicImage(rotation=2);" class="icon mr-4"><path d="M16 21c3.527-1.547 5.999-4.909 5.999-9S19.527 4.547 16 3v2c2.387 1.386 3.999 4.047 3.999 7S18.387 17.614 16 19v2z"></path><path d="M16 7v10c1.225-1.1 2-3.229 2-5s-.775-3.9-2-5zM4 17h2.697l5.748 3.832a1.004 1.004 0 0 0 1.027.05A1 1 0 0 0 14 20V4a1 1 0 0 0-1.554-.832L6.697 7H4c-1.103 0-2 .897-2 2v6c0 1.103.897 2 2 2zm0-8h3c.033 0 .061-.016.093-.019a1.027 1.027 0 0 0 .38-.116c.026-.015.057-.017.082-.033L12 5.868v12.264l-4.445-2.964c-.025-.017-.056-.02-.082-.033a.986.986 0 0 0-.382-.116C7.059 15.016 7.032 15 7 15H4V9z"></path></svg>
+              Start Listening
+              </span>
+            </a>
+            {% endif %}
+            <button onclick="toggleModal(this)" data-modal-toggle="report-modal" class="rounded relative flex items-center px-3 justify-center text-white bg-BGColorLight hover:bg-BGColorDarkLight px-6" style="min-height: 48px; min-width: 0px;">
               <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon mr-4"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zm0 7v-7"></path></svg> 
                 Report
@@ -53,20 +68,22 @@
         </div>
         <div class="col-span-2">
           <div class="flex space-x-2 pt-6 pb-4">
-            <div class="flex items-center space-x-1 text-sm py-1 px-2 bg-green-200 text-green-800 rounded-full">
-              <div style="width: 0.4rem; height: 0.4rem" class="bg-green-500 rounded-full"></div>
-              <div>{{context.book_details.status}}</div>
-            </div>
+            <a href="{{ url_for('webapp.titles_page')+'?status='+context.book_details.status}}">
+              <div class="flex items-center space-x-1 text-sm py-1 px-2 bg-green-200 text-green-800 rounded-full">
+                <div style="width: 0.4rem; height: 0.4rem" class="bg-green-500 rounded-full"></div>
+                <div>{{context.book_details.status}}</div>
+              </div>
+            </a>
           </div>
           <div class="stats-list">
             <div class="flex gap-2 flex-wrap items-center text-sm sm:text-base">
               <span title="7.6818 (Average)" class="text-themeMain flex items-center relative group" style="cursor: pointer;">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1 rel text-currentColor icon"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg> 
-                7.98
+                {{context.rating_avg}}
               </span>
               <span class="text-secondary flex items-center" style="cursor: pointer;" title="425">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="mr-1 rel text-currentColor icon"><path d="m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg> 
-                425
+                {{context.library_total}}
               </span>
             </div>
           </div>
@@ -87,18 +104,12 @@
             <p class="font-bold">Type</p>
             <div class="tags-list">
               {% for genre in context.book_details.genres|sort(attribute='title') %}
-              <span class="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 whitespace-nowrap">{{genre.title}}</span>
+              <a href="{{ url_for('webapp.titles_page')+'?genres='+genre.id|string}}">
+                <span class="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 whitespace-nowrap">{{genre.title}}</span>
+              </a>
               {% endfor %}
             </div>
           </div>
-          <!-- <div class="col-span-2 xl:col-span-1">
-            <p class="font-bold">Genres</p>
-            <div class="tags-list">
-              <span class="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 whitespace-nowrap">Adventure</span>
-              <span class="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 whitespace-nowrap">History</span>
-              <span class="bg-gray-100 text-gray-800 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-gray-300 whitespace-nowrap">Fantacy</span>
-            </div>
-          </div> -->
           <div class="col-span-2 md:col-span-1">
             <p class="font-bold">Formats</p>
             <div class="tags-list">
@@ -141,11 +152,174 @@
     </div>
   </div>
 </div>
+<!-- Report Modal section -->
+<div id="report-modal" class="fixed top-0 left-0 z-30 bg-slate-900/50 w-full h-full backdrop-blur-sm hidden">
+  <div class="relative p-4 pt-10 w-full max-w-2xl h-full md:h-auto mx-auto">
+    <div class="relative bg-BGColor rounded-lg box-shadow">
+      <div class="flex justify-between items-start p-4 rounded-t border-b border-gray-600">
+        <h3 class="text-xl font-semibold text-white">
+          Report an issue
+        </h3>
+        <button type="button" onclick="toggleModal(this)" data-modal-toggle="report-modal" class="ml-auto -mx-1.5 -my-1.5 bg-BGColorDarkLight text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8" aria-label="Close">
+          <span class="sr-only">Close</span>
+          <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+        </button>
+      </div>
+      <form action="{{ url_for('webapp.report_book', id=context.book_details.id) }}" id="book-report-form" method="POST">
+        <div class="gridgrid-col-1 gap-4 p-6">
+          <div class="relative z-0 w-full mb-6 group">
+            {% if current_user.is_authenticated %}
+            <input type="email" name="report-email" id="floating_email" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-slate-600 focus:outline-none focus:ring-0 focus:border-slate-600 peer" placeholder="" value="{{current_user|string}}" required readonly />
+            <label for="floating_email" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-slate-600 peer-focus:dark:text-slate-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Email address</label>
+            {% else %}
+            <input type="email" name="floating_email" id="floating_email" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-slate-600 focus:outline-none focus:ring-0 focus:border-slate-600 peer" placeholder="" value="" required readonly />
+            <label for="floating_email" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-slate-600 peer-focus:dark:text-slate-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Email address</label>
+            {% endif %}
+          </div>
+          <div class="relative z-0 w-full mb-6 group">
+            <input type="text" name="report-title" id="floating_text" class="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-slate-600 focus:outline-none focus:ring-0 focus:border-slate-600 peer" placeholder="" value="{{context.book_details.title}}" required readonly />
+            <label for="floating_text" class="peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-slate-600 peer-focus:dark:text-slate-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">Subject</label>
+          </div>
+          <label for="message" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your message</label>
+          <textarea id="message" maxlength="1000" name="report-subject" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-themeMain focus:border-themeMain dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-themeMain dark:focus:border-themeMain" placeholder="Explain the issue(s)..." required></textarea>
+        </div>
+        <div class="flex items-center p-6 space-x-2 rounded-b border-t border-gray-600">
+          {% if current_user.is_authenticated %}
+          <button type="submit" class="g-recaptcha text-white focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 bg-red-600 hover:bg-red-900 focus:outline-none focus:ring-read-800 transition-colors" data-sitekey="{{context.site_key}}" data-callback='onSubmit' data-action='submit' class="">Report</button>
+          {% endif %}
+          <button onclick="toggleModal(this)" data-modal-toggle="report-modal" type="button" class="focus:ring-4 focus:outline-none rounded-lg border text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 bg-gray-700 text-gray-300 border-gray-500 hover:text-white hover:bg-gray-600 focus:ring-gray-600 transition-colors">Close</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- END Report Modal section -->
+<!-- Rate Modal section -->
+<div id="rate-modal" class="fixed top-0 left-0 z-30 bg-slate-900/50 w-full h-full backdrop-blur-sm hidden">
+  <div class="relative p-4 pt-10 w-full max-w-2xl h-full md:h-auto mx-auto">
+    <div class="relative bg-BGColor rounded-lg box-shadow">
+      <div class="flex justify-between items-start p-4 rounded-t border-b border-gray-600">
+        <h3 class="text-xl font-semibold text-white">
+          Rate {{context.book_details.title}}
+        </h3>
+        <button type="button" onclick="toggleModal(this)" data-modal-toggle="rate-modal" class="ml-auto -mx-1.5 -my-1.5 bg-BGColorDarkLight text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8" aria-label="Close">
+          <span class="sr-only">Close</span>
+          <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+        </button>
+      </div>
+      <div class="grid sm:grid-cols-2 grid-col-1 gap-4 p-6">
+
+        <ul class="w-48 mx-auto text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+          <li class="w-full border-b hover:bg-themeDark border-gray-200 rounded-t-lg dark:border-gray-600">
+            <div class="flex items-center pl-3">
+              <input id="list-radio-1" type="radio" value="1" name="rate-radio" class="w-4 h-4 text-themeMain focus:ring-blue-600 ring-offset-gray-700 focus:ring-offset-gray-700 focus:ring-2 bg-gray-600 border-gray-500">
+              <label for="list-radio-1" class="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">(1) Appalling </label>
+            </div>
+          </li>
+          <li class="w-full border-b hover:bg-themeDark border-gray-200 dark:border-gray-600">
+            <div class="flex items-center pl-3">
+              <input id="list-radio-2" type="radio" value="2" name="rate-radio" class="w-4 h-4 text-themeMain focus:ring-blue-600 ring-offset-gray-700 focus:ring-offset-gray-700 focus:ring-2 bg-gray-600 border-gray-500">
+              <label for="list-radio-2" class="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">(2) Horrible </label>
+            </div>
+          </li>
+          <li class="w-full border-b hover:bg-themeDark border-gray-200 dark:border-gray-600">
+            <div class="flex items-center pl-3">
+              <input id="list-radio-3" type="radio" value="3" name="rate-radio" class="w-4 h-4 text-themeMain focus:ring-blue-600 ring-offset-gray-700 focus:ring-offset-gray-700 focus:ring-2 bg-gray-600 border-gray-500">
+              <label for="list-radio-3" class="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">(3) Very Bad</label>
+            </div>
+          </li>
+          <li class="w-full border-b hover:bg-themeDark border-gray-200 dark:border-gray-600">
+            <div class="flex items-center pl-3">
+              <input id="list-radio-4" type="radio" value="4" name="rate-radio" class="w-4 h-4 text-themeMain focus:ring-blue-600 ring-offset-gray-700 focus:ring-offset-gray-700 focus:ring-2 bg-gray-600 border-gray-500">
+              <label for="list-radio-4" class="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">(4) Bad </label>
+            </div>
+          </li>
+          <li class="w-full hover:bg-themeDark border-gray-200 rounded-b-lg dark:border-gray-600">
+            <div class="flex items-center pl-3">
+              <input id="list-radio-5" type="radio" value="5" name="rate-radio" class="w-4 h-4 text-themeMain focus:ring-blue-600 ring-offset-gray-700 focus:ring-offset-gray-700 focus:ring-2 bg-gray-600 border-gray-500">
+              <label for="list-radio-5" class="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">(5) Average </label>
+            </div>
+          </li>
+        </ul>
+        <ul class="w-48 mx-auto text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+          <li class="w-full border-b hover:bg-themeDark border-gray-200 rounded-t-lg dark:border-gray-600">
+            <div class="flex items-center pl-3">
+              <input id="list-radio-6" type="radio" value="6" name="rate-radio" class="w-4 h-4 text-themeMain focus:ring-blue-600 ring-offset-gray-700 focus:ring-offset-gray-700 focus:ring-2 bg-gray-600 border-gray-500">
+              <label for="list-radio-6" class="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">(6) Fine </label>
+            </div>
+          </li>
+          <li class="w-full border-b hover:bg-themeDark border-gray-200 dark:border-gray-600">
+            <div class="flex items-center pl-3">
+              <input id="list-radio-7" type="radio" value="7" name="rate-radio" class="w-4 h-4 text-themeMain focus:ring-blue-600 ring-offset-gray-700 focus:ring-offset-gray-700 focus:ring-2 bg-gray-600 border-gray-500">
+              <label for="list-radio-7" class="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">(7) Good </label>
+            </div>
+          </li>
+          <li class="w-full border-b hover:bg-themeDark border-gray-200 dark:border-gray-600">
+            <div class="flex items-center pl-3">
+              <input id="list-radio-8" type="radio" value="8" name="rate-radio" class="w-4 h-4 text-themeMain focus:ring-blue-600 ring-offset-gray-700 focus:ring-offset-gray-700 focus:ring-2 bg-gray-600 border-gray-500">
+              <label for="list-radio-8" class="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">(8) Very Good </label>
+            </div>
+          </li>
+          <li class="w-full border-b hover:bg-themeDark border-gray-200 dark:border-gray-600">
+            <div class="flex items-center pl-3">
+              <input id="list-radio-9" type="radio" value="9" name="rate-radio" class="w-4 h-4 text-themeMain focus:ring-blue-600 ring-offset-gray-700 focus:ring-offset-gray-700 focus:ring-2 bg-gray-600 border-gray-500">
+              <label for="list-radio-9" class="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">(9) Great </label>
+            </div>
+          </li>
+          <li class="w-full hover:bg-themeDark border-gray-200 rounded-b-lg dark:border-gray-600">
+            <div class="flex items-center pl-3">
+              <input id="list-radio-10" type="radio" value="10" name="rate-radio" class="w-4 h-4 text-themeMain focus:ring-blue-600 ring-offset-gray-700 focus:ring-offset-gray-700 focus:ring-2 bg-gray-600 border-gray-500">
+              <label for="list-radio-10" class="w-full py-3 ml-2 text-sm font-medium text-gray-900 dark:text-gray-300">(10) Masterpiece </label>
+            </div>
+          </li>
+        </ul>
+
+      </div>
+      <div class="flex items-center p-6 space-x-2 rounded-b border-t border-gray-600">
+          <button onclick="rateThisBook(this)" data-book-value="{{context.book_details.id}}" class="text-white focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 bg-themeMain hover:bg-themeDarkLight focus:outline-none focus:ring-teal-800 transition-colors">Save</button>
+          <button onclick="toggleModal(this)" data-modal-toggle="rate-modal" type="button" class="focus:ring-4 focus:outline-none rounded-lg border text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 bg-gray-700 text-gray-300 border-gray-500 hover:text-white hover:bg-gray-600 focus:ring-gray-600 transition-colors">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- END Rate Modal section -->
+<!-- toast section -->
+<div class="fixed bottom-4 right-4 z-30">
+  <div class="toast-message special-toast-message flex items-center p-4 mb-4 w-full max-w-xs text-gray-500 bg-BGColorLight rounded-lg drop-shadow" role="alert" style="display: none;">
+    <div class="inline-flex flex-shrink-0 justify-center items-center w-8 h-8 text-slate-200 bg-slate-600 rounded-lg">
+      <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
+      <span class="sr-only">Check icon</span>
+    </div>
+    <div class="ml-3 text-sm font-normal pr-4" id="special-toast-content">Hi</div>
+    <button type="button" onclick="dismissToast(this)" class="ml-auto -mx-1.5 -my-1.5 bg-BGColorDarkLight text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex h-8 w-8" aria-label="Close">
+      <span class="sr-only">Close</span>
+      <svg aria-hidden="true" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+    </button>
+  </div>
+</div>
+<!-- END toast section -->
 
 
 {% endblock %}
 {% block scripts %}
 <script>
+  function onSubmit(token) {
+    document.getElementById("book-report-form").submit();
+  }
+  {% if context.book_rating %}
+  $(function() {
+    $("#list-radio-{{context.book_rating}}").prop("checked", true);
+  });
+  {% endif %}
+
+  function invokeToast(msg){
+    $('#special-toast-content').html(msg);
+    $('.special-toast-message').fadeIn('fast');
+    setTimeout(function(){
+      $('.special-toast-message').fadeOut('slow');
+    }, 5000);
+  }
+
   function deleteChapter(chapter){
     if (confirm("Do you really want to delete this chapter?") == true) {
       $.ajax({
@@ -161,19 +335,55 @@
       });
     }
   }
-</script>
-<script type="module">
-  var swiper = new Swiper('.swiper', {
-    slidesPerView: 'auto',
-    mousewheel: true,
-    pagination: {
-      el: '.swiper-pagination',
-      clickable: true,
-    },
-    autoplay: {
-      delay: 2500,
-      disableOnInteraction: false,
-    },
-  });
+
+  function addToLibrary(elem){
+    let bookID = $(elem).data('bookValue');
+    var btn_span = $(elem).children();
+    $.ajax({
+      type: 'POST',
+      url: "{{ url_for('webapp.add_to_library') }}",
+      data: JSON.stringify({'book_id': bookID}),
+      contentType: "application/json",
+      success: function(response) {
+        if(response.value == 'redirect'){
+          window.location.href = "{{ url_for('webapp.login_page') }}";
+        } else if(response.value == 'added'){
+          btn_span.html("Remove from Library");
+          invokeToast("Book successfully added to your library.");
+        } else if(response.value == 'removed'){
+          btn_span.html("Add to Library");
+          invokeToast("Book successfully removed from your library.");
+        }
+      },
+      fail: function(xhr, status, error) {
+        invokeToast("Something went wrong. Please try again later.");
+      }
+    });
+  }
+
+  function rateThisBook(elem){
+    let bookID = $(elem).data('bookValue');
+    let rateVal = $('input[name="rate-radio"]:checked').val();
+    //console.log(bookID + " - " + rateVal);
+    $.ajax({
+      type: 'POST',
+      url: "{{ url_for('webapp.rate_book') }}",
+      data: JSON.stringify({'book_id': bookID, 'rate_val': rateVal}),
+      contentType: "application/json",
+      success: function(response) {
+        if(response.value == 'redirect'){
+          window.location.href = "{{ url_for('webapp.login_page') }}";
+        } else if(response.value == 'rated'){
+          invokeToast("Book rated successfully.");
+        } else if(response.value == 'updated'){
+          invokeToast("Book rating updated successfully.");
+        }
+      },
+      fail: function(xhr, status, error) {
+        invokeToast("Something went wrong. Please try again later.");
+      }
+    });
+    $('#rate-modal').fadeToggle('fast');
+  }
 </script>
 {% endblock %}

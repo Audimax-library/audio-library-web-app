@@ -5,8 +5,8 @@ import smtplib
 from dotenv import load_dotenv
 
 load_dotenv()
-email_sender = os.getenv('Gmail')
-email_password = os.getenv('Gmail-Password')
+email_sender = os.getenv('GMAIL_USER')
+email_password = os.getenv('GMAIL_PSWD')
 subject = 'Audimax NewsLetter'
 body ='subscribed to newsLetter'
 

@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
-import os
+import os, datetime
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -20,8 +20,8 @@ db = SQLAlchemy(app)
 from admin_model import User, Userlevel
 
 book_genres = db.Table("book_genres",
-  db.Column("book_id", db.Integer, db.ForeignKey("book.id"), primary_key=True),
-  db.Column("genre_id", db.Integer, db.ForeignKey("genre.id"), primary_key=True)
+  db.Column("book_id", db.Integer, db.ForeignKey("book.id", onupdate='CASCADE', ondelete='CASCADE'), primary_key=True),
+  db.Column("genre_id", db.Integer, db.ForeignKey("genre.id", onupdate='CASCADE', ondelete='CASCADE'), primary_key=True)
 )
 
 class Book(db.Model):
@@ -37,13 +37,14 @@ class Book(db.Model):
   updated = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
   author_name = db.Column(db.String(200), nullable=False, unique=False)
   is_approved = db.Column(db.Boolean, unique=False, default=0)
-  draft_user_email = db.Column(db.String(200), db.ForeignKey(User.email),nullable=False)
-  chapters = db.relationship('Chapter', backref="book")
+  draft_user_email = db.Column(db.String(200), db.ForeignKey(User.email, onupdate='CASCADE', ondelete='CASCADE'), nullable=False)
+  chapters = db.relationship('Chapter', back_populates="book_obj")
   genres = db.relationship("Genre", secondary=book_genres, back_populates="books")
   users = db.relationship(User, backref="book")
 
   def __repr__(self):
     return f'{self.title}'
+
 
 class Genre(db.Model):
   id = db.Column(db.Integer, autoincrement=True, primary_key=True)
@@ -55,9 +56,10 @@ class Genre(db.Model):
   def __repr__(self):
     return f'{self.id}-{self.title}'
 
+
 class Chapter(db.Model):
   id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-  order = db.Column(db.Integer, nullable=False, unique=True)
+  order = db.Column(db.Integer, nullable=False, unique=False)
   display_number = db.Column(db.String(10), nullable=False, unique=False)
   audio_url = db.Column(db.String(100), nullable=False, unique=False, server_default="sample.mp3")
   is_convert = db.Column(db.Boolean, unique=False, default=0)
@@ -65,49 +67,81 @@ class Chapter(db.Model):
   views = db.Column(db.Integer, nullable=False, default=0)
   created = db.Column(db.DateTime, server_default=db.func.now())
   updated = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
-  uploaded_by = db.Column(db.String(200), db.ForeignKey(User.email),nullable=False)
-  book_id = db.Column(db.Integer, db.ForeignKey('book.id'),nullable=False)
+  uploaded_by = db.Column(db.String(200), db.ForeignKey(User.email, onupdate='CASCADE', ondelete='CASCADE'), nullable=False)
+  book_id = db.Column(db.Integer, db.ForeignKey('book.id', onupdate='CASCADE', ondelete='CASCADE'), nullable=False)
   users = db.relationship(User, backref="chapter")
+
+  book_obj = db.relationship("Book", back_populates="chapters")
 
   def __repr__(self):
     return f'Chapter-{self.display_number}'
 
   @property
   def elapsed_time(self):
-    return (self.updated.strftime("%d/%m/%Y"))
+    current_time = datetime.datetime.now()
+    difference = current_time - self.updated
+    total_seconds = difference.total_seconds()
+    if total_seconds > 365*24*60*60: #years
+      return f"{int(divmod(total_seconds, 365*24*60*60)[0])} years ago..."
+    elif total_seconds > 30*24*60*60: #months
+      return f"{int(divmod(total_seconds, 30*24*60*60)[0])} months ago..."
+    elif total_seconds > 7*24*60*60: #weeks
+      return f"{int(divmod(total_seconds, 7*24*60*60)[0])} weeks ago..."
+    elif total_seconds > 24*60*60: #days
+      return f"{int(divmod(total_seconds, 24*60*60)[0])} days ago..."
+    elif total_seconds > 60*60: #hours
+      return f"{int(divmod(total_seconds, 60*60)[0])} hours ago..."
+    elif total_seconds > 60: #minutes
+      return f"{int(divmod(total_seconds, 60)[0])} minutes ago..."
+    elif total_seconds > 5: #seconds
+      return f"{int(total_seconds)} seconds ago..."
+    else:
+      return "Right now..."
 
-""" class Author(db.Model):
-  id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-  name = db.Column(db.String(200), nullable=False, unique=True)
-  created = db.Column(db.DateTime, server_default=db.func.now())
-  updated = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
-  books = db.relationship('Book', backref="author")
+class Library(db.Model):
+  book_id = db.Column(db.Integer, db.ForeignKey('book.id', onupdate='CASCADE', ondelete='CASCADE'),nullable=False, primary_key=True)
+  user_email = db.Column(db.String(200), db.ForeignKey(User.email, onupdate='CASCADE', ondelete='CASCADE'),nullable=False, primary_key=True)
 
   def __repr__(self):
-    return f'{self.name}' """
+    return f'Library-{self.book_id}-{self.user_email}'
 
 class Rating(db.Model):
-  rating_id = db.Column(db.Integer, autoincrement=True, primary_key=True)
-  book_id = db.Column(db.Integer, db.ForeignKey(Book.id), nullable=False)
-  user_id = db.Column(db.Integer, db.ForeignKey(User.id), nullable=False)
-  score = db.Column(db.Integer, nullable=False)
-
-  users = db.relationship(User, backref=db.backref("rating", order_by=rating_id))
-  books = db.relationship(Book, backref=db.backref("rating", order_by=rating_id))
+  book_id = db.Column(db.Integer, db.ForeignKey('book.id', onupdate='CASCADE', ondelete='CASCADE'),nullable=False, primary_key=True)
+  user_email = db.Column(db.String(200), db.ForeignKey(User.email, onupdate='CASCADE', ondelete='CASCADE'),nullable=False, primary_key=True)
+  rate_score = db.Column(db.Integer, nullable=False)
+  created_date = db.Column(db.DateTime, server_default=db.func.now())
+  updated = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
 
   def __repr__(self):
-    return f'Movie{self.book_id}-User{self.user_id}-score{self.score}'
+    return f'Rating-{self.book_id}-{self.user_email}-score{self.rate_score}'
+
+class ReportBook(db.Model):
+  id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+  user_email = db.Column(db.String(200), db.ForeignKey(User.email, onupdate='CASCADE', ondelete='CASCADE'),nullable=False)
+  title = db.Column(db.String(100), nullable=False, unique=False)
+  subject = db.Column(db.String(1000), nullable=True, unique=False)
+  is_read = db.Column(db.Boolean, unique=False, default=0)
+  created_date = db.Column(db.DateTime, server_default=db.func.now())
+
+  def __repr__(self):
+    return f'Report-{self.id}-{self.title}-{self.user_email}'
 
 class NewsLetterSubscription(db.Model):
-    subscription_id = db.Column(db.Integer, autoincrement=True, nullable=False, unique=True, primary_key=True)
-    email = db.Column(db.String(80), nullable=False, unique=True, primary_key=True)
-    created_date = db.Column(db.DateTime, server_default=db.func.now())
+  subscription_id = db.Column(db.Integer, autoincrement=True, nullable=False, unique=True, primary_key=True)
+  email = db.Column(db.String(80), nullable=False, unique=True, primary_key=True)
+  created_date = db.Column(db.DateTime, server_default=db.func.now())
 
-    # id - autoincrement
-    # email - unique/primary key
-    # created - date on create
-    def __repr__(self):
-        return f'MailID-{self.subscription_id}'  # set return value as id
+  def __repr__(self):
+    return f'MailID-{self.subscription_id}'
+
+class ListenHistory(db.Model):
+  user_email = db.Column(db.String(200), db.ForeignKey(User.email, onupdate='CASCADE', ondelete='CASCADE'), nullable=False, primary_key=True)
+  chapter_id = db.Column(db.Integer, db.ForeignKey(Chapter.id, onupdate='CASCADE', ondelete='CASCADE'), nullable=False, primary_key=True)
+  first_heard_on = db.Column(db.DateTime, server_default=db.func.now())
+  last_heard_on = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
+
+  def __repr__(self):
+    return f'History-{self.user_email}-{self.chapter_id}-{self.last_heard_on}'
 
 
 db.drop_all()
@@ -117,8 +151,10 @@ db.create_all()
 
 memberlvl = Userlevel(id=0, title="member")
 adminlvl = Userlevel(id=1, title="admin")
+
 db.session.add(memberlvl)
 db.session.add(adminlvl)
+
 objects = [
     Genre(title="Action and Adventure"),
     Genre(title="Classics"),
@@ -144,3 +180,49 @@ objects = [
 ]
 db.session.bulk_save_objects(objects)
 db.session.commit()
+
+##### Optional
+user1 = User(username="Dulan Pabasara", email="dulan9595531@gmail.com", password="$2b$12$Ay2Ln/FGK5lfD.DSrT3/7uIWUUudC8KFSrB5FSoeVEDafMx/BnTtW")
+book1 = Book(
+  title='Oliver Twist', 
+  alt_title="The Parish Boy's Progress", 
+  cover_img="689698d5-ac26-4e76-a97b-a0d7d9cece7a-new_title_cover.png", 
+  synopsis="Oliver Twist is a young orphan. His life in the workhouse is lonely and sad. Oliver becomes an apprentice for an undertaker but runs away after he gets into a fight with another apprentice. When Oliver arrives in London, he meets Jack, also known as the Artful Dodger, who offers him a place to stay.", 
+  status="Completed", 
+  language="English", 
+  author_name="Charles Dickens", 
+  draft_user_email="dulan9595531@gmail.com",
+  is_approved=1)
+book2 = Book(
+  title='A Tale of Two Cities', 
+  alt_title="A Tale of Two Cities (1997)", 
+  cover_img="689698d5-ac26-4e76-a97b-a0d7d9cece7a-new_title_cover.png", 
+  synopsis="A Tale of Two Cities is a historical novel published in 1859 by Charles Dickens, set in London and Paris before and during the French Revolution.", 
+  status="Completed", 
+  language="English", 
+  author_name="Charles Dickens", 
+  draft_user_email="dulan9595531@gmail.com",
+  is_approved=1)
+book3 = Book(
+  title='A Study in Scarlet', 
+  alt_title="A Study in Scarlet (1987)", 
+  cover_img="689698d5-ac26-4e76-a97b-a0d7d9cece7a-new_title_cover.png", 
+  synopsis="A Study in Scarlet is an 1887 detective novel by British writer Arthur Conan Doyle. The story marks the first appearance of Sherlock Holmes and Dr. Watson, who would become the most famous detective duo in literature.", 
+  status="Completed", 
+  language="English", 
+  author_name="Arthur Conan Doyle", 
+  draft_user_email="dulan9595531@gmail.com",
+  is_approved=1)
+genre_obj_classics = db.session.query(Genre).filter_by(id=2).first()
+genre_obj_mystery = db.session.query(Genre).filter_by(id=4).first()
+book1.genres.append(genre_obj_classics)
+book2.genres.append(genre_obj_classics)
+book3.genres.append(genre_obj_classics)
+book3.genres.append(genre_obj_mystery)
+db.session.add(user1)
+db.session.commit()
+db.session.add(book1)
+db.session.add(book2)
+db.session.add(book3)
+db.session.commit()
+######

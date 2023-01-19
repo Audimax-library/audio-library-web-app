@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template
 from webapp import db as webapp_db
 from admin import db as admin_db, login_manager, oauth, discord, bcrypt
 
@@ -41,6 +41,10 @@ from assisted.views import assisted
 app.register_blueprint(webapp, url_prefix="/")
 app.register_blueprint(admin, url_prefix="/admin")
 app.register_blueprint(assisted, url_prefix="/assisted")
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True)
