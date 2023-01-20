@@ -61,7 +61,7 @@
         </div>
         <button class="btn btn-success" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-book-{{draft.id}}" aria-expanded="false" aria-controls="collapse-book-{{draft.id}}">Chapters</button>
         <a href="{{url_for('webapp.update_title_page', id=draft.id)}}" class="btn btn-warning" target="_blank">Edit <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgb(0, 0, 0);"><path d="m13 3 3.293 3.293-7 7 1.414 1.414 7-7L21 11V3z"></path><path d="M19 19H5V5h7l-2-2H5c-1.103 0-2 .897-2 2v14c0 1.103.897 2 2 2h14c1.103 0 2-.897 2-2v-5l-2-2v7z"></path></svg></a>
-        <select class="form-select w-auto d-inline" id="change-state" data-book-id="{{draft.id}}">
+        <select class="form-select w-auto d-inline change-state" data-book-id="{{draft.id}}">
           <option value="1" selected>Approved</option>
           <option value="0">Pending</option>
         </select>
@@ -82,10 +82,10 @@
     });
   });
 
-  $('#change-state').change(function() {
-    var change_val = $('#change-state').val();
-    var book_id = $('#change-state').data('bookId');
-    if (confirm("This will will add this book back to the drafts. Are you sure?") == true) {
+  $('.change-state').change(function() {
+    var change_val = $(this).val();
+    var book_id = $(this).data('bookId');
+    if (confirm("This will add this book back to the drafts. Are you sure?") == true) {
       $.ajax({
         type: "POST",
         url: "{{url_for('admin.manage_books_page')}}",
@@ -100,9 +100,8 @@
           console.log("Internal Server Error: 500");
         }
       });
-      console.log("good");
     } else{
-      $('#change-state').val(1);
+      $('.change-state').val(1);
     }
   });
 </script>

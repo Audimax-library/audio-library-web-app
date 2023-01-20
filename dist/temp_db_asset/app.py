@@ -24,6 +24,7 @@ book_genres = db.Table("book_genres",
   db.Column("genre_id", db.Integer, db.ForeignKey("genre.id", onupdate='CASCADE', ondelete='CASCADE'), primary_key=True)
 )
 
+
 class Book(db.Model):
   id = db.Column(db.Integer, autoincrement=True, primary_key=True)
   title = db.Column(db.String(100), nullable=False, unique=True)
@@ -79,7 +80,7 @@ class Chapter(db.Model):
   @property
   def elapsed_time(self):
     current_time = datetime.datetime.now()
-    difference = current_time - self.updated
+    difference = current_time - self.created
     total_seconds = difference.total_seconds()
     if total_seconds > 365*24*60*60: #years
       return f"{int(divmod(total_seconds, 365*24*60*60)[0])} years ago..."
@@ -98,6 +99,7 @@ class Chapter(db.Model):
     else:
       return "Right now..."
 
+
 class Library(db.Model):
   book_id = db.Column(db.Integer, db.ForeignKey('book.id', onupdate='CASCADE', ondelete='CASCADE'),nullable=False, primary_key=True)
   user_email = db.Column(db.String(200), db.ForeignKey(User.email, onupdate='CASCADE', ondelete='CASCADE'),nullable=False, primary_key=True)
@@ -109,8 +111,6 @@ class Rating(db.Model):
   book_id = db.Column(db.Integer, db.ForeignKey('book.id', onupdate='CASCADE', ondelete='CASCADE'),nullable=False, primary_key=True)
   user_email = db.Column(db.String(200), db.ForeignKey(User.email, onupdate='CASCADE', ondelete='CASCADE'),nullable=False, primary_key=True)
   rate_score = db.Column(db.Integer, nullable=False)
-  created_date = db.Column(db.DateTime, server_default=db.func.now())
-  updated = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
 
   def __repr__(self):
     return f'Rating-{self.book_id}-{self.user_email}-score{self.rate_score}'
@@ -126,6 +126,7 @@ class ReportBook(db.Model):
   def __repr__(self):
     return f'Report-{self.id}-{self.title}-{self.user_email}'
 
+# newsletter model
 class NewsLetterSubscription(db.Model):
   subscription_id = db.Column(db.Integer, autoincrement=True, nullable=False, unique=True, primary_key=True)
   email = db.Column(db.String(80), nullable=False, unique=True, primary_key=True)
@@ -151,9 +152,11 @@ db.create_all()
 
 memberlvl = Userlevel(id=0, title="member")
 adminlvl = Userlevel(id=1, title="admin")
+modlvl = Userlevel(id=2, title="moderator")
 
 db.session.add(memberlvl)
 db.session.add(adminlvl)
+db.session.add(modlvl)
 
 objects = [
     Genre(title="Action and Adventure"),
@@ -182,7 +185,7 @@ db.session.bulk_save_objects(objects)
 db.session.commit()
 
 ##### Optional
-user1 = User(username="Dulan Pabasara", email="dulan9595531@gmail.com", password="$2b$12$Ay2Ln/FGK5lfD.DSrT3/7uIWUUudC8KFSrB5FSoeVEDafMx/BnTtW")
+user1 = User(username="Dulan Pabasara", email="dulan9595531@gmail.com", password="$2b$12$Ay2Ln/FGK5lfD.DSrT3/7uIWUUudC8KFSrB5FSoeVEDafMx/BnTtW", userlevel=1)
 book1 = Book(
   title='Oliver Twist', 
   alt_title="The Parish Boy's Progress", 

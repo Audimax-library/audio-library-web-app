@@ -1,0 +1,201 @@
+{% extends 'dashboard_base.html' %}
+{% block title %}Manage Staff & Members | Audimax{% endblock %}
+{% block style %}
+<style>
+  
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5" style="padding-bottom: 5rem;">
+  <h4>Staff Users <span class="badge bg-secondary">{{context.all_staff|count}}</span> :</h4>
+  <table class="table table-light table-striped">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Username</th>
+        <th scope="col">User Level</th>
+        <th scope="col">Email</th>
+        <th scope="col">Status</th>
+        <th scope="col">Created On</th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in context.all_staff %}
+      <tr>
+        <th scope="row">{{user.id}}</th>
+        <td>{{user.username}}</td>
+        <td>
+          <select class="form-select w-auto d-inline form-select-sm" onchange="getChange(this, event)" data-user-id="{{user.id}}">
+            <option value="1" {% if user.userlevel == 1 %} selected {% endif %} >Admin</option>
+            <option value="2" {% if user.userlevel == 2 %} selected {% endif %} >Moderator</option>
+            <option value="0" {% if user.userlevel == 3 %} selected {% endif %}>Member</option>
+          </select>
+        </td>
+        <td>{{user.email}}</td>
+        <td>
+          {% if user.is_banned %}
+          <span class="badge rounded-pill bg-danger">Banned</span>
+          {% else %}
+          <span class="badge rounded-pill bg-success">Active</span>
+          {% endif %}
+        </td>
+        <td>{{user.created_on}}</td>
+        <td>
+          <button class="btn btn-danger btn-sm" onclick="takeAction(this, 'ban')" data-user-id="{{user.id}}" >Ban</button>
+          <button class="btn btn-warning btn-sm" onclick="takeAction(this, 'kick')" data-user-id="{{user.id}}" >Kick</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="d-block bg-light p-4 rounded my-3 border border-1 border-dark">
+    <h4>User Levels:</h4>
+    <ol>
+      <li><b>Admin:</b> Has the ability to access every functionality of the audimax platform.</li>
+      <li><b>Moderator:</b> Has limited access. Can approve drafts, manage books, edit genres, read issue reports.</li>
+      <li><b>Member:</b> Does not have access to the admin panel. All other client-side functionalities are allowed.</li>
+    </ol>
+  </div>
+  <h4>Member Users <span class="badge bg-secondary">{{context.all_member_count}}</span> :</h4>
+  <div class="col-12 col-xl-4 col-lg-4 col-md-6 col-sm-10">
+    <div class="input-group mb-3">
+      <span class="input-group-text" id="search-addon">Search</span>
+      <input type="text" id="search-input" class="form-control" aria-label="Search" aria-describedby="search-addon"">
+    </div>
+  </div>
+  <table class="table table-light table-striped">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Username</th>
+        <th scope="col">User Level</th>
+        <th scope="col">Email</th>
+        <th scope="col">Status</th>
+        <th scope="col">Created On</th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody id="user-search-results">
+      <tr>
+        <td class="text-center" scope="row" colspan="7"><i>Search for users...</i></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  $("#search-input").on("keyup", function() {
+    var value = $("#search-input").val();
+    var table_body = $('#user-search-results');
+    table_body.empty();
+    if(value.length >2){
+      $.ajax({
+        type: "POST",
+        url: "{{url_for('admin.manage_users_page')}}",
+        data: JSON.stringify({ 'value': value, 'type': 'search' }),
+        contentType: "application/json",
+        success: function(response) {
+          if(response.status == 'success'){
+            table_body.empty();
+            $.each(response.value, function( index, value ) {
+              table_body.append(`<tr>
+        <th scope="row">`+value.id+`</th>
+        <td>`+value.username+`</td>
+        <td>
+          <select class="form-select w-auto d-inline form-select-sm" onchange="getChange(this, event)" data-user-id="`+value.id+`">
+            <option value="1">Admin</option>
+            <option value="2">Moderator</option>
+            <option value="0" selected>Member</option>
+          </select>
+        </td>
+        <td>`+value.email+`</td>
+        <td>
+          `+value.status_element+`
+        </td>
+        <td>`+value.created_on+`</td>
+        <td>
+          <button class="btn btn-danger btn-sm" onclick="takeAction(this, 'ban')" data-user-id="`+value.id+`">Ban</button>
+          <button class="btn btn-warning btn-sm" onclick="takeAction(this, 'kick')" data-user-id="`+value.id+`">Kick</button>
+        </td>
+      </tr>`);
+            });
+            if (response.value === undefined || response.value.length == 0) {
+              table_body.empty();
+              table_body.append(`<tr><td class="text-center" scope="row" colspan="7"><i>No Results! Try Again.</i></td></tr>`);
+            }
+          }
+        }, 
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          console.log("Internal Server Error: 500");
+        }
+      });
+    }
+  });
+
+  function getChange(elem, e){
+    e.preventDefault();
+    var change_val = $(elem).val();
+    var user_id = $(elem).data('userId');
+    console.log(change_val + "--" + user_id);
+    if (confirm("This action will change selected user's level. Are you sure?") == true) {
+      $.ajax({
+        type: "POST",
+        url: "{{url_for('admin.manage_users_page')}}",
+        data: JSON.stringify({ 'change_value': change_val, 'user_id': user_id, 'type': 'role' }),
+        contentType: "application/json",
+        success: function(response) {
+          if(response.value == 'updated'){
+            location.reload();
+          }
+        }, 
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          console.log("Internal Server Error: 500");
+        }
+      });
+    }
+  }
+
+  function takeAction(elem, action){
+    var user_id = $(elem).data('userId');
+    if(action == 'ban'){
+      if (confirm("Ban this user?") == true) {
+        $.ajax({
+          type: "POST",
+          url: "{{url_for('admin.manage_users_page')}}",
+          data: JSON.stringify({ 'user_id': user_id, 'type': 'ban' }),
+          contentType: "application/json",
+          success: function(response) {
+            if(response.value == 'updated'){
+              location.reload();
+            }
+          }, 
+          error: function(XMLHttpRequest, textStatus, errorThrown) {
+            console.log("Internal Server Error: 500");
+          }
+        });
+      }
+    } else if(action == 'kick'){
+      if (confirm("Kick this user?") == true) {
+        $.ajax({
+          type: "POST",
+          url: "{{url_for('admin.manage_users_page')}}",
+          data: JSON.stringify({ 'user_id': user_id, 'type': 'kick' }),
+          contentType: "application/json",
+          success: function(response) {
+            if(response.value == 'updated'){
+              location.reload();
+            }
+          }, 
+          error: function(XMLHttpRequest, textStatus, errorThrown) {
+            console.log("Internal Server Error: 500");
+          }
+        });
+      }
+    }
+  }
+</script>
+{% endblock %}

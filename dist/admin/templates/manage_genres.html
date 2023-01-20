@@ -1,0 +1,104 @@
+{% extends 'dashboard_base.html' %}
+{% block title %}Manage Staff & Members | Audimax{% endblock %}
+{% block style %}
+<style>
+  
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5" style="padding-bottom: 5rem;">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-4 px-4 mb-4">
+      <h4>Add new genre:</h4>
+      <form action="" method="POST">
+        <div class="mb-3">
+          <label for="newgenretitle" class="form-label">New Genre Title:</label>
+          <input type="text" class="form-control" placeholder="Title..." id="newgenretitle" name="genre_title">
+        </div>
+        <button type="submit" class="btn btn-success">Add Genre</button>
+      </form>
+    </div>
+    <div class="col-12 col-md-8 mb-4">
+      <h4>Genres <span class="badge bg-secondary">{{context.all_genre|count}}</span> :</h4>
+      <div class="col-12 col-xl-4 col-lg-4 col-md-6 col-sm-10">
+        <div class="input-group mb-3">
+          <span class="input-group-text" id="search-addon">Search</span>
+          <input type="text" id="search-input" class="form-control" aria-label="Search" aria-describedby="search-addon"">
+        </div>
+      </div>
+      <table class="table table-light table-striped" id="genre-table">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Genre</th>
+            <th scope="col">Created On</th>
+            <th scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="user-search-results">
+          {% for genre in context.all_genre %}
+          <tr>
+            <td scope="row">{{genre.id}}</td>
+            <td>{{genre.title}} <span class="badge rounded-pill bg-info text-dark">{{genre.books|count}}</span> <button class="btn btn-outline-secondary btn-sm" onclick="editGenre(this)" data-genre-id="{{genre.id}}" data-genre-title="{{genre.title}}" ><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgb(165, 175, 184);"><path d="m16 2.012 3 3L16.713 7.3l-3-3zM4 14v3h3l8.299-8.287-3-3zm0 6h16v2H4z"></path></svg> Edit</button></td>
+            <td>{{genre.created}}</td>
+            <td><button class="btn btn-warning btn-sm" onclick="takeAction(this)" data-genre-id="{{genre.id}}" >Delete</button></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  
+  
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  $("#search-input").on("keyup", function() {
+    var value = $(this).val().toLowerCase();
+    $("#genre-table tbody tr").filter(function() {
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    });
+  });
+
+  function takeAction(elem){
+    var genre_id = $(elem).data('genreId');
+    if (confirm("Delete this genre?") == true) {
+      $.ajax({
+        type: "POST",
+        url: "{{url_for('admin.manage_genres_page')}}",
+        data: JSON.stringify({ 'genre_id': genre_id, 'type': 'add_new' }),
+        contentType: "application/json",
+        success: function(response) {
+          location.reload();
+        }, 
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          console.log("Internal Server Error: 500");
+        }
+      });
+    }
+  }
+
+  function editGenre(elem){
+    var genre_id = $(elem).data('genreId');
+    var genre_title = $(elem).data('genreTitle');
+    let new_title = prompt("Please enter the new genre name:", genre_title);
+    if (! (new_title == null || new_title == "")) {
+      $.ajax({
+        type: "POST",
+        url: "{{url_for('admin.manage_genres_page')}}",
+        data: JSON.stringify({ 'genre_id': genre_id, 'new_title': new_title, 'type': 'update' }),
+        contentType: "application/json",
+        success: function(response) {
+          location.reload();
+        }, 
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          console.log("Internal Server Error: 500");
+        }
+      });
+    }
+  }
+</script>
+{% endblock %}

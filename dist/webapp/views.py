@@ -602,12 +602,16 @@ def login_page():
         #print(request.form.getlist('rememberme'))
         if(user):
             if(bcrypt.check_password_hash(user.password, form.password.data)):
-                if(len(request.form.getlist('rememberme')) > 0):
-                    login_user(user, remember=True, duration=datetime.timedelta(days=30))
+                if(user.is_banned == 0):
+                    if(len(request.form.getlist('rememberme')) > 0):
+                        login_user(user, remember=True, duration=datetime.timedelta(days=30))
+                    else:
+                        login_user(user)
+                    flash(f'Welcome back, {user.username}.', 'success')
+                    return redirect(url_for('webapp.home_page'))
                 else:
-                    login_user(user)
-                flash(f'Welcome back, {user.username}.', 'success')
-                return redirect(url_for('webapp.home_page'))
+                    flash("Your account has been banned due to suspicious activity.", 'error')
+                    return redirect(url_for('webapp.home_page'))
             else:
                 flash('Invalid Password.', 'error')
         else:
@@ -667,9 +671,13 @@ def authorize():
     session['profile'] = user
     userQuery = User.query.filter_by(email=user['email']).first()
     if(userQuery):
-        login_user(userQuery, remember=True, duration=datetime.timedelta(days=7))
-        flash(f'Welcome back, {userQuery.username}.', 'success')
-        return redirect(url_for('webapp.home_page'))
+        if(userQuery.is_banned == 0):
+            login_user(userQuery, remember=True, duration=datetime.timedelta(days=7))
+            flash(f'Welcome back, {userQuery.username}.', 'success')
+            return redirect(url_for('webapp.home_page'))
+        else:
+            flash("Your account has been banned due to suspicious activity.", 'error')
+            return redirect(url_for('webapp.home_page'))
     flash('This email is not a registered email. Please sign up first to use SSO.', 'error')
     return redirect(url_for('webapp.login_page'))
 

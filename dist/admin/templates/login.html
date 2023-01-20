@@ -16,7 +16,7 @@
 {% endblock %}
 {% block content %}
 <div class="container mt-5 py-5">
-  <div id="login-container" class="col-lg-6 col-12 p-4 shadow-sm mx-auto">
+  <div id="login-container" class="col-lg-6 col-12 p-4 shadow mx-auto">
     <h1 class="fw-bold">Admin Login</h1>
     <form action="" method="POST">
       {{ context.form.hidden_tag() }}
@@ -40,7 +40,7 @@
       - OR -
     </div>
     <div class="text-center">
-      <a href="{{ url_for('admin.discord_login') }}"><img class="py-3" src="{{url_for('admin.static', filename='img/discord_login.png')}}" alt="Login with google"></a>
+      <a href="{{ url_for('admin.discord_login') }}"><img class="py-3" src="{{url_for('admin.static', filename='img/discord_login1.png')}}" alt="Login with google"></a>
     </div>
   </div>
 </div>
