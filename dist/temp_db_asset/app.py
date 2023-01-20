@@ -111,6 +111,8 @@ class Rating(db.Model):
   book_id = db.Column(db.Integer, db.ForeignKey('book.id', onupdate='CASCADE', ondelete='CASCADE'),nullable=False, primary_key=True)
   user_email = db.Column(db.String(200), db.ForeignKey(User.email, onupdate='CASCADE', ondelete='CASCADE'),nullable=False, primary_key=True)
   rate_score = db.Column(db.Integer, nullable=False)
+  created_date = db.Column(db.DateTime, server_default=db.func.now())
+  updated = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
 
   def __repr__(self):
     return f'Rating-{self.book_id}-{self.user_email}-score{self.rate_score}'
