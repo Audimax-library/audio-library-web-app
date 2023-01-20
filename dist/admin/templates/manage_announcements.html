@@ -1,0 +1,69 @@
+{% extends 'dashboard_base.html' %}
+{% block title %}Manage Announcement | Audimax{% endblock %}
+{% block style %}
+<style>
+  
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5" style="padding-bottom: 5rem;">
+  <h4>Add new Announcement:</h4>
+  <form action="" method="POST">
+    <div class="mb-3">
+      <label for="announcetitle" class="form-label">Announcement Title:</label>
+      <input type="text" class="form-control" placeholder="Title..." id="announcetitle" name="announce_title" required>
+    </div>
+    <div class="mb-3">
+      <label for="announcecontent" class="form-label">Announcement Content: (In MarkDown Syntax)</label>
+      <textarea class="form-control" name="announce_content" id="announcecontent" rows="10"></textarea>
+    </div>
+    <button type="submit" class="btn btn-success">Publish Now</button>
+  </form>
+  <h4 class="mt-4">Published Announcements:</h4>
+  <table class="table table-light table-striped">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Title</th>
+        <th scope="col">Created On</th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for announce in context.all_announce %}
+      <tr>
+        <th scope="row">{{announce.id}}</th>
+        <td>{{announce.title}}</td>
+        <td>{{announce.created_date}}</td>
+        <td>
+          <button class="btn btn-danger btn-sm" onclick="takeAction(this, '{{announce.id}}')" >Delete</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function takeAction(elem, announce_id){
+    if (confirm("Delete this announcement?") == true) {
+      $.ajax({
+        type: "POST",
+        url: "{{url_for('admin.manage_announcement_page')}}",
+        data: JSON.stringify({ 'announce_id': announce_id }),
+        contentType: "application/json",
+        success: function(response) {
+          location.reload();
+        }, 
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          console.log("Internal Server Error: 500");
+        }
+      });
+    }
+  }
+</script>
+{% endblock %}

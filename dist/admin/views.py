@@ -1,7 +1,7 @@
 from flask import Blueprint,render_template, redirect, url_for, session, flash, request, jsonify
 from .forms import RegistrationForm, LoginForm
 from .models import User
-from webapp.models import Book, Chapter, Genre
+from webapp.models import Book, Chapter, Genre, Announcement
 from admin import db, login_manager, oauth, discord, bcrypt
 from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy import desc, or_, and_
@@ -289,6 +289,45 @@ def manage_genres_page():
         'all_genre':all_genre,
         }
     return render_template('manage_genres.html', context=context)
+
+####### Manage announcements
+@admin.route('/dashboard/announcement/', methods=['GET', 'POST'])
+@login_required
+def manage_announcement_page():
+    if not(is_allowed(current_user, allowed_roles=[1,])):
+        flash('You are not authorized to manage users.', 'error')
+        return redirect(url_for('admin.home_page'))
+    if request.method == 'POST':
+        if request.form:
+            new_title = request.form['announce_title']
+            new_content = request.form['announce_content']
+            if new_content:
+                try:
+                    new_announce = Announcement(title=new_title, content=new_content)
+                    db.session.add(new_announce)
+                    db.session.commit()
+                    flash("The announcement has been published.",'success')
+                except:
+                    flash("An error occured while adding the announcement.",'error')
+                return redirect(url_for('admin.manage_announcement_page'))
+        else:
+            try:
+                data = request.get_json()['announce_id']
+                current_details = db.session.query(Announcement).filter_by(id=int(data)).delete()
+                db.session.commit()
+                flash("Announcement deleted successfully.",'success')
+            except:
+                flash("Announcement delete failed.",'error')
+            return jsonify({'status': 'success', 'value': ''})
+    all_announce = Announcement.query.order_by(desc(Announcement.created_date)).all()
+    context = {
+        'user':current_user,
+        'all_announce':all_announce,
+        }
+    return render_template('manage_announcements.html', context=context) 
+
+
+
 #### google OAuth
 @admin.route('/oauth')
 def oauth_login():

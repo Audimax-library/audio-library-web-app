@@ -706,6 +706,16 @@ video {
   grid-row: span 2 / span 2;
 }
 
+.mx-auto{
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.my-8{
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+
 .mx-2{
   margin-left: 0.5rem;
   margin-right: 0.5rem;
@@ -724,11 +734,6 @@ video {
 .my-4{
   margin-top: 1rem;
   margin-bottom: 1rem;
-}
-
-.mx-auto{
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .-mx-1\.5{
@@ -766,14 +771,14 @@ video {
   margin-bottom: 5rem;
 }
 
-.my-8{
-  margin-top: 2rem;
-  margin-bottom: 2rem;
-}
-
 .mx-4{
   margin-left: 1rem;
   margin-right: 1rem;
+}
+
+.my-2{
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .mr-2{
@@ -1585,6 +1590,11 @@ video {
   text-align: start;
 }
 
+.text-4xl{
+  font-size: 2.25rem;
+  line-height: 2.5rem;
+}
+
 .text-sm{
   font-size: 0.875rem;
   line-height: 1.25rem;
@@ -1618,11 +1628,6 @@ video {
 .text-base{
   font-size: 1rem;
   line-height: 1.5rem;
-}
-
-.text-4xl{
-  font-size: 2.25rem;
-  line-height: 2.5rem;
 }
 
 .text-3xl{
@@ -1779,6 +1784,12 @@ video {
 .shadow-lg{
   --tw-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
   --tw-shadow-colored: 0 10px 15px -3px var(--tw-shadow-color), 0 4px 6px -4px var(--tw-shadow-color);
+  box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
+}
+
+.shadow{
+  --tw-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  --tw-shadow-colored: 0 1px 3px 0 var(--tw-shadow-color), 0 1px 2px -1px var(--tw-shadow-color);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 

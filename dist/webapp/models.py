@@ -1,6 +1,6 @@
 from webapp import db
 from admin.models import User, Userlevel
-import datetime
+import datetime, markdown
 
 book_genres = db.Table("book_genres",
   db.Column("book_id", db.Integer, db.ForeignKey("book.id", onupdate='CASCADE', ondelete='CASCADE'), primary_key=True),
@@ -128,6 +128,40 @@ class ListenHistory(db.Model):
 
   def __repr__(self):
     return f'History-{self.user_email}-{self.chapter_id}-{self.last_heard_on}'
+
+class Announcement(db.Model):
+  id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+  title = db.Column(db.String(100), nullable=False, unique=True)
+  content = db.Column(db.Text, nullable=False)
+  created_date = db.Column(db.DateTime, server_default=db.func.now())
+
+  def __repr__(self):
+    return f'{self.id}-{self.title}'
+  
+  @property
+  def elapsed_time(self):
+    current_time = datetime.datetime.now()
+    difference = current_time - self.created_date
+    total_seconds = difference.total_seconds()
+    if total_seconds > 365*24*60*60: #years
+      return f"{int(divmod(total_seconds, 365*24*60*60)[0])} years ago..."
+    elif total_seconds > 30*24*60*60: #months
+      return f"{int(divmod(total_seconds, 30*24*60*60)[0])} months ago..."
+    elif total_seconds > 7*24*60*60: #weeks
+      return f"{int(divmod(total_seconds, 7*24*60*60)[0])} weeks ago..."
+    elif total_seconds > 24*60*60: #days
+      return f"{int(divmod(total_seconds, 24*60*60)[0])} days ago..."
+    elif total_seconds > 60*60: #hours
+      return f"{int(divmod(total_seconds, 60*60)[0])} hours ago..."
+    elif total_seconds > 60: #minutes
+      return f"{int(divmod(total_seconds, 60)[0])} minutes ago..."
+    elif total_seconds > 5: #seconds
+      return f"{int(total_seconds)} seconds ago..."
+    else:
+      return "Right now..."
+  @property
+  def convert_MD(self):
+    return markdown.markdown(self.content)
 
 
 # db.create_all()

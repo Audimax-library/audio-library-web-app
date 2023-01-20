@@ -7,11 +7,11 @@ from flask_login import login_required, login_user, logout_user, current_user
 from admin import db, login_manager, oauth, discord, bcrypt
 from admin.forms import LoginForm, RegistrationForm
 from admin.models import User
-import datetime, json, re, os, threading, phonetics, requests, random
+import datetime, json, re, os, threading, phonetics, requests, random, markdown
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import desc, or_, func
 from sqlalchemy.dialects.mysql import insert #only works with mysql
-from .models import Genre, Book, Chapter, NewsLetterSubscription, Library, Rating, ReportBook, ListenHistory
+from .models import Genre, Book, Chapter, NewsLetterSubscription, Library, Rating, ReportBook, ListenHistory, Announcement
 from .send_email import send_mail
 from urllib.parse import parse_qs, urlparse
 from admin.views import is_allowed
@@ -586,6 +586,19 @@ def add_history():
             print('Invalid Request: You have to be logged in to keep playback history!')
             flash('You have to be logged in to keep playback history!', 'error')
             return jsonify({'status': 'unauthorized', 'value':'redirect'})
+
+######## Announcements page
+@webapp.route("/announcements/", methods=['GET', 'POST'])
+def announce_page():
+    all_announce = Announcement.query.order_by(desc(Announcement.created_date)).all()
+    context = {
+        "all_announce": all_announce,
+    }
+    if current_user.is_authenticated:
+        context['user_initial'] = str(current_user)[0:2].upper()
+        context['user_name'] = current_user.username
+    return render_template('announcements.html', context=context)
+
 
 ######## user login page 
 @webapp.route("/login/", methods=['GET', 'POST'])
