@@ -1,11 +1,12 @@
 from flask import Blueprint,render_template, redirect, url_for, session, flash, request, jsonify
 from .forms import RegistrationForm, LoginForm
 from .models import User
-from webapp.models import Book, Chapter, Genre, Announcement
+from webapp.models import Book, Chapter, Genre, Announcement, ReportBook, NewsLetterSubscription
+from webapp.send_email import send_newsletter, send_custom_newsletter
 from admin import db, login_manager, oauth, discord, bcrypt
 from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy import desc, or_, and_
-import os
+import os, threading
 
 admin = Blueprint('admin', __name__, static_folder="static", static_url_path="/admin/static" , template_folder='templates')
 login_manager.login_view = "admin.home_page"
@@ -326,7 +327,135 @@ def manage_announcement_page():
         }
     return render_template('manage_announcements.html', context=context) 
 
+####### Manage announcements
+@admin.route('/dashboard/reports/', methods=['GET', 'POST'])
+@login_required
+def manage_reports_page():
+    if not(is_allowed(current_user, allowed_roles=[1,2])):
+        flash('You are not authorized to manage users.', 'error')
+        return redirect(url_for('admin.home_page'))
+    if request.method == 'POST':
+        try:
+            data = request.get_json()
+            call_type = data['type']
+            report_id = data['report_id']
+            if call_type == 'change':
+                current_details = db.session.query(ReportBook).filter_by(id=int(report_id)).first()
+                if(current_details.is_read):
+                    current_details.is_read = 0
+                else:
+                    current_details.is_read = 1
+                db.session.commit()
+                flash("Report state changed successfully.",'success')
+            elif call_type == 'delete':
+                current_details = db.session.query(ReportBook).filter_by(id=int(report_id)).delete()
+                db.session.commit()
+                flash("Report deleted successfully.",'success')
+        except:
+            flash("Report state change failed.",'error')
+        return jsonify({'status': 'success', 'value': ''})
+    all_unread = ReportBook.query.filter_by(is_read=0).order_by(desc(ReportBook.created_date)).all()
+    all_read = ReportBook.query.filter_by(is_read=1).order_by(desc(ReportBook.created_date)).all()
+    context = {
+        'user':current_user,
+        'all_unread':all_unread,
+        'all_read':all_read,
+        }
+    return render_template('reports.html', context=context) 
 
+####### Manage announcements
+@admin.route('/dashboard/newsletter/', methods=['GET', 'POST'])
+@login_required
+def newsletter_page():
+    if not(is_allowed(current_user, allowed_roles=[1,])):
+        flash('You are not authorized to manage users.', 'error')
+        return redirect(url_for('admin.home_page'))
+    if request.method == 'POST':
+        if 'mail_content' in request.form:
+            if request.form['mail_content']:
+                all_subs = NewsLetterSubscription.query.all()
+                recep_list = []
+                for sub in all_subs:
+                    recep_list.append(str(sub.email))
+                if len(recep_list) > 500:
+                    threads = list()
+                    recep_list = [recep_list[i:i + 500] for i in range(0, len(recep_list), 500)]
+                    for mail_list in recep_list:
+                        thread = threading.Thread(target=send_custom_newsletter, args=(mail_list, request.form['mail_content']))
+                        threads.append(thread)
+                        thread.start()
+                else:
+                    thread = threading.Thread(target=send_custom_newsletter, args=(recep_list, request.form['mail_content']))
+                    thread.start()
+                flash("Newsletter sent to all subscribers.", "success")
+            return redirect(url_for('admin.newsletter_page'))
+        else:
+            all_subs = NewsLetterSubscription.query.all()
+            latest_books = Book.query.filter_by(is_approved=1).order_by(desc(Book.created)).limit(4).all()
+            mail_cards = ""
+            for book in latest_books:
+                mail_cards += f"""
+                <td class="column column-1" width="33.333333333333336%" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; font-weight: 400; text-align: left; vertical-align: top; border-top: 0px; border-right: 0px; border-bottom: 0px; border-left: 0px;">
+					<table class="image_block block-2" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
+						<tr>
+							<td class="pad" style="width:100%;padding-right:0px;padding-left:0px;padding-top:5px;">
+								<div class="alignment" align="center" style="line-height:10px"><img src="{request.url_root}webapp/static/uploads/{book.cover_img}" style="display: block; height: auto; border: 0; width: 200px; max-width: 100%;" width="200" alt="{book.title}" title="{book.title}"></div>
+							</td>
+						</tr>
+					</table>
+					<table class="text_block block-3" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
+						<tr>
+							<td class="pad">
+								<div style="font-family: sans-serif">
+									<div class style="font-size: 12px; font-family: Arial, Helvetica Neue, Helvetica, sans-serif; mso-line-height-alt: 14.399999999999999px; color: #ffffff; line-height: 1.2;">
+										<p style="margin: 0; font-size: 16px; text-align: center; mso-line-height-alt: 19.2px;"><em><strong>{book.title}</strong></em></p>
+									</div>
+								</div>
+							</td>
+						</tr>
+					</table>
+					<table class="text_block block-4" width="100%" border="0" cellpadding="10" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt; word-break: break-word;">
+						<tr>
+							<td class="pad">
+								<div style="font-family: sans-serif">
+									<div class style="font-size: 12px; font-family: Arial, Helvetica Neue, Helvetica, sans-serif; mso-line-height-alt: 14.399999999999999px; color: #ffffff; line-height: 1.2;">
+										<p style="margin: 0; font-size: 14px; text-align: center; mso-line-height-alt: 16.8px;">{book.synopsis}</p>
+									</div>
+								</div>
+							</td>
+						</tr>
+					</table>
+					<table class="button_block block-5" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
+						<tr>
+							<td class="pad" style="padding-bottom:15px;padding-left:10px;padding-right:10px;padding-top:10px;text-align:center;">
+								<div class="alignment" align="center">
+									<!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="{request.url_root}book/{book.id}/" style="height:42px;width:115px;v-text-anchor:middle;" arcsize="10%" stroke="false" fillcolor="#46cdcf"><w:anchorlock/><v:textbox inset="0px,0px,0px,0px"><center style="color:#ffffff; font-family:Arial, sans-serif; font-size:16px"><![endif]--><a href="{request.url_root}book/{book.id}/" target="_blank" style="text-decoration:none;display:inline-block;color:#ffffff;background-color:#46cdcf;border-radius:4px;width:auto;border-top:0px solid transparent;font-weight:400;border-right:0px solid transparent;border-bottom:0px solid transparent;border-left:0px solid transparent;padding-top:5px;padding-bottom:5px;font-family:Arial, Helvetica Neue, Helvetica, sans-serif;font-size:16px;text-align:center;mso-border-alt:none;word-break:keep-all;"><span style="padding-left:20px;padding-right:20px;font-size:16px;display:inline-block;letter-spacing:normal;"><span dir="ltr" style="margin: 0; word-break: break-word; line-height: 32px;">View Book</span></span></a>
+									<!--[if mso]></center></v:textbox></v:roundrect><![endif]-->
+								</div>
+							</td>
+						</tr>
+					</table>
+                </td>
+                """
+            recep_list = []
+            for sub in all_subs:
+                recep_list.append(str(sub.email))
+            if len(recep_list) > 500:
+                threads = list()
+                recep_list = [recep_list[i:i + 500] for i in range(0, len(recep_list), 500)]
+                for mail_list in recep_list:
+                    thread = threading.Thread(target=send_newsletter, args=(mail_list, mail_cards))
+                    threads.append(thread)
+                    thread.start()
+            else:
+                thread = threading.Thread(target=send_newsletter, args=(recep_list, mail_cards))
+                thread.start()
+            flash("Newsletter sent to all subscribers.", "success")
+            return redirect(url_for('admin.newsletter_page'))
+    context = {
+        'user':current_user,
+        }
+    return render_template('newsletter.html', context=context)
 
 #### google OAuth
 @admin.route('/oauth')

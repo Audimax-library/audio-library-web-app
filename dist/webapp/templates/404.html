@@ -1,1 +1,21 @@
-<h1>404</h1>
+{% extends 'base.html' %}
+{% block title %}404 - Not Found | Audimax{% endblock %}
+{% block content %}
+<style>
+  img{
+    max-width: 300px;
+  }
+</style>
+<div class="container text-center mx-auto mt-40">
+  <h1 class="text-8xl font-bold">404.</h1>
+  <p>Page Not Found</p>
+  <a href="{{url_for('webapp.home_page')}}" class="rounded relative btn cursor-pointer flex items-center px-3 my-4 mx-auto justify-center text-white bg-themeMain hover:bg-themeDarkLight active:bg-themeDark glow px-4 px-6" style="min-height: 48px; max-width: 300px;">
+    <span class="flex items-center justify-center font-medium select-none">
+      Back to Home
+    </span>
+  </a>
+</div>
+{% endblock %}
+{% block scripts %}
+
+{% endblock %}

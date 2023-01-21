@@ -1,0 +1,87 @@
+{% extends 'dashboard_base.html' %}
+{% block title %}Issue Reports | Audimax{% endblock %}
+{% block style %}
+<style>
+  
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5" style="padding-bottom: 5rem;">
+  <h4 class="fw-bold">Unread Issue Reports:</h4>
+  <div class="accordion" id="unreadsection">
+    {% if context.all_unread %}
+    {% for report in context.all_unread %}
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="heading-{{report.id}}">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{report.id}}" aria-expanded="false" aria-controls="collapse-{{report.id}}">
+          <p class="m-0"><b>{{report.title}}</b> <i>by</i> <u>{{report.user_email}}</u></p>
+        </button>
+      </h2>
+      <div id="collapse-{{report.id}}" class="accordion-collapse collapse" aria-labelledby="heading-{{report.id}}" data-bs-parent="#unreadsection">
+        <div class="accordion-body">
+          {{report.subject}}
+          <div class="mt-2">
+            <button class="btn btn-sm btn-info" onclick="changeState({{report.id}}, 'change')">Mark as read</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <i>There's no unread messages.</i>
+    {% endif %}
+  </div>
+
+  <h4 class="fw-bold mt-5">Read Issue Reports:</h4>
+  <div class="accordion" id="unreadsection">
+    {% if context.all_read %}
+    {% for report in context.all_read %}
+    <div class="accordion-item">
+      <h2 class="accordion-header" id="heading-{{report.id}}">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{report.id}}" aria-expanded="false" aria-controls="collapse-{{report.id}}">
+          <p class="m-0"><b>{{report.title}}</b> <i>by</i> <u>{{report.user_email}}</u></p>
+        </button>
+      </h2>
+      <div id="collapse-{{report.id}}" class="accordion-collapse collapse" aria-labelledby="heading-{{report.id}}" data-bs-parent="#unreadsection">
+        <div class="accordion-body">
+          <div class="text-muted">{{report.subject}}</div>
+          <div class="mt-2">
+            <button class="btn btn-sm btn-info" onclick="changeState({{report.id}}, 'change')">Unmark</button>
+            <button class="btn btn-sm btn-danger" onclick="changeState({{report.id}}, 'delete')">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <i>There's no read messages.</i>
+    {% endif %}
+  </div>
+  
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function changeState(report_id, mode){
+    if(mode == 'delete'){
+      if (confirm("Delete this report?") != true) {
+        return 0;
+      }
+    }
+    $.ajax({
+      type: "POST",
+      url: "{{url_for('admin.manage_reports_page')}}",
+      data: JSON.stringify({ 'report_id': report_id, 'type': mode }),
+      contentType: "application/json",
+      success: function(response) {
+        location.reload();
+      }, 
+      error: function(XMLHttpRequest, textStatus, errorThrown) {
+        console.log("Internal Server Error: 500");
+      }
+    });
+  }
+</script>
+{% endblock %}

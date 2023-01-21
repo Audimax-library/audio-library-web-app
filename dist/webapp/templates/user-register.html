@@ -72,7 +72,7 @@
           <span hidden id="checked-svg"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" class="text-icon-black dark:text-icon-white text-false icon"><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><path d="m9 11 3 3L22 4" stroke="#46cdcf" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
           <input type="checkbox" name="rememberme" id="rmbr-me" value="true" hidden>
         </span> 
-        <span>I have read and accept the <a href="#" class="text-themeMain font-bold">Rules</a>, <a href="#" class="text-themeMain font-bold">Terms & Conditions</a>.</span>
+        <span>I have read and accept the <a href="{{url_for('webapp.policy_page')}}" target="_blank" class="text-themeMain font-bold">Rules</a>, <a href="{{url_for('webapp.policy_page')}}" target="_blank" class="text-themeMain font-bold">Terms & Conditions</a>.</span>
       </label>
     </div> 
     <button id="reg-sub" type="submit" class="rounded relative btn flex items-center px-3 my-4 justify-center text-white bg-themeMain hover:bg-themeDarkLight active:bg-themeDark glow px-4 px-6" style="min-height: 48px; min-width: 100%;" disabled>

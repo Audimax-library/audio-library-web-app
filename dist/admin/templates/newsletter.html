@@ -1,0 +1,29 @@
+{% extends 'dashboard_base.html' %}
+{% block title %}Manage Newsletter and E-Mails | Audimax{% endblock %}
+{% block style %}
+
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5" style="padding-bottom: 5rem;">
+  <h2 class="fw-bold">Manage Newsletter and E-Mails</h2>
+  <div class="monthy-letter border border-1 border-dark bg-light p-4 rounded mb-4">
+    <h4>Monthly Newsletter</h4>
+    <p>This feature will allow you to send a newsletter to all the users who have signed up for the newsletter and it will showcase the latest books uploaded to the site.</p>
+    <form action="" method="post">
+      <button class="btn btn-outline-primary" type="submit">Send Newsletter</button>
+    </form>
+  </div>
+  <div class="monthy-letter border border-1 border-dark bg-light p-4 rounded mb-4">
+    <h4>Send Custom Newsletter</h4>
+    <p>This feature will allow you to send a custom newsletter to all the users who have signed up for the newsletter and it will display the html code given to the textfield.</p>
+    <form action="" method="post">
+      <textarea name="mail_content" id="" rows="10" class="form-control mb-3"></textarea>
+      <button class="btn btn-outline-primary" type="submit">Send Newsletter</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}

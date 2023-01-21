@@ -77,9 +77,19 @@ def filter_books(obj, status_list, genre_list):
     return return_book_list
 
 
+######## 404 page
+@webapp.errorhandler(404)
+def page_not_found(e):
+    context = {}
+    if current_user.is_authenticated:
+        context['user_initial'] = str(current_user)[0:2].upper()
+        #user = User.query.filter_by(email=str(current_user)).first()
+        context['user_name'] = current_user.username
+    return render_template('404.html', context=context), 404
+
 ######## home page
-@webapp.route("/", methods=['GET', 'POST'])
 @webapp.route("/home/", methods=['GET', 'POST'])
+@webapp.route("/", methods=['GET', 'POST'])
 def home_page():
     recent_books = Book.query.filter_by(is_approved=1).order_by(desc(Book.created)).limit(8).all()
     recent_chapters = Chapter.query.order_by(desc(Chapter.created)).limit(20).all()
@@ -367,7 +377,7 @@ def book_page(id):
     book_details = Book.query.get_or_404(id)
     if book_details.is_approved == 0:
         flash("You are not authorized to view this page.", 'error')
-        return redirect(url_for('webapp.home_page'))
+        abort(404)
     library_count = Library.query.filter_by(book_id=id).count()
     rating_total = db.session.query(
         func.sum(Rating.rate_score).label('rating_sum'),
@@ -445,7 +455,9 @@ def upload_chapter(id):
 def view_chapter(book_id,chapter_id):
     book_details = Book.query.get_or_404(book_id)
     chapter_details = Chapter.query.get_or_404(chapter_id)
-
+    if book_details.is_approved == 0:
+        flash("You are not authorized to view this page.", 'error')
+        abort(404)
     context = {
         "book_details": book_details,
         "chapter_details": chapter_details,
@@ -599,6 +611,14 @@ def announce_page():
         context['user_name'] = current_user.username
     return render_template('announcements.html', context=context)
 
+######## privacy policy page
+@webapp.route("/privacy-policy/", methods=['GET', 'POST'])
+def policy_page():
+    context = {}
+    if current_user.is_authenticated:
+        context['user_initial'] = str(current_user)[0:2].upper()
+        context['user_name'] = current_user.username
+    return render_template('privacy-policy.html', context=context)
 
 ######## user login page 
 @webapp.route("/login/", methods=['GET', 'POST'])
