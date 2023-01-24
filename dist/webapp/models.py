@@ -23,6 +23,7 @@ class Book(db.Model):
   is_approved = db.Column(db.Boolean, unique=False, default=0)
   draft_user_email = db.Column(db.String(200), db.ForeignKey(User.email, onupdate='CASCADE', ondelete='CASCADE'), nullable=False)
   chapters = db.relationship('Chapter', back_populates="book_obj")
+  library_record = db.relationship('Library', back_populates="book_obj")
   genres = db.relationship("Genre", secondary=book_genres, back_populates="books")
   users = db.relationship(User, backref="book")
 
@@ -54,6 +55,7 @@ class Chapter(db.Model):
   uploaded_by = db.Column(db.String(200), db.ForeignKey(User.email, onupdate='CASCADE', ondelete='CASCADE'), nullable=False)
   book_id = db.Column(db.Integer, db.ForeignKey('book.id', onupdate='CASCADE', ondelete='CASCADE'), nullable=False)
   users = db.relationship(User, backref="chapter")
+  chap_history = db.relationship('ListenHistory', back_populates="chapter_obj")
 
   book_obj = db.relationship("Book", back_populates="chapters")
 
@@ -87,6 +89,8 @@ class Library(db.Model):
   book_id = db.Column(db.Integer, db.ForeignKey('book.id', onupdate='CASCADE', ondelete='CASCADE'),nullable=False, primary_key=True)
   user_email = db.Column(db.String(200), db.ForeignKey(User.email, onupdate='CASCADE', ondelete='CASCADE'),nullable=False, primary_key=True)
 
+  book_obj = db.relationship("Book", back_populates="library_record")
+
   def __repr__(self):
     return f'Library-{self.book_id}-{self.user_email}'
 
@@ -110,6 +114,28 @@ class ReportBook(db.Model):
 
   def __repr__(self):
     return f'Report-{self.id}-{self.title}-{self.user_email}'
+  
+  @property
+  def elapsed_time(self):
+    current_time = datetime.datetime.now()
+    difference = current_time - self.created_date
+    total_seconds = difference.total_seconds()
+    if total_seconds > 365*24*60*60: #years
+      return f"{int(divmod(total_seconds, 365*24*60*60)[0])} years ago..."
+    elif total_seconds > 30*24*60*60: #months
+      return f"{int(divmod(total_seconds, 30*24*60*60)[0])} months ago..."
+    elif total_seconds > 7*24*60*60: #weeks
+      return f"{int(divmod(total_seconds, 7*24*60*60)[0])} weeks ago..."
+    elif total_seconds > 24*60*60: #days
+      return f"{int(divmod(total_seconds, 24*60*60)[0])} days ago..."
+    elif total_seconds > 60*60: #hours
+      return f"{int(divmod(total_seconds, 60*60)[0])} hours ago..."
+    elif total_seconds > 60: #minutes
+      return f"{int(divmod(total_seconds, 60)[0])} minutes ago..."
+    elif total_seconds > 5: #seconds
+      return f"{int(total_seconds)} seconds ago..."
+    else:
+      return "Right now..."
 
 # newsletter model
 class NewsLetterSubscription(db.Model):
@@ -126,8 +152,32 @@ class ListenHistory(db.Model):
   first_heard_on = db.Column(db.DateTime, server_default=db.func.now())
   last_heard_on = db.Column(db.DateTime, server_default=db.func.now(), server_onupdate=db.func.now())
 
+  chapter_obj = db.relationship("Chapter", back_populates="chap_history")
+
   def __repr__(self):
     return f'History-{self.user_email}-{self.chapter_id}-{self.last_heard_on}'
+  
+  @property
+  def elapsed_time(self):
+    current_time = datetime.datetime.now()
+    difference = current_time - self.last_heard_on
+    total_seconds = difference.total_seconds()
+    if total_seconds > 365*24*60*60: #years
+      return f"{int(divmod(total_seconds, 365*24*60*60)[0])} years ago..."
+    elif total_seconds > 30*24*60*60: #months
+      return f"{int(divmod(total_seconds, 30*24*60*60)[0])} months ago..."
+    elif total_seconds > 7*24*60*60: #weeks
+      return f"{int(divmod(total_seconds, 7*24*60*60)[0])} weeks ago..."
+    elif total_seconds > 24*60*60: #days
+      return f"{int(divmod(total_seconds, 24*60*60)[0])} days ago..."
+    elif total_seconds > 60*60: #hours
+      return f"{int(divmod(total_seconds, 60*60)[0])} hours ago..."
+    elif total_seconds > 60: #minutes
+      return f"{int(divmod(total_seconds, 60)[0])} minutes ago..."
+    elif total_seconds > 5: #seconds
+      return f"{int(total_seconds)} seconds ago..."
+    else:
+      return "Right now..."
 
 class Announcement(db.Model):
   id = db.Column(db.Integer, autoincrement=True, primary_key=True)

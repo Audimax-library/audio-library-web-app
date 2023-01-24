@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% block title %}{{context.user_details.username}} Profile | Audimax{% endblock %}
+{% block content %}
+<div class="page-cover relative">
+  <div class="absolute w-full h-72 xl:h-64 overflow-hidden">
+    <div class="blur">
+      <img src="{{url_for('webapp.static', filename='img/profile-cover.jpg')}}" class="w-full" alt="">
+    </div>
+  </div>
+  <div class="relative w-full z-10 px-6 py-8">
+    <div class="container mx-auto">
+      <div class="row-span-3 block md:hidden mb-4">
+        <img src="https://via.placeholder.com/150/46CDCF/000000?text={{context.user_initial}}" class="rounded-full w-52 shadow-lg" alt="">
+      </div>
+      <div class="grid grid-rows-3 grid-flow-col gap-4">
+        <div class="row-span-3 hidden md:block">
+          <img src="https://via.placeholder.com/150/46CDCF/000000?text={{context.user_initial}}" class="rounded-full w-52 shadow-lg mx-auto" alt="">
+        </div>
+        <div class="col-span-2 row-span-3 self-center">
+          <h1 class="text-5xl font-bold drop-shadow">{{context.user_details.username}}</h1>
+          <p class="text-lg drop-shadow-sm">{{context.user_details.email}}</p>
+        </div>
+      </div>
+      <div class="tab-btn-list pt-16">
+        <ul class="flex flex-wrap text-sm font-medium text-center text-gray-400 bg-gray-800 p-2 inline-flex">
+          <li class="mr-2">
+            <a href="#library" data-tab-title="library" class="inline-block px-3 py-1 rounded-sm hover:bg-gray-900 hover:text-white text-white bg-themeMain active transition-colors">Library</a>
+          </li>
+          <li class="mr-2">
+              <a href="#uploads" data-tab-title="uploads" class="inline-block px-3 py-1 rounded-sm hover:bg-gray-900 hover:text-white transition-colors">Uploads</a>
+          </li>
+          <li class="mr-2">
+              <a href="#history" data-tab-title="history"  class="inline-block px-3 py-1 rounded-sm hover:bg-gray-900 hover:text-white transition-colors">History</a>
+          </li>
+          <li class="mr-2">
+            <a href="#drafts" data-tab-title="drafts" class="inline-block px-3 py-1 rounded-sm hover:bg-gray-900 hover:text-white transition-colors">Drafts</a>
+          </li>
+          <li class="mr-2">
+            <a href="#reports" data-tab-title="reports"  class="inline-block px-3 py-1 rounded-sm hover:bg-gray-900 hover:text-white transition-colors">Reports</a>
+          </li>
+        </ul>
+
+        <div class="tab-content mt-8">
+          <div class="library-content" id="library">
+            <h1 class="text-2xl font-bold mb-4">My Library</h1>
+            {% if context.library_details %}
+              {% for item in context.library_details %}
+              <div class="rounded bg-gray-700 hover:bg-gray-800 duration-100 ease-out mb-2">
+                <a href="{{url_for('webapp.book_page', id=item.book_id)}}" class="p-2 flex items-center font-medium text-white">
+                  <div style="width:50px; height:70px;" class="overflow-hidden rounded flex-none mr-4">
+                    <img src="{{url_for('webapp.static', filename='uploads/'+item.book_obj.cover_img)}}" alt="{{item.book_obj.title}}" class="w-auto h-full object-cover">
+                  </div>
+                  <div class="flex-none">
+                    <span class="font-bold">{{item.book_obj.title}}</span><br><span class="bg-green-100 text-white text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-700 dark:text-white whitespace-nowrap">{{item.book_obj.status}}</span><span>No. Chapter(s): {{'%02d' % item.book_obj.chapters|length}}</span>
+                  </div>
+                </a>
+                <div class="pb-2 pl-2">
+                  {% for genre in item.book_obj.genres|sort(attribute='title') %}
+                  <a href="{{ url_for('webapp.titles_page')+'?genres='+genre.id|string}}">
+                    <span class="text-xs font-semibold mr-2 px-2.5 py-0.5 rounded bg-gray-600 text-gray-300 whitespace-nowrap">{{genre.title}}</span>
+                  </a>
+                  {% endfor %}
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <p class="italic">There are no books added to your library. Use "Add to Library" button of each book to add them to the library.</p>
+            {% endif %}
+          </div>
+          <div class="uploads-content hidden" id="uploads">
+            <h1 class="text-2xl font-bold mb-4">My Uploads</h1>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {% if context.upload_details %}
+                {% for item in context.upload_details %}
+                <a href="{{url_for('webapp.view_chapter', book_id=item.book_obj.id, chapter_id=item.id)}}" class="p-2 mb-2 flex items-center font-medium rounded text-white bg-gray-700 hover:bg-gray-800 duration-100 ease-out">
+                  <div style="width:50px; height:70px;" class="overflow-hidden rounded flex-none mr-4">
+                    <img src="{{url_for('webapp.static', filename='uploads/'+item.book_obj.cover_img)}}" alt="{{item.book_obj.title}}" class="w-auto h-full object-cover">
+                  </div>
+                  <div>
+                    <span class="font-bold">{{item.book_obj.title}}</span><br><span>Chapter {{item.display_number}}</span><br><span class="text-sm">{{item.elapsed_time}}</span>
+                  </div>
+                </a>
+                {% endfor %}
+              {% else %}
+                <p class="italic">There are no chapter uploads done by you.</p>
+              {% endif %}
+            </div>
+          </div>
+          <div class="history-content hidden" id="history">
+            <h1 class="text-2xl font-bold mb-4">Playback History</h1>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {% if context.history_details %}
+                {% for item in context.history_details %}
+                <a href="{{url_for('webapp.view_chapter', book_id=item.chapter_obj.book_obj.id, chapter_id=item.chapter_id)}}" class="p-2 mb-2 flex items-center font-medium rounded text-white bg-gray-700 hover:bg-gray-800 duration-100 ease-out">
+                  <div style="width:50px; height:70px;" class="overflow-hidden rounded flex-none mr-4">
+                    <img src="{{url_for('webapp.static', filename='uploads/'+item.chapter_obj.book_obj.cover_img)}}" alt="{{item.chapter_obj.book_obj.title}}" class="w-auto h-full object-cover">
+                  </div>
+                  <div>
+                    <span class="font-bold">{{item.chapter_obj.book_obj.title}}</span><br><span>Chapter {{item.chapter_obj.display_number}}</span><br><span class="text-sm">Last listened {{item.elapsed_time}}</span>
+                  </div>
+                </a>
+                {% endfor %}
+              {% else %}
+                <p class="italic">Your playback history is empty. Start listening and each will apear here.</p>
+              {% endif %}
+            </div>
+          </div>
+          <div class="drafts-content hidden" id="drafts">
+            <h1 class="text-2xl font-bold mb-4">Pending Title Drafts</h1>
+            {% if context.pending_drafts %}
+              {% for item in context.pending_drafts %}
+              <div class="rounded bg-gray-700 hover:bg-gray-800 duration-100 ease-out mb-2">
+                <div href="{{url_for('webapp.book_page', id=item.id)}}" class="p-2 flex items-center font-medium text-white">
+                  <div style="width:50px; height:70px;" class="overflow-hidden rounded flex-none mr-4">
+                    <img src="{{url_for('webapp.static', filename='uploads/'+item.cover_img)}}" alt="{{item.title}}" class="w-auto h-full object-cover">
+                  </div>
+                  <div class="flex-none">
+                    <span class="font-bold">{{item.title}}</span><br><span class="bg-green-100 text-white text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-700 dark:text-white whitespace-nowrap">{{item.status}}</span><span>No. Chapter(s): {{'%02d' % item.chapters|length}}</span>
+                  </div>
+                </div>
+                <div class="pb-2 pl-2">
+                  {% for genre in item.genres|sort(attribute='title') %}
+                  <a href="{{ url_for('webapp.titles_page')+'?genres='+genre.id|string}}">
+                    <span class="text-xs font-semibold mr-2 px-2.5 py-0.5 rounded bg-gray-600 text-gray-300 whitespace-nowrap">{{genre.title}}</span>
+                  </a>
+                  {% endfor %}
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <p class="italic">There are no pending title drafts.</p>
+            {% endif %}
+            <h1 class="text-2xl font-bold my-4">Approved Title Drafts</h1>
+            {% if context.approved_drafts %}
+              {% for item in context.approved_drafts %}
+              <div class="rounded bg-gray-700 hover:bg-gray-800 duration-100 ease-out mb-2">
+                <a href="{{url_for('webapp.book_page', id=item.id)}}" class="p-2 flex items-center font-medium text-white">
+                  <div href="{{url_for('webapp.book_page', id=item.id)}}" class="p-2 flex items-center font-medium text-white">
+                    <div style="width:50px; height:70px;" class="overflow-hidden rounded flex-none mr-4">
+                      <img src="{{url_for('webapp.static', filename='uploads/'+item.cover_img)}}" alt="{{item.title}}" class="w-auto h-full object-cover">
+                    </div>
+                    <div class="flex-none">
+                      <span class="font-bold">{{item.title}}</span><br><span class="bg-green-100 text-white text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-700 dark:text-white whitespace-nowrap">{{item.status}}</span><span>No. Chapter(s): {{'%02d' % item.chapters|length}}</span>
+                    </div>
+                  </div>
+                </a>
+                <div class="pb-2 pl-2">
+                  {% for genre in item.genres|sort(attribute='title') %}
+                  <a href="{{ url_for('webapp.titles_page')+'?genres='+genre.id|string}}">
+                    <span class="text-xs font-semibold mr-2 px-2.5 py-0.5 rounded bg-gray-600 text-gray-300 whitespace-nowrap">{{genre.title}}</span>
+                  </a>
+                  {% endfor %}
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <p class="italic">There are no approved book titles that was submitted by you.</p>
+            {% endif %}
+          </div>
+          <div class="reports-content hidden" id="reports">
+            <h1 class="text-2xl font-bold mb-4">My Reports</h1>
+            {% if context.report_details %}
+              {% for item in context.report_details %}
+              <div class="bg-gray-700 rounded">
+                <div class="border-b-2 border-themeMain px-4 py-2">
+                  <h2 class="font-semibold">{{item.title}}</h2>
+                </div>
+                <div class="p-4">
+                  <p class="">{{item.subject}}</p>
+                </div>
+                <div class="px-4 py-1 text-sm border-t border-gray-500 italic">
+                  <span>{{item.elapsed_time}}</span>
+                </div>
+              </div>
+              {% endfor %}
+            {% else %}
+              <p class="italic">There are no reports done by you.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
+{% block scripts %}
+<script>
+  $(document).ready(function(){
+    if(window.location.hash){
+      var urlHash = window.location.hash.substring(1);
+      if(jQuery.inArray(urlHash, ['library', 'uploads', 'history', 'drafts', 'reports']) !== -1){
+        $('.tab-btn-list ul li').children().each(function () {
+          $(this).removeClass('active text-white bg-themeMain');
+          if($(this).data('tabTitle') == urlHash){
+            $(this).addClass('active text-white bg-themeMain');
+          }
+        });
+        $('.tab-content').children().each(function () {
+          $(this).addClass('hidden');
+        });
+        $('#'+urlHash).removeClass('hidden');
+      }
+    }
+    $(".tab-btn-list ul li a").click(function(){
+      $('.tab-btn-list ul li').children().each(function () {
+        $(this).removeClass('active text-white bg-themeMain');
+      });
+      $(this).addClass('active text-white bg-themeMain');
+
+      var tabTitle = $(this).data('tabTitle');
+      var tabContents = $(".tab-content").children('div');
+      $('.tab-content').children().each(function () {
+        $(this).addClass('hidden');
+      });
+      $('#'+tabTitle).removeClass('hidden');
+    });
+  });
+</script>
+{% endblock %}

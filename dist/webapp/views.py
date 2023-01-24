@@ -78,14 +78,14 @@ def filter_books(obj, status_list, genre_list):
 
 
 ######## 404 page
-@webapp.errorhandler(404)
+""" @webapp.errorhandler(404)
 def page_not_found(e):
     context = {}
     if current_user.is_authenticated:
         context['user_initial'] = str(current_user)[0:2].upper()
         #user = User.query.filter_by(email=str(current_user)).first()
         context['user_name'] = current_user.username
-    return render_template('404.html', context=context), 404
+    return render_template('404.html', context=context), 404 """
 
 ######## home page
 @webapp.route("/home/", methods=['GET', 'POST'])
@@ -292,7 +292,8 @@ def title_quick_search():
         Book.title.ilike(f'%{search_by}%'), 
         Book.alt_title.ilike(f'%{search_by}%'), 
         Book.synopsis.ilike(f'%{search_by}%'), 
-        Book.author_name.ilike(f'%{search_by}%'))).all()
+        Book.author_name.ilike(f'%{search_by}%')),
+        Book.is_approved==1).all()
     #results = db.session.query(Book).all()
     context={
         "result": "success",
@@ -311,7 +312,8 @@ def titles_page():
             Book.title.ilike(f'%{search_by}%'), 
             Book.alt_title.ilike(f'%{search_by}%'), 
             Book.synopsis.ilike(f'%{search_by}%'), 
-            Book.author_name.ilike(f'%{search_by}%'))).all()
+            Book.author_name.ilike(f'%{search_by}%')),
+            Book.is_approved==1).all()
         if "status" in data_dict and "genres" in data_dict:
             filtered_books = filter_books(results, data_dict['status'], data_dict['genres'])
         elif "status" in data_dict:
@@ -342,7 +344,8 @@ def titles_page():
             Book.title.ilike(f'%{param1}%'), 
             Book.alt_title.ilike(f'%{param1}%'), 
             Book.synopsis.ilike(f'%{param1}%'), 
-            Book.author_name.ilike(f'%{param1}%'))).all()
+            Book.author_name.ilike(f'%{param1}%')),
+            Book.is_approved==1).all()
     else:
         results = Book.query.filter_by(is_approved=1).order_by(desc(Book.created)).limit(15).all()
     if param2 != [] and param3 != []:
@@ -363,7 +366,7 @@ def titles_page():
 ######## random title
 @webapp.route("/titles/random/", methods=['GET', 'POST'])
 def random_title():
-    book_details = Book.query.all()
+    book_details = Book.query.filter_by(is_approved=1).all()
     if(book_details != []):
         random_book = random.choice(book_details)
         return redirect(url_for('webapp.book_page', id=random_book.id))
@@ -656,7 +659,7 @@ def login_page():
 @webapp.route("/sign-up/", methods=['GET', 'POST'])
 def register_page():
     if current_user.is_authenticated:
-        return redirect(url_for('admin.dashboard_page'))
+        return redirect(url_for('webapp.profile_page'))
 
     form = RegistrationForm()
     if request.method == 'POST':
@@ -725,6 +728,34 @@ def logout():
     logout_user()
     flash('Log Out Successful.', 'success')
     return redirect(url_for('webapp.login_page'))
+
+####### User profile
+@webapp.route('/profile/')
+def profile_page():
+    context = {}
+    if current_user.is_authenticated:
+        context['user_initial'] = str(current_user)[0:2].upper()
+        context['user_name'] = current_user.username
+        user_details = User.query.filter_by(email=str(current_user)).first()
+        if user_details:
+            library_details = Library.query.filter_by(user_email=str(current_user)).limit(50).all()
+            upload_details = Chapter.query.filter_by(uploaded_by=str(current_user)).order_by(desc(Chapter.created)).limit(50).all()
+            history_details = ListenHistory.query.filter_by(user_email=str(current_user)).order_by(desc(ListenHistory.last_heard_on)).limit(50).all()
+            pending_drafts = Book.query.filter(Book.draft_user_email==str(current_user), Book.is_approved==0).limit(25).all()
+            approved_drafts = Book.query.filter(Book.draft_user_email==str(current_user), Book.is_approved==1).limit(25).all()
+            report_details = ReportBook.query.filter_by(user_email=str(current_user)).order_by(desc(ReportBook.created_date)).limit(10).all()
+            context['user_details'] = user_details
+            context['library_details'] = library_details
+            context['upload_details'] = upload_details
+            context['history_details'] = history_details
+            context['pending_drafts'] = pending_drafts
+            context['approved_drafts'] = approved_drafts
+            context['report_details'] = report_details
+        else:
+            return redirect(url_for('webapp.login_page')) 
+    else:
+       return redirect(url_for('webapp.login_page')) 
+    return render_template('user-profile.html', context=context)
 
 ####### API functions
 

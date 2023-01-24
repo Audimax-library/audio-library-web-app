@@ -24,7 +24,7 @@
     {% for draft in context.approved_books %}
     <div class="row justify-content-center border border-2 rounded border-dark p-2 my-2 bg-light book-item">
       <div class="col-md-4 col-sm-12 text-center">
-        <img src="{{ url_for('webapp.static', filename='uploads/'+draft.cover_img )}}" alt="" style="height: 300px;">
+        <img src="{{ url_for('webapp.static', filename='uploads/'+draft.cover_img )}}" class="rounded w-100" alt="" style="height: 300px;">
       </div>
       <div class="col-md-6 col-sm-12 p-2">
         <ul>

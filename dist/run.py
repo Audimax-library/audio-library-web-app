@@ -1,6 +1,7 @@
 from flask import Flask, render_template
 from webapp import db as webapp_db
 from admin import db as admin_db, login_manager, oauth, discord, bcrypt
+from flask_login import current_user
 
 import os
 from dotenv import load_dotenv
@@ -35,12 +36,23 @@ oauth.init_app(app)
 discord.init_app(app)
 bcrypt.init_app(app)
 
+
 from webapp.views import webapp
 from admin.views import admin
 from assisted.views import assisted
 app.register_blueprint(webapp, url_prefix="/")
 app.register_blueprint(admin, url_prefix="/admin")
 app.register_blueprint(assisted, url_prefix="/assisted")
+
+######## 404 page
+@app.errorhandler(404)
+def page_not_found(e):
+    context = {}
+    if current_user.is_authenticated:
+        context['user_initial'] = str(current_user)[0:2].upper()
+        #user = User.query.filter_by(email=str(current_user)).first()
+        context['user_name'] = current_user.username
+    return render_template('404.html', context=context), 404
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True)

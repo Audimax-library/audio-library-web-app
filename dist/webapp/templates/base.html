@@ -71,19 +71,24 @@
               <div class="flex-none"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-currentColor icon"><path d="m19 21-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg></div> 
               <div class="mx-2 flex-none">Follows</div>
             </div> -->
-            <a href="/">
+            <a href="{{url_for('assisted.home_page')}}">
+              <div class="px-2 py-1 rounded-md hover:bg-BGColor hover:text-white transition-colors">
+                <div class="mx-3 flex-none">Download</div>
+              </div>
+            </a>
+            <a href="{{url_for('webapp.profile_page',_anchor='library')}}">
               <div class="px-2 py-1 rounded-md hover:bg-BGColor hover:text-white transition-colors">
                 <div class="mx-3 flex-none">Library</div>
               </div>
             </a>
-            <!-- <a href="/">
-              <div class="px-2 py-1 rounded-md hover:bg-BGColor hover:text-white transition-colors">
-                <div class="mx-3 flex-none">Lists</div>
-              </div>
-            </a> -->
-            <a href="/">
+            <a href="{{url_for('webapp.profile_page',_anchor='history')}}">
               <div class="px-2 py-1 rounded-md hover:bg-BGColor hover:text-white transition-colors">
                 <div class="mx-3 flex-none">History</div>
+              </div>
+            </a>
+            <a href="{{url_for('webapp.profile_page',_anchor='drafts')}}">
+              <div class="px-2 py-1 rounded-md hover:bg-BGColor hover:text-white transition-colors">
+                <div class="mx-3 flex-none">Drafts</div>
               </div>
             </a>
           </div>
@@ -218,7 +223,7 @@
           <img src="https://via.placeholder.com/150/46CDCF/000000?text={{context.user_initial}}" class="mx-auto rounded-full w-1/6 h-1/6" alt="Avatar" id="avatar">
         </div>
         <div class="grid sm:grid-cols-2 grid-col-1 gap-4 p-6">
-          <a href="/user/me" class="p-2 flex items-center font-medium rounded text-white bg-BGColorDarkLight hover:bg-BGColorLight duration-100 ease-out">
+          <a href="{{url_for('webapp.profile_page')}}" class="p-2 flex items-center font-medium rounded text-white bg-BGColorDarkLight hover:bg-BGColorLight duration-100 ease-out">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="mr-2 text-icon-white text-false icon"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2m8-10a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg> 
             <span>My Profile</span>
           </a>
