@@ -188,6 +188,25 @@
 {% block scripts %}
 <script>
   $(document).ready(function(){
+    checkHashLocation();
+    $(window).bind('hashchange', function() {
+        checkHashLocation();
+    });
+    $(".tab-btn-list ul li a").click(function(){
+      $('.tab-btn-list ul li').children().each(function () {
+        $(this).removeClass('active text-white bg-themeMain');
+      });
+      $(this).addClass('active text-white bg-themeMain');
+
+      var tabTitle = $(this).data('tabTitle');
+      var tabContents = $(".tab-content").children('div');
+      $('.tab-content').children().each(function () {
+        $(this).addClass('hidden');
+      });
+      $('#'+tabTitle).removeClass('hidden');
+    });
+  });
+  function checkHashLocation(){
     if(window.location.hash){
       var urlHash = window.location.hash.substring(1);
       if(jQuery.inArray(urlHash, ['library', 'uploads', 'history', 'drafts', 'reports']) !== -1){
@@ -203,19 +222,6 @@
         $('#'+urlHash).removeClass('hidden');
       }
     }
-    $(".tab-btn-list ul li a").click(function(){
-      $('.tab-btn-list ul li').children().each(function () {
-        $(this).removeClass('active text-white bg-themeMain');
-      });
-      $(this).addClass('active text-white bg-themeMain');
-
-      var tabTitle = $(this).data('tabTitle');
-      var tabContents = $(".tab-content").children('div');
-      $('.tab-content').children().each(function () {
-        $(this).addClass('hidden');
-      });
-      $('#'+tabTitle).removeClass('hidden');
-    });
-  });
+  }
 </script>
 {% endblock %}

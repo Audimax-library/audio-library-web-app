@@ -57,7 +57,7 @@
     </div>
     <ul id="audio-playlist" class="text-start ml-4">
       {% for chapter in context.book_details.chapters %}
-      <li style="cursor:pointer;" title="Chapter {{chapter.display_number}}" data-chapter-id="{{chapter.id}}" index="{{loop.index}}" path="{{ url_for('webapp.static', filename='uploads/chapters/'+chapter.audio_url) }}">
+      <li style="cursor:pointer;" title="Chapter {{chapter.display_number}}" data-chapter-id="{{chapter.id}}" index="{{loop.index}}" path="{{ chapter.audio_url }}">
         ▶ Chapter {{chapter.display_number}}
       </li>
       {% endfor %}
@@ -79,7 +79,7 @@
     </div>
   </div>
   <audio class="js-audio-source">
-    <source src="{{ url_for('webapp.static', filename='uploads/chapters/'+context.chapter_details.audio_url) }}" type="audio/mp3">
+    <source src="{{ context.chapter_details.audio_url }}" type="audio/mp3">
   </audio>
 </div>
 
@@ -139,6 +139,7 @@
     audio_source.src = playlist.children[current_song].getAttribute("path");
     var playingChapterID = playlist.children[current_song].getAttribute("data-chapter-id");
     audio_source.volume = default_volume;
+    audio_source.crossOrigin = "anonymous";
     if(playlist.children[current_song+1] === undefined){
       $(".next-track").html("End of Playlist");
       $("#chapter-name").html(playlist.children[current_song].getAttribute("title"));
@@ -163,6 +164,7 @@
   }
   
   function play(){
+    audio_source.crossOrigin = "anonymous";
     audio_source.play();
     interval = setInterval(update_seek, 60);
     if(audio_api === undefined){

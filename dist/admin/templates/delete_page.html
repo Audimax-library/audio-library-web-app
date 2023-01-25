@@ -42,7 +42,7 @@
   <div class="border border-1 border-dark bg-light p-4 rounded">
     <img class="rounded mb-2" src="{{ context.item_details.book_obj.cover_img }}" alt="" style="height: 200px;">
     <audio controls>
-      <source src="{{url_for('webapp.static', filename='uploads/chapters/'+context.item_details.audio_url)}}" type="audio/mpeg">
+      <source src="{{context.item_details.audio_url}}" type="audio/mpeg">
       Your browser does not support the audio tag.
     </audio>
     <ul>

@@ -18,7 +18,9 @@ from admin.views import is_allowed
 from google.cloud import storage
 
 
+
 webapp = Blueprint('webapp', __name__, static_folder="static", static_url_path='/webapp/static' , template_folder='templates')
+
 UPLOAD_FOLDER = "static/uploads/"
 CHAPTER_UPLOAD_FOLDER = "static/uploads/chapters/"
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
@@ -79,7 +81,6 @@ def filter_books(obj, status_list, genre_list):
                         return_book_list.append(book)
                         break
     return return_book_list
-
 
 ######## 404 page
 """ @webapp.errorhandler(404)
@@ -456,12 +457,25 @@ def upload_chapter(id):
             split_tup = os.path.splitext(filename)
             dest_filename = make_unique(f'{chapter_title_id}_chapter_{split_tup[1]}')
             try:
-                chapter_audio_file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),CHAPTER_UPLOAD_FOLDER, dest_filename))
+                gcs = storage.Client.from_service_account_json(CLOUD_SERVICE_ACCOUNT_KEY)
+                bucket = gcs.get_bucket(CLOUD_STORAGE_BUCKET)
+                blob = bucket.blob("audio-files/"+dest_filename)
+                blob.upload_from_string(
+                    chapter_audio_file.read(),
+                    content_type=chapter_audio_file.content_type
+                )
+                blob.make_public()
+            except Exception as e:
+                flash('An error occured while uploading chapter to storage. Please try again later.', 'error')
+                print(e)
+                return redirect(url_for('webapp.book_page', id=chapter_title_id))
+            try:
+                #chapter_audio_file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),CHAPTER_UPLOAD_FOLDER, dest_filename))
                 try:
                     new_chapter_query = Chapter(
                         order = int(chapter_order),
                         display_number = chapter_display,
-                        audio_url=dest_filename,
+                        audio_url=blob.public_url,
                         is_convert=0,
                         read_text_url='NULL',
                         uploaded_by=str(current_user),
@@ -474,7 +488,7 @@ def upload_chapter(id):
                 except Exception as e:
                     flash('An error occured while updating the database. Please try again later.', 'error')
                     print(e)
-                    return redirect(url_for('webapp.home_page'))
+                    return redirect(url_for('webapp.book_page', id=chapter_title_id))
             except Exception as e:
                 flash('An error occured uploading the audio file. Please try again later.', 'error')
                 print(e)
@@ -513,7 +527,18 @@ def update_chapter(book_id,chapter_id):
     if request.method == 'POST':
         if current_user.is_authenticated:
             try:
-                #os.remove(f"/static/uploads/chapters/{db.session.query(Chapter).filter_by(id=chapter_id).first().audio_url}")
+                try:
+                    temp_chap_details = Chapter.query.get_or_404(chapter_id).audio_url
+                    temp_audio_url = urlparse(temp_chap_details)
+                    print("audio-files/"+str(os.path.basename(temp_audio_url.path)))
+                    gcs = storage.Client.from_service_account_json(CLOUD_SERVICE_ACCOUNT_KEY)
+                    bucket = gcs.get_bucket(CLOUD_STORAGE_BUCKET)
+                    delete_blob = bucket.blob("audio-files/"+str(os.path.basename(temp_audio_url.path)))
+                    delete_blob.delete()
+                except Exception as e:
+                    flash('An error occured while deleting the chapter. Please try again later.', 'error')
+                    print(e)
+                    abort(400, 'Error: File delete Failed.')
                 db.session.query(Chapter).filter_by(id=chapter_id).delete()
                 db.session.commit()
                 flash('Chapter deleted successfully!', 'success')
@@ -521,7 +546,7 @@ def update_chapter(book_id,chapter_id):
             except Exception as e:
                 flash('An error occured deleting the chapter. Please try again later.', 'error')
                 print(e)
-                abort(400, 'Error: File delete Failed.')
+                abort(400, 'Error: Record delete Failed.')
         else:
             print('Invalid Request: Authentication Failed')
             flash('Authentication Failed!', 'error')
@@ -831,7 +856,7 @@ def book_details_api(book_id):
     if not book_details is None:
         dist_sub_item = []
         for chapter in book_details.chapters:
-            dist_sub_item.append({"id": chapter.id, "order_number":chapter.display_number, "audio_url":"/webapp/static/uploads/chapters/"+chapter.audio_url})
+            dist_sub_item.append({"id": chapter.id, "order_number":chapter.display_number, "audio_url":chapter.audio_url})
         book_detail_dict = {"id": book_details.id, "title":book_details.title, "cover_img":book_details.cover_img, "status":book_details.status, "chapters": dist_sub_item}
         return jsonify({
             'status': '200',

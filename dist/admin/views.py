@@ -1,4 +1,4 @@
-from flask import Blueprint,render_template, redirect, url_for, session, flash, request, jsonify
+from flask import Blueprint,render_template, redirect, url_for, session, flash, request, jsonify, abort
 from .forms import RegistrationForm, LoginForm
 from .models import User
 from webapp.models import Book, Chapter, Genre, Announcement, ReportBook, NewsLetterSubscription
@@ -7,9 +7,13 @@ from admin import db, login_manager, oauth, discord, bcrypt
 from flask_login import login_required, login_user, logout_user, current_user
 from sqlalchemy import desc, or_, and_
 import os, threading
+from urllib.parse import parse_qs, urlparse
+from google.cloud import storage
 
 admin = Blueprint('admin', __name__, static_folder="static", static_url_path="/admin/static" , template_folder='templates')
 login_manager.login_view = "admin.home_page"
+CLOUD_STORAGE_BUCKET = os.getenv('CLOUD_STORAGE_BUCKET')
+CLOUD_SERVICE_ACCOUNT_KEY = "service-acc-key.json"
 
 def is_allowed(user, allowed_roles=[]):
     if not(user.userlevel in allowed_roles) or user.is_banned:
@@ -165,18 +169,48 @@ def delete_page(type, id):
         item_id = request.form['item-id']
         if(item_type == "Title"):
             try:
+                try:
+                    gcs = storage.Client.from_service_account_json(CLOUD_SERVICE_ACCOUNT_KEY)
+                    bucket = gcs.get_bucket(CLOUD_STORAGE_BUCKET)
+                    temp_book = db.session.query(Book).filter_by(id=int(item_id)).first()
+                    for item in temp_book.chapters:
+                        temp_audio_url = urlparse(item.audio_url)
+                        print("audio-files/"+str(os.path.basename(temp_audio_url.path)))
+                        delete_blob = bucket.blob("audio-files/"+str(os.path.basename(temp_audio_url.path)))
+                        delete_blob.delete()
+                    temp_cover_url = urlparse(temp_book.cover_img)
+                    print("cover-images/"+str(os.path.basename(temp_cover_url.path)))
+                    delete_blob = bucket.blob("cover-images/"+str(os.path.basename(temp_cover_url.path)))
+                    delete_blob.delete()
+                except Exception as e:
+                    flash('An error occured while deleting the title. Please try again later.', 'error')
+                    print(e)
+                    abort(400, 'Error: File delete Failed.')
                 db.session.query(Book).filter_by(id=int(item_id)).delete()
                 db.session.commit()
                 flash('Title deleted successfully.', 'success')
-            except:
+            except Exception as e:
+                print(e)
                 flash('An error occured while deleting from the database.', 'error')
         elif(item_type == "Chapter"):
             try:
+                try:
+                    gcs = storage.Client.from_service_account_json(CLOUD_SERVICE_ACCOUNT_KEY)
+                    bucket = gcs.get_bucket(CLOUD_STORAGE_BUCKET)
+                    temp_chapter = db.session.query(Chapter).filter_by(id=int(item_id)).first()
+                    temp_audio_url = urlparse(temp_chapter.audio_url)
+                    print("audio-files/"+str(os.path.basename(temp_audio_url.path)))
+                    delete_blob = bucket.blob("audio-files/"+str(os.path.basename(temp_audio_url.path)))
+                    delete_blob.delete()
+                except Exception as e:
+                    flash('An error occured while deleting the chapter. Please try again later.', 'error')
+                    print(e)
+                    abort(400, 'Error: File delete Failed.')
                 db.session.query(Chapter).filter_by(id=int(item_id)).delete()
                 db.session.commit()
                 flash('Chapter deleted successfully.', 'success')
             except:
-                flash('An error occured while deleting from the database.', 'error')
+                flash('An error occured while deleting the record.', 'error')
         return redirect(url_for('admin.manage_books_page'))
     if(type == "Title"):
         item_details = db.session.query(Book).filter_by(id=int(id)).first()
@@ -391,7 +425,7 @@ def newsletter_page():
             return redirect(url_for('admin.newsletter_page'))
         else:
             all_subs = NewsLetterSubscription.query.all()
-            latest_books = Book.query.filter_by(is_approved=1).order_by(desc(Book.created)).limit(4).all()
+            latest_books = Book.query.filter_by(is_approved=1).order_by(desc(Book.created)).limit(3).all()
             mail_cards = ""
             for book in latest_books:
                 mail_cards += f"""
