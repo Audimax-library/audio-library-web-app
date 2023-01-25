@@ -31,7 +31,7 @@
     </div>
     <div class="form-field mb-6">
       <label class="block mb-2 text-xl text-white" for="">Current Title Cover:</label>
-      <img src="{{ url_for('webapp.static', filename='uploads/'+context.book_details.cover_img) }}" class="rounded w-40" alt="">
+      <img src="{{ context.book_details.cover_img }}" class="rounded w-40" alt="">
       <span class="text-sm text-slate-500 italic">*Adding your new image will replace this image.</span>
     </div>
     <div class="form-field mb-6">

@@ -1,5 +1,7 @@
 uploads/
 
+service-acc-key.json
+
 Logs
 logs
 *.log

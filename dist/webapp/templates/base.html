@@ -325,7 +325,7 @@
           success: function(response) {
             book_container.empty();
             $.each(response.value, function( index, value ) {
-              book_container.append('<a href="/book/'+value.id+'" class="p-2 mb-2 flex items-center font-medium rounded text-white bg-BGColorDarkLight hover:bg-BGColorLight duration-100 ease-out"><div style="width:50px; height:70px;" class="overflow-hidden rounded flex-none mr-4"><img src="/webapp/static/uploads/'+value.cover_img+'" alt=""></div><span>'+value.title+'</span></a>');
+              book_container.append('<a href="/book/'+value.id+'" class="p-2 mb-2 flex items-center font-medium rounded text-white bg-BGColorDarkLight hover:bg-BGColorLight duration-100 ease-out"><div style="width:50px; height:70px;" class="overflow-hidden rounded flex-none mr-4"><img src="'+value.cover_img+'" alt=""></div><span>'+value.title+'</span></a>');
             });
             if (response.value === undefined || response.value.length == 0) {
               book_container.empty();

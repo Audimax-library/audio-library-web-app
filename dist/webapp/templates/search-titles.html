@@ -25,7 +25,7 @@
     {% for book in context.results %}
     <a href="{{url_for('webapp.book_page', id=book.id)}}" class="p-2 mb-2 flex items-center font-medium rounded text-white bg-BGColorDarkLight hover:bg-BGColorLight duration-100 ease-out">
       <div style="width:50px; height:70px;" class="overflow-hidden rounded flex-none mr-4">
-        <img src="{{ url_for('webapp.static', filename='uploads/'+book.cover_img) }}" alt="{{book.title}}" class="w-auto h-full object-cover">
+        <img src="{{ book.cover_img }}" alt="{{book.title}}" class="w-auto h-full object-cover">
       </div>
       <div>
         <span class="font-bold">{{book.title}}</span><br><span class="bg-green-100 text-white text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-700 dark:text-white whitespace-nowrap">{{book.status}}</span><span>No. Chapters: {{book.chapters|length}}</span>
@@ -132,7 +132,7 @@
         //console.log(response)
         adv_book_container.empty();
         $.each(response.value, function( index, value ) {
-          adv_book_container.append('<a href="/book/'+value.id+'" class="p-2 mb-2 flex items-center font-medium rounded text-white bg-BGColorDarkLight hover:bg-BGColorLight duration-100 ease-out"><div style="width:50px; height:70px;" class="overflow-hidden rounded flex-none mr-4"><img src="/webapp/static/uploads/'+value.cover_img+'" alt="'+value.title+'" class="w-auto h-full object-cover"></div><div><span class="font-bold">'+value.title+'</span><br><span class="bg-green-100 text-white text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-700 dark:text-white whitespace-nowrap">'+value.status+'</span><span>No. Chapters: '+value.no_chapters+'</span></div></a>');
+          adv_book_container.append('<a href="/book/'+value.id+'" class="p-2 mb-2 flex items-center font-medium rounded text-white bg-BGColorDarkLight hover:bg-BGColorLight duration-100 ease-out"><div style="width:50px; height:70px;" class="overflow-hidden rounded flex-none mr-4"><img src="'+value.cover_img+'" alt="'+value.title+'" class="w-auto h-full object-cover"></div><div><span class="font-bold">'+value.title+'</span><br><span class="bg-green-100 text-white text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-700 dark:text-white whitespace-nowrap">'+value.status+'</span><span>No. Chapters: '+value.no_chapters+'</span></div></a>');
         });
         if (response.value === undefined || response.value.length == 0) {
           adv_book_container.empty();

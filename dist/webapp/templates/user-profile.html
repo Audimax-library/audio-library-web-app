@@ -48,7 +48,7 @@
               <div class="rounded bg-gray-700 hover:bg-gray-800 duration-100 ease-out mb-2">
                 <a href="{{url_for('webapp.book_page', id=item.book_id)}}" class="p-2 flex items-center font-medium text-white">
                   <div style="width:50px; height:70px;" class="overflow-hidden rounded flex-none mr-4">
-                    <img src="{{url_for('webapp.static', filename='uploads/'+item.book_obj.cover_img)}}" alt="{{item.book_obj.title}}" class="w-auto h-full object-cover">
+                    <img src="{{ item.book_obj.cover_img }}" alt="{{item.book_obj.title}}" class="w-auto h-full object-cover">
                   </div>
                   <div class="flex-none">
                     <span class="font-bold">{{item.book_obj.title}}</span><br><span class="bg-green-100 text-white text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-700 dark:text-white whitespace-nowrap">{{item.book_obj.status}}</span><span>No. Chapter(s): {{'%02d' % item.book_obj.chapters|length}}</span>
@@ -74,7 +74,7 @@
                 {% for item in context.upload_details %}
                 <a href="{{url_for('webapp.view_chapter', book_id=item.book_obj.id, chapter_id=item.id)}}" class="p-2 mb-2 flex items-center font-medium rounded text-white bg-gray-700 hover:bg-gray-800 duration-100 ease-out">
                   <div style="width:50px; height:70px;" class="overflow-hidden rounded flex-none mr-4">
-                    <img src="{{url_for('webapp.static', filename='uploads/'+item.book_obj.cover_img)}}" alt="{{item.book_obj.title}}" class="w-auto h-full object-cover">
+                    <img src="{{ item.book_obj.cover_img }}" alt="{{item.book_obj.title}}" class="w-auto h-full object-cover">
                   </div>
                   <div>
                     <span class="font-bold">{{item.book_obj.title}}</span><br><span>Chapter {{item.display_number}}</span><br><span class="text-sm">{{item.elapsed_time}}</span>
@@ -93,7 +93,7 @@
                 {% for item in context.history_details %}
                 <a href="{{url_for('webapp.view_chapter', book_id=item.chapter_obj.book_obj.id, chapter_id=item.chapter_id)}}" class="p-2 mb-2 flex items-center font-medium rounded text-white bg-gray-700 hover:bg-gray-800 duration-100 ease-out">
                   <div style="width:50px; height:70px;" class="overflow-hidden rounded flex-none mr-4">
-                    <img src="{{url_for('webapp.static', filename='uploads/'+item.chapter_obj.book_obj.cover_img)}}" alt="{{item.chapter_obj.book_obj.title}}" class="w-auto h-full object-cover">
+                    <img src="{{ item.chapter_obj.book_obj.cover_img }}" alt="{{item.chapter_obj.book_obj.title}}" class="w-auto h-full object-cover">
                   </div>
                   <div>
                     <span class="font-bold">{{item.chapter_obj.book_obj.title}}</span><br><span>Chapter {{item.chapter_obj.display_number}}</span><br><span class="text-sm">Last listened {{item.elapsed_time}}</span>
@@ -112,7 +112,7 @@
               <div class="rounded bg-gray-700 hover:bg-gray-800 duration-100 ease-out mb-2">
                 <div href="{{url_for('webapp.book_page', id=item.id)}}" class="p-2 flex items-center font-medium text-white">
                   <div style="width:50px; height:70px;" class="overflow-hidden rounded flex-none mr-4">
-                    <img src="{{url_for('webapp.static', filename='uploads/'+item.cover_img)}}" alt="{{item.title}}" class="w-auto h-full object-cover">
+                    <img src="{{ item.cover_img }}" alt="{{item.title}}" class="w-auto h-full object-cover">
                   </div>
                   <div class="flex-none">
                     <span class="font-bold">{{item.title}}</span><br><span class="bg-green-100 text-white text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-700 dark:text-white whitespace-nowrap">{{item.status}}</span><span>No. Chapter(s): {{'%02d' % item.chapters|length}}</span>
@@ -137,7 +137,7 @@
                 <a href="{{url_for('webapp.book_page', id=item.id)}}" class="p-2 flex items-center font-medium text-white">
                   <div href="{{url_for('webapp.book_page', id=item.id)}}" class="p-2 flex items-center font-medium text-white">
                     <div style="width:50px; height:70px;" class="overflow-hidden rounded flex-none mr-4">
-                      <img src="{{url_for('webapp.static', filename='uploads/'+item.cover_img)}}" alt="{{item.title}}" class="w-auto h-full object-cover">
+                      <img src="{{ item.cover_img }}" alt="{{item.title}}" class="w-auto h-full object-cover">
                     </div>
                     <div class="flex-none">
                       <span class="font-bold">{{item.title}}</span><br><span class="bg-green-100 text-white text-xs font-semibold mr-2 px-2.5 py-0.5 rounded dark:bg-green-700 dark:text-white whitespace-nowrap">{{item.status}}</span><span>No. Chapter(s): {{'%02d' % item.chapters|length}}</span>

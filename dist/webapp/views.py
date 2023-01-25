@@ -15,6 +15,7 @@ from .models import Genre, Book, Chapter, NewsLetterSubscription, Library, Ratin
 from .send_email import send_mail
 from urllib.parse import parse_qs, urlparse
 from admin.views import is_allowed
+from google.cloud import storage
 
 
 webapp = Blueprint('webapp', __name__, static_folder="static", static_url_path='/webapp/static' , template_folder='templates')
@@ -23,6 +24,9 @@ CHAPTER_UPLOAD_FOLDER = "static/uploads/chapters/"
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 ALLOWED_AUDIO_EXTENSIONS = {'mp3', 'wav'}
 RECAPTCHA_VERIFY_URL='https://www.google.com/recaptcha/api/siteverify'
+CLOUD_STORAGE_BUCKET = os.getenv('CLOUD_STORAGE_BUCKET')
+CLOUD_SERVICE_ACCOUNT_KEY = "service-acc-key.json"
+
 login_manager.login_view = "webapp.login_page"
 status_types = ['Ongoing', 'Completed', 'Hiatus', 'Discontinued']
 lang_types = ['Sinhala', 'English']
@@ -144,11 +148,24 @@ def add_title_page():
             split_tup = os.path.splitext(filename)
             dest_filename = make_unique(f'new_title_cover{split_tup[1]}')
             try:
-                new_title_cover.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),UPLOAD_FOLDER, dest_filename))
+                gcs = storage.Client.from_service_account_json(CLOUD_SERVICE_ACCOUNT_KEY)
+                bucket = gcs.get_bucket(CLOUD_STORAGE_BUCKET)
+                blob = bucket.blob("cover-images/"+dest_filename)
+                blob.upload_from_string(
+                    new_title_cover.read(),
+                    content_type=new_title_cover.content_type
+                )
+                blob.make_public()
+            except Exception as e:
+                flash('An error occured while uploading to storage. Please try again later.', 'error')
+                print(e)
+                return redirect(url_for('webapp.add_title_page'))
+            try:
+                #new_title_cover.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),UPLOAD_FOLDER, dest_filename))
                 new_title_query = Book(
                     title=new_title, 
                     alt_title=new_alt_title, 
-                    cover_img=dest_filename, 
+                    cover_img=blob.public_url, 
                     synopsis=new_title_synopsis, 
                     status=new_title_status, 
                     language=new_title_lang, 
@@ -199,11 +216,30 @@ def update_title_page(id):
             if allowed_file(update_title_cover.filename, 'image'):
                 filename = secure_filename(update_title_cover.filename)
                 split_tup = os.path.splitext(filename)
-                dest_filename = db.session.query(Book).filter_by(id=id).first().cover_img
+                dest_filename = make_unique(f'update_title_cover{split_tup[1]}')
                 try:
-                    update_title_cover.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),UPLOAD_FOLDER, dest_filename))
+                    gcs = storage.Client.from_service_account_json(CLOUD_SERVICE_ACCOUNT_KEY)
+                    bucket = gcs.get_bucket(CLOUD_STORAGE_BUCKET)
+                    blob = bucket.blob("cover-images/"+dest_filename)
+                    blob.upload_from_string(
+                        update_title_cover.read(),
+                        content_type=update_title_cover.content_type
+                    )
+                    blob.make_public()
+
+                    old_cover_url = db.session.query(Book).filter_by(id=id).first().cover_img #delete this guy
+                    old_cover_url = urlparse(old_cover_url)
+                    print("cover-images/"+str(os.path.basename(old_cover_url.path)))
+                    delete_blob = bucket.blob("cover-images/"+str(os.path.basename(old_cover_url.path)))
+                    delete_blob.delete()
+                except Exception as e:
+                    flash('An error occured while swapping cover image. Please try again later.', 'error')
+                    print(e)
+                    return redirect(url_for('webapp.book_page', id=id))
+                try:
+                    #update_title_cover.save(os.path.join(os.path.abspath(os.path.dirname(__file__)),UPLOAD_FOLDER, dest_filename))
                     current_details.update({
-                        Book.cover_img: dest_filename,
+                        Book.cover_img: blob.public_url,
                         Book.title: update_title, 
                         Book.alt_title: update_alt_title, 
                         Book.synopsis: update_title_synopsis,
@@ -211,7 +247,7 @@ def update_title_page(id):
                         Book.language: update_title_lang, 
                         Book.author_name: update_title_author,
                         Book.is_approved: 1
-                        })
+                    })
                     db.session.commit()
                     current_details = db.session.query(Book).filter_by(id=id).first()
                     current_genre_list = []

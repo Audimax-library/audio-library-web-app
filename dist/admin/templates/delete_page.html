@@ -13,7 +13,7 @@
 
   <div class="border border-1 border-dark bg-light p-4 rounded">
     <p>Do you really want to delete this Title from this platform ?</p>
-    <img class="rounded mb-2" src="{{ url_for('webapp.static', filename='uploads/'+context.item_details.cover_img )}}" alt="" style="height: 200px;">
+    <img class="rounded mb-2" src="{{ context.item_details.cover_img }}" alt="" style="height: 200px;">
     <ul>
       <li><b>Title:</b> {{context.item_details.title}}</li>
       <li><b>Alt Title(s):</b> {{context.item_details.alt_title}}</li>
@@ -40,7 +40,7 @@
   {% elif context.type == "Chapter" %}
   <h2>Delete <span class="fw-bold">Chapter {{context.item_details.display_number}}</span> of <span class="fw-bold">{{context.item_details.book_obj.title}}</span> ?</h2>
   <div class="border border-1 border-dark bg-light p-4 rounded">
-    <img class="rounded mb-2" src="{{ url_for('webapp.static', filename='uploads/'+context.item_details.book_obj.cover_img )}}" alt="" style="height: 200px;">
+    <img class="rounded mb-2" src="{{ context.item_details.book_obj.cover_img }}" alt="" style="height: 200px;">
     <audio controls>
       <source src="{{url_for('webapp.static', filename='uploads/chapters/'+context.item_details.audio_url)}}" type="audio/mpeg">
       Your browser does not support the audio tag.

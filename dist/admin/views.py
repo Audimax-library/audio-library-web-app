@@ -399,7 +399,7 @@ def newsletter_page():
 					<table class="image_block block-2" width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation" style="mso-table-lspace: 0pt; mso-table-rspace: 0pt;">
 						<tr>
 							<td class="pad" style="width:100%;padding-right:0px;padding-left:0px;padding-top:5px;">
-								<div class="alignment" align="center" style="line-height:10px"><img src="{request.url_root}webapp/static/uploads/{book.cover_img}" style="display: block; height: auto; border: 0; width: 200px; max-width: 100%;" width="200" alt="{book.title}" title="{book.title}"></div>
+								<div class="alignment" align="center" style="line-height:10px"><img src="{book.cover_img}" style="display: block; height: auto; border: 0; width: 200px; max-width: 100%;" width="200" alt="{book.title}" title="{book.title}"></div>
 							</td>
 						</tr>
 					</table>

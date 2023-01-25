@@ -5,17 +5,17 @@
 <div class="page-cover relative">
   <div class="absolute w-full h-72 xl:h-64 overflow-hidden">
     <div class="blur">
-      <img src="{{ url_for('webapp.static', filename='uploads/'+context.book_details.cover_img) }}" class="w-full" alt="">
+      <img src="{{ context.book_details.cover_img }}" class="w-full" alt="">
     </div>
   </div>
   <div class="relative w-full z-10 px-6 py-8">
     <div class="container mx-auto">
       <div class="row-span-3 block md:hidden mb-4">
-        <img src="{{ url_for('webapp.static', filename='uploads/'+context.book_details.cover_img) }}" class="rounded-lg w-52 shadow-lg" alt="">
+        <img src="{{ context.book_details.cover_img }}" class="rounded-lg w-52 shadow-lg" alt="">
       </div>
       <div class="grid grid-rows-3 grid-flow-col gap-4">
         <div class="row-span-3 hidden md:block">
-          <img src="{{ url_for('webapp.static', filename='uploads/'+context.book_details.cover_img) }}" class="rounded-lg w-52 shadow-lg" alt="">
+          <img src="{{ context.book_details.cover_img }}" class="rounded-lg w-52 shadow-lg" alt="">
         </div>
         <div class="col-span-2">
           <h1 class="text-6xl font-bold drop-shadow">{{context.book_details.title}}</h1>
