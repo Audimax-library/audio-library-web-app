@@ -5,9 +5,32 @@
   img{
     max-width: 300px;
   }
+  .msg-content ol, ul, menu {
+    list-style: revert;
+    margin: revert;
+    padding: revert;
+  }
+  .msg-content  h1, h2, h3, h4, h5, h6 {
+    font-size: revert;
+    font-weight: revert;
+  }
+  .msg-content code{
+    background: #0c314a;
+    border-radius: 4px;
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+  .msg-content blockquote{
+    margin: revert;
+  }
+  .msg-content a {
+    color: #46cdcf;
+    text-decoration: revert;
+  }
 </style>
 <div class="container mx-auto my-8">
   <h1 class="text-4xl text-center font-bold">Announcements</h1>
+  {% if context.all_announce %}
   {% for announce in context.all_announce %}
   <div class="shadow-lg p-4 rounded border border-1 border-themeMain my-2">
     <h6 class="text-xl font-bold">{{announce.title}}</h6>
@@ -17,6 +40,11 @@
     <p class="text-xs">{{announce.elapsed_time}}</p>
   </div>
   {% endfor %}
+  {% else %}
+  <div class="text-center italic mt-8">
+    There are no new Announcements. Comeback later, bye. 👋
+  </div>
+  {% endif %}
 </div>
 {% endblock %}
 {% block scripts %}
