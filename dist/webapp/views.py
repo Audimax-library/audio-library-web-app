@@ -778,6 +778,35 @@ def authorize():
     flash('This email is not a registered email. Please sign up first to use SSO.', 'error')
     return redirect(url_for('webapp.login_page'))
 
+#### Discord OAuth
+@webapp.route("/discordlogin/")
+def discord_login():
+    return discord.create_session()
+
+@webapp.route("/discord-authorize/")
+def callback():
+    try:
+        data = discord.callback()
+    except:
+        flash("Login canceled.", 'error')
+        return redirect(url_for('webapp.home_page'))
+    #print(data)
+    redirect_to = data.get("redirect", "/")
+
+    user = discord.fetch_user()
+    userQuery = User.query.filter_by(email=user.email).first()
+    if(userQuery):
+        if(userQuery.is_banned == 0):
+            login_user(userQuery, remember=True, duration=datetime.timedelta(days=7))
+            flash(f'Welcome back, {userQuery.username}.', 'success')
+            return redirect(url_for('webapp.home_page'))
+        else:
+            flash("Your account has been banned due to suspicious activity.", 'error')
+            return redirect(url_for('webapp.home_page'))
+    else:
+        flash('This email is not a registered email. Please sign up first to use SSO.', 'error')
+    return redirect(url_for('admin.home_page'))
+
 ######## user logout redirect 
 @webapp.route("/logout/", methods=['GET', 'POST'])
 @login_required
