@@ -4,8 +4,9 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cloud Guage | Assisted Mode</title>
+  <title>Assisted Mode Download | Audimax by Cloud Guage</title>
   <link rel="stylesheet" href="{{ url_for('webapp.static', filename='css/style.css') }}">
+  <link rel="icon" type="image/png" href="{{ url_for('webapp.static', filename='img/audimax-logo-only.png') }}" />
   <style>
     body{
       /*background-image: url("{{ url_for('assisted.static', filename='asst-bg.jpg') }}");*/
@@ -16,10 +17,19 @@
   <div class="fixed h-full w-full -z-10">
     <img src="{{ url_for('assisted.static', filename='asst-bg.jpg') }}" class="h-full mx-auto" alt="">
   </div>
-  <div class="container mx-auto text-center my-8 pt-8 pb-16 px-4 rounded-lg bg-slate-700/50">
+  <div class="container mx-auto text-center mt-20 mb-8 pt-8 pb-16 px-4 rounded-lg bg-slate-700/50">
     <h1 class="font-mono">Assisted Mode</h1>
     <h1 class="text-3xl my-4">Welcome to <b>Audimax</b></h1>
-    <p>Audimax is an online audio library and you are currently using the assisted mode specially developed for visually impaired people.</p>
+    <p>Audimax is an online audio library and now you can download the assisted mode specially developed for visually impaired people.</p>
+    <p>Audimax Assisted mode uses voice commands and keyboard navigation to help users.</p>
+    <div class="download-section text-center px-8 py-12">
+      <span class=""><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(255, 255, 255, 1);" class="inline mr-2"><path d="m3 5.557 7.357-1.002.004 7.097-7.354.042L3 5.557zm7.354 6.913.006 7.103-7.354-1.011v-6.14l7.348.048zm.892-8.046L21.001 3v8.562l-9.755.077V4.424zm9.758 8.113-.003 8.523-9.755-1.378-.014-7.161 9.772.016z"></path></svg>Windows</span>
+      <a href="https://github.com/Audimax-library/Audimax-Assisted/releases/" class="mx-auto mt-2 rounded relative flex items-center px-3 flex flex-grow-0 whitespace-nowrap px-2 sm:px-3 justify-center text-white bg-themeMain hover:bg-themeLight glow px-6" style="min-height: 48px; min-width: 220px; max-width: 300px;">
+        <span class="flex items-center justify-center font-medium select-none" style="pointer-events: none;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" style="fill: rgba(255, 255, 255, 1);" class="mr-2"><path d="m12 16 4-5h-3V4h-2v7H8z"></path><path d="M20 18H4v-7H2v7c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2v-7h-2v7z"></path></svg>Download
+        </span>
+      </a>
+    </div>
     <p>If you think you are at the wrong place either press 'Esc' button on your keyboard or click <a href="/" class="text-themeMain underline">Here</a> to redirect back to main site.</p>
   </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.min.js" integrity="sha512-aVKKRRi/Q/YV+4mjoKBsE4x3H+BkegoM/em46NNlCqNTmUYADjBbeNefNxYV7giUp0VxICtqdrbqU7iVaeZNXA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -37,7 +47,7 @@
       speech.volume = 0.5;
       speech.pitch = 1;
       
-      speech.text = "Audimax is an online audio library and you are currently using the assisted mode specially developed for visually impaired people."
+      speech.text = "Audimax is an online audio library and now you can download the assisted mode specially developed for visually impaired people."
       
       $(document).on('click keypress', () => {
         window.speechSynthesis.speak(speech);
@@ -47,6 +57,11 @@
         var startButton = document.getElementById("start");
         startButton.click();
       }; 
+      $(document).keydown(function(e) {
+        if (e.keyCode == 27) {
+          document.location = "/";
+        }
+      });
     </script>
   </body>
 </html>

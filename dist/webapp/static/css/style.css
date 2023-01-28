@@ -1403,6 +1403,10 @@ video {
   background-color: rgb(31 41 55 / var(--tw-bg-opacity));
 }
 
+.bg-slate-700\/50{
+  background-color: rgb(51 65 85 / 0.5);
+}
+
 .bg-gradient-to-r{
   background-image: linear-gradient(to right, var(--tw-gradient-stops));
 }
@@ -1559,6 +1563,16 @@ video {
   padding-bottom: 0.75rem;
 }
 
+.px-8{
+  padding-left: 2rem;
+  padding-right: 2rem;
+}
+
+.py-12{
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+
 .pt-2{
   padding-top: 0.5rem;
 }
@@ -1607,6 +1621,14 @@ video {
   padding-left: 0.5rem;
 }
 
+.pt-8{
+  padding-top: 2rem;
+}
+
+.pb-16{
+  padding-bottom: 4rem;
+}
+
 .text-left{
   text-align: left;
 }
@@ -1625,6 +1647,10 @@ video {
 
 .text-start{
   text-align: start;
+}
+
+.font-mono{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 .text-8xl{
