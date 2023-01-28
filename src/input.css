@@ -12,7 +12,7 @@
     height: 228px;
   }
   .narrow{
-    width: 556px;
+    max-width: 556px;
   }
 }
 
