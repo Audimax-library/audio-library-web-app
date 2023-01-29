@@ -675,6 +675,15 @@ def announce_page():
         context['user_name'] = current_user.username
     return render_template('announcements.html', context=context)
 
+######## about us page
+@webapp.route("/about-us/", methods=['GET', 'POST'])
+def about_page():
+    context = {}
+    if current_user.is_authenticated:
+        context['user_initial'] = str(current_user)[0:2].upper()
+        context['user_name'] = current_user.username
+    return render_template('about.html', context=context)
+
 ######## privacy policy page
 @webapp.route("/privacy-policy/", methods=['GET', 'POST'])
 def policy_page():
