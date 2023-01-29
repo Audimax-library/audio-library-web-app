@@ -1,3 +1,4 @@
+######## imprt all the modules
 from flask import Blueprint,render_template, redirect, session, url_for, request, make_response, jsonify, abort, flash
 from .forms import UploadFileForm
 from werkzeug.utils import secure_filename
@@ -18,7 +19,7 @@ from admin.views import is_allowed
 from google.cloud import storage
 
 
-
+######## find the static files form the Blueprints static folder insted of defaults
 webapp = Blueprint('webapp', __name__, static_folder="static", static_url_path='/webapp/static' , template_folder='templates')
 
 UPLOAD_FOLDER = "static/uploads/"
