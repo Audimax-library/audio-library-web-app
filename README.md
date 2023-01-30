@@ -62,7 +62,7 @@ Run the server
 
 **Database:**  MySQL
 
-**Cloud services:** AWS, Azure, GCP (Load balancing services, Cloud storage services)
+**Cloud services:**  GCP (Load balancing services, Cloud and storage services)
 
 ## Authors
 
@@ -76,6 +76,7 @@ Run the server
 - [@Nuyun-Kalamullage](https://github.com/Nuyun-Kalamullage)
 - [@ChathuKavishya](https://github.com/ChathuKavishya)
 - [@Nuyun-Kalamullage](https://github.com/Nuyun-Kalamullage)
+- [@dck-hub](https://github.com/dck-hub)
 
 
 ## Feedback
