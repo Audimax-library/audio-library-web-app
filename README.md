@@ -73,7 +73,7 @@ Run the server
 - [@Nuyun-Kalamullage](https://github.com/Nuyun-Kalamullage)
 - [@ChathuKavishya](https://github.com/ChathuKavishya)
 - [@re4nightwing](https://github.com/re4nightwing)
-- [@Nuyun-Kalamullage](https://github.com/Nuyun-Kalamullage)
+- [@Peshan Radeesha](https://github.com/peshanr)
 - [@ChathuKavishya](https://github.com/ChathuKavishya)
 - [@Nuyun-Kalamullage](https://github.com/Nuyun-Kalamullage)
 
