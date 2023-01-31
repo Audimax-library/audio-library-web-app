@@ -55,14 +55,14 @@
     <div onclick="stop()" class="rounded-lg py-4 bg-gradient-to-r from-violet-500 to-fuchsia-500 hover:brightness-75 transition-all cursor-pointer">
       <span class="">Stop ▉</span>
     </div>
-    <ul id="audio-playlist" class="text-start ml-4">
+    <ul id="audio-playlist" class="col-span-3 sm:col-span-2 md:col-span-1 text-start ml-4">
       {% for chapter in context.book_details.chapters %}
       <li style="cursor:pointer;" title="Chapter {{chapter.display_number}}" data-chapter-id="{{chapter.id}}" index="{{loop.index}}" path="{{ chapter.audio_url }}">
         ▶ Chapter {{chapter.display_number}}
       </li>
       {% endfor %}
     </ul>
-    <div class="col-span-2">
+    <div class="col-span-3 md:col-span-2">
       <svg viewbox="0 0 1024 300" class="w-full h-auto rounded">
         <defs>
           <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">

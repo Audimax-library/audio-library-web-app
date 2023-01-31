@@ -1,6 +1,6 @@
-# Audimax - Audio Library Web Application
+# [Audimax](https://audimax.xyz/) - Audio Library Web Application
 
-## Web application link - [Audi Max](https://audimax.xyz/)
+!['audimax ss'](https://images2.imgbox.com/dc/0e/EBBXJTpF_o.png)
 
 ## How to setup the environment
 #
@@ -12,8 +12,6 @@
 1. Activate the virtual environment using `.\venv\Scripts\activate` and install all required python modules using `pip install -r requirements.txt`.
 
 ## How to set up the database
-
-- Open Xampp local host on your PC.
 
 - Create a new database on localhost and give a name as you like. Then create your user account.
 
@@ -76,5 +74,5 @@ Run the server
 
 ## Feedback
 
-If you have any feedback, please reach out to us at fake@fake.com
+If you have any feedback, please reach out to us at audimax.cloudguage@gmail.com
 

@@ -27,7 +27,7 @@ os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "true"
 app.config["DISCORD_CLIENT_ID"] = os.getenv('DISCORD_CLIENT_ID')
 app.config["DISCORD_CLIENT_SECRET"] = os.getenv('DISCORD_CLIENT_SECRET')
 #app.config["DISCORD_BOT_TOKEN"] = ''
-app.config["DISCORD_REDIRECT_URI"] = "http://127.0.0.1:5000/admin/discord-authorize"
+app.config["DISCORD_REDIRECT_URI"] = os.getenv('DISCORD_REDIRECT_URI')
 
 webapp_db.init_app(app)
 admin_db.init_app(app)
