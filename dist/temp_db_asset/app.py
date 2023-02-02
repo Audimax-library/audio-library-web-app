@@ -229,6 +229,27 @@ class Announcement(db.Model):
   def convert_MD(self):
     return markdown.markdown(self.content)
 
+class ForgotPassword(db.Model):
+  id = db.Column(db.Integer, autoincrement=True, primary_key=True)
+  user_email = db.Column(db.String(200), db.ForeignKey(User.email, onupdate='CASCADE', ondelete='CASCADE'), nullable=False)
+  reset_hash = db.Column(db.String(255), nullable=False, unique=False)
+  reset_token = db.Column(db.Integer(), nullable=False, unique=False)
+  created_date = db.Column(db.DateTime, server_default=db.func.now())
+
+  def __repr__(self):
+    return f'Reset:{self.id}-{self.user_email}'
+  
+  @property
+  def check_expired(self):
+    current_time = datetime.datetime.now()
+    difference = current_time - self.created_date
+    total_seconds = difference.total_seconds()
+    if(total_seconds > 24*60*60): #24hrs
+      return True
+    else:
+      return False
+
+
 db.drop_all()
 db.create_all()
 

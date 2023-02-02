@@ -855,6 +855,10 @@ video {
   margin-left: 0.5rem;
 }
 
+.mt-1{
+  margin-top: 0.25rem;
+}
+
 .mt-2{
   margin-top: 0.5rem;
 }
@@ -873,10 +877,6 @@ video {
 
 .mb-0{
   margin-bottom: 0px;
-}
-
-.mt-1{
-  margin-top: 0.25rem;
 }
 
 .block{
@@ -1816,6 +1816,11 @@ video {
   color: rgb(226 232 240 / var(--tw-text-opacity));
 }
 
+.text-gray-600{
+  --tw-text-opacity: 1;
+  color: rgb(75 85 99 / var(--tw-text-opacity));
+}
+
 .text-green-500{
   --tw-text-opacity: 1;
   color: rgb(34 197 94 / var(--tw-text-opacity));
@@ -1846,6 +1851,14 @@ video {
           text-decoration-line: underline;
 }
 
+.placeholder-current::-moz-placeholder{
+  color: currentColor;
+}
+
+.placeholder-current::placeholder{
+  color: currentColor;
+}
+
 .placeholder-gray-400::-moz-placeholder{
   --tw-placeholder-opacity: 1;
   color: rgb(156 163 175 / var(--tw-placeholder-opacity));
@@ -1854,14 +1867,6 @@ video {
 .placeholder-gray-400::placeholder{
   --tw-placeholder-opacity: 1;
   color: rgb(156 163 175 / var(--tw-placeholder-opacity));
-}
-
-.placeholder-current::-moz-placeholder{
-  color: currentColor;
-}
-
-.placeholder-current::placeholder{
-  color: currentColor;
 }
 
 .opacity-0{
@@ -2738,10 +2743,6 @@ video {
     padding-right: 0.75rem;
   }
 
-  .sm\:text-start{
-    text-align: start;
-  }
-
   .sm\:text-base{
     font-size: 1rem;
     line-height: 1.5rem;
@@ -2783,10 +2784,6 @@ video {
 
   .md\:grid-cols-2{
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .md\:text-start{
-    text-align: start;
   }
 }
 

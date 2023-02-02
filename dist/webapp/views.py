@@ -11,8 +11,8 @@ import datetime, json, re, os, threading, phonetics, requests, random, markdown
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import desc, or_, func
 from sqlalchemy.dialects.mysql import insert #only works with mysql
-from .models import Genre, Book, Chapter, NewsLetterSubscription, Library, Rating, ReportBook, ListenHistory, Announcement
-from .send_email import send_mail
+from .models import Genre, Book, Chapter, NewsLetterSubscription, Library, Rating, ReportBook, ListenHistory, Announcement, ForgotPassword
+from .send_email import send_mail, send_forgot_password
 from urllib.parse import parse_qs, urlparse
 from admin.views import is_allowed
 from google.cloud import storage
@@ -81,6 +81,11 @@ def filter_books(obj, status_list, genre_list):
                         return_book_list.append(book)
                         break
     return return_book_list
+
+def random_with_N_digits(n):
+    range_start = 10**(n-1)
+    range_end = (10**n)-1
+    return random.randint(range_start, range_end)
 
 ######## 404 page
 """ @webapp.errorhandler(404)
@@ -747,6 +752,72 @@ def register_page():
 
     context = {"form": form}
     return render_template('user-register.html', context=context)
+
+#### Forgot Password page
+@webapp.route("/forgot-password/", methods=['GET', 'POST'])
+def forgot_pswd_page():
+    if current_user.is_authenticated:
+        flash('Please log out to use reset password.', 'error')
+        return redirect(url_for('webapp.home_page'))
+    if request.method == 'POST':
+        user_email = request.form['forgot-email']
+        user = User.query.filter_by(email=user_email).first()
+        if(user):
+            token = random_with_N_digits(6)
+            reset_hash = str(uuid4())
+            hash_url = f"https://audimax.xyz/reset-password/{reset_hash}/"
+            new_reset = ForgotPassword(
+                user_email=user.email,
+                reset_hash=reset_hash,
+                reset_token=token
+            )
+            db.session.add(new_reset)
+            db.session.commit()
+            thread = threading.Thread(target=send_forgot_password, args=(user.email, token, hash_url, user.username))
+            thread.start()
+            flash("Email sent. Please check your inbox.", 'success')
+            return redirect(url_for('webapp.home_page'))
+        else:
+            flash("There's no registered account under this email address.", 'error')
+    context = {}
+    return render_template('forgot-password.html', context=context)
+
+#### reset Password page
+@webapp.route("/reset-password/<string:id>/", methods=['GET', 'POST'])
+def reset_pswd_page(id):
+    if current_user.is_authenticated:
+        flash('Please log out to use reset password.', 'error')
+        return redirect(url_for('webapp.home_page'))
+    reset_entry = ForgotPassword.query.filter_by(reset_hash=id).first()
+    if reset_entry.check_expired:
+        flash("This reset link is expired.",'error')
+        return redirect(url_for('webapp.home_page'))
+    if (not id) or (not reset_entry):
+        flash('Invalid link.', 'error')
+        return redirect(url_for('webapp.home_page'))
+    if request.method == 'POST':
+        token = request.form['reset-token']
+        passwd1 = request.form['password']
+        passwd2 = request.form['password2']
+        if(str(token) == str(reset_entry.reset_token) and id == reset_entry.reset_hash):
+            if(passwd1 == passwd2):
+                hashed_password = bcrypt.generate_password_hash(passwd1)
+                current_details = db.session.query(User).filter_by(email=reset_entry.user_email).first()
+                if(current_details):
+                    current_details.password = hashed_password
+                    db.session.commit()
+                    flash("User password reset successful.",'success')
+                    return redirect(url_for('webapp.login_page'))
+                else:
+                    flash("Invalid user account.",'error')
+            else:
+                flash("Password confirmation does not match.",'error')
+        else:
+            flash("Invalid token or invalid URL.",'error')
+        return redirect(url_for('webapp.home_page'))
+
+    context = {}
+    return render_template('reset-password.html', context=context)
 
 #### google OAuth
 @webapp.route('/oauth')
